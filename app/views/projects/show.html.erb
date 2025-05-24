@@ -1,0 +1,12 @@
+<h1><%= @project.name %></h1>
+
+<p><%= simple_format(@project.description) %></p>
+
+<p>
+  Repository URL: <%= safe_external_link(@project.repository_url, @project.repository_url) %>
+</p>
+
+<h2>Setup Script</h2>
+<pre><code><%= @project.setup_script %></code></pre>
+
+<%= link_to 'Back', projects_path %>
