@@ -17,6 +17,7 @@
     libxml2
     libxslt
     libffi
+    docker
   ];
 
   languages.ruby.enable = true;
