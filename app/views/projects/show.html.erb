@@ -3,7 +3,7 @@
 <p><%= simple_format(@project.description) %></p>
 
 <p>
-  Repository URL: <%= link_to @project.repository_url, @project.repository_url %>
+  Repository URL: <%= safe_external_link(@project.repository_url, @project.repository_url) %>
 </p>
 
 <h2>Setup Script</h2>
