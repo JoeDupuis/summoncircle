@@ -1,0 +1,44 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    branches: [main]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.workflow_run.head_repository.full_name }}
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Tailscale
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:gh-action-summoncircle
+
+      - name: Install 1Password CLI
+        uses: 1password/install-cli-action@v1
+
+      - name: Deploy with Kamal
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          OP_ACCOUNT: ${{ secrets.OP_ACCOUNT }}
+          OP_SECRETS: ${{ secrets.OP_SECRETS }}
+        run: bin/kamal deploy
