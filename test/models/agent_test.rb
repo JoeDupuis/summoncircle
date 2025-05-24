@@ -1,0 +1,15 @@
+require "test_helper"
+
+class AgentTest < ActiveSupport::TestCase
+  test "fixture is valid" do
+    agent = agents(:one)
+    assert agent.valid?
+  end
+
+  test "requires name and docker image" do
+    agent = Agent.new(agent_prompt: "prompt", setup_script: "script", start_arguments: {}, continue_arguments: {})
+    assert_not agent.valid?
+    assert_includes agent.errors[:name], "can't be blank"
+    assert_includes agent.errors[:docker_image], "can't be blank"
+  end
+end
