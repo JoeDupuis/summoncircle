@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: Example Agent
+  docker_image: example/image:latest
+  agent_prompt: Example prompt
+  setup_script: example setup
+  start_arguments: {}
+  continue_arguments: {}
+
+two:
+  name: Other Agent
+  docker_image: other/image:latest
+  agent_prompt: Other prompt
+  setup_script: other setup
+  start_arguments: {}
+  continue_arguments: {}
