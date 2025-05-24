@@ -5,7 +5,7 @@ class Project < ApplicationRecord
   def safe_repository_url
     return nil unless repository_url.present?
     return nil unless repository_url.start_with?("http://", "https://")
-    
+
     repository_url
   end
 end
