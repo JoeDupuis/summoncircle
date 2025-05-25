@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  task: one
+  prompt: MyText
+  output: MyText
+  status: MyString
+  is_initial: false
+  started_at: 2025-05-24 19:13:02
+  completed_at: 2025-05-24 19:13:02
+
+two:
+  task: two
+  prompt: MyText
+  output: MyText
+  status: MyString
+  is_initial: false
+  started_at: 2025-05-24 19:13:02
+  completed_at: 2025-05-24 19:13:02
