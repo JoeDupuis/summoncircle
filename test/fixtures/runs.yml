@@ -2,18 +2,18 @@
 
 one:
   task: one
-  prompt: MyText
-  output: MyText
-  status: MyString
-  is_initial: false
+  prompt: echo hello
+  output: hello
+  status: 2 # completed
+  is_initial: true
   started_at: 2025-05-24 19:13:02
   completed_at: 2025-05-24 19:13:02
 
 two:
-  task: two
-  prompt: MyText
-  output: MyText
-  status: MyString
+  task: one
+  prompt: echo world
+  output: world
+  status: 2 # completed
   is_initial: false
-  started_at: 2025-05-24 19:13:02
-  completed_at: 2025-05-24 19:13:02
+  started_at: 2025-05-24 19:13:03
+  completed_at: 2025-05-24 19:13:03

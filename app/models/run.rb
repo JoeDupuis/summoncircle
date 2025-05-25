@@ -1,5 +1,5 @@
 class Run < ApplicationRecord
   belongs_to :task
 
-  validates :status, inclusion: { in: %w[pending running completed failed] }
+  enum :status, { pending: 0, running: 1, completed: 2, failed: 3 }, default: :pending
 end

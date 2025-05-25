@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_25_021419) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_25_025712) do
   create_table "agents", force: :cascade do |t|
     t.string "name"
     t.string "docker_image"
@@ -35,12 +35,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_25_021419) do
     t.integer "task_id", null: false
     t.text "prompt"
     t.text "output"
-    t.string "status", default: "pending"
     t.boolean "is_initial"
     t.datetime "started_at"
     t.datetime "completed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "status", default: 0, null: false
     t.index ["task_id"], name: "index_runs_on_task_id"
   end
 
