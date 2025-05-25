@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  description: MyText
+  repository_url: http://example.com/one.git
+  setup_script: MyText
+
+two:
+  name: MyString
+  description: MyText
+  repository_url: http://example.com/two.git
+  setup_script: MyText

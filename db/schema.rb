@@ -11,6 +11,26 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[8.0].define(version: 2025_05_24_223752) do
+  create_table "agents", force: :cascade do |t|
+    t.string "name"
+    t.string "docker_image"
+    t.text "agent_prompt"
+    t.text "setup_script"
+    t.json "start_arguments"
+    t.json "continue_arguments"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "projects", force: :cascade do |t|
+    t.string "name"
+    t.text "description"
+    t.string "repository_url"
+    t.text "setup_script"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "ip_address"
