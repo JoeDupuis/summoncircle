@@ -1,4 +1,4 @@
-class MissionControl::Jobs::ApplicationController < ApplicationController
+class AdminController < ApplicationController
   before_action :require_admin
 
   private
