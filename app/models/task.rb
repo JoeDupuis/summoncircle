@@ -7,10 +7,9 @@ class Task < ApplicationRecord
     is_initial = runs.count == 0
     run = runs.create!(
       prompt: prompt,
-      is_initial: is_initial,
-      started_at: Time.current
+      is_initial: is_initial
     )
-    agent.execute(run)
+    RunJob.perform_later(run.id)
     run
   end
 end
