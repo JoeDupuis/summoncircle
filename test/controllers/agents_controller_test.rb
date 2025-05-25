@@ -35,6 +35,14 @@ class AgentsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to agent_path(Agent.last)
   end
 
+  test "create persists json arguments" do
+    login @user
+    post agents_url, params: { agent: { name: "Args", docker_image: "img", agent_prompt: "prompt", setup_script: "script", start_arguments: "[\"a\", \"b\"]", continue_arguments: "[1]" } }
+    agent = Agent.last
+    assert_equal [ "a", "b" ], agent.start_arguments
+    assert_equal [ 1 ], agent.continue_arguments
+  end
+
   test "show requires authentication" do
     get agent_url(@agent)
     assert_redirected_to new_session_path
