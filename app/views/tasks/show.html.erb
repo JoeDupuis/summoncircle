@@ -1,0 +1,15 @@
+<h1>Task <%= @task.id %></h1>
+
+<p>Agent: <%= @task.agent.name %></p>
+
+<h2>Runs</h2>
+<ul>
+  <% @runs.each do |run| %>
+    <li>
+      <strong>Prompt:</strong> <%= run.prompt %><br>
+      <pre><code><%= run.output %></code></pre>
+    </li>
+  <% end %>
+</ul>
+
+<%= link_to 'Back', project_tasks_path(@project) %>
