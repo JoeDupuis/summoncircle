@@ -7,8 +7,6 @@ class Agent < ApplicationRecord
   validates :setup_script, presence: true
 
   def execute(run)
-    require "docker"
-
     run.update!(status: "running")
 
     begin
