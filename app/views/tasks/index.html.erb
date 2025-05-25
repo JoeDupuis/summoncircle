@@ -1,0 +1,14 @@
+<h1>Tasks</h1>
+
+<%= link_to 'New Task', new_project_task_path(@project) %>
+
+<ul>
+  <% @tasks.each do |task| %>
+    <li>
+      <%= link_to "Task ##{task.id}", project_task_path(@project, task) %> -
+      <%= task.agent.name %>
+    </li>
+  <% end %>
+</ul>
+
+<%= link_to 'Back', project_path(@project) %>
