@@ -199,6 +199,16 @@ GEM
     mime-types-data (3.2025.0520)
     mini_mime (1.1.5)
     minitest (5.25.5)
+    mission_control-jobs (1.0.2)
+      actioncable (>= 7.1)
+      actionpack (>= 7.1)
+      activejob (>= 7.1)
+      activerecord (>= 7.1)
+      importmap-rails (>= 1.2.1)
+      irb (~> 1.13)
+      railties (>= 7.1)
+      stimulus-rails
+      turbo-rails
     mocha (2.7.1)
       ruby2_keywords (>= 0.0.5)
     msgpack (1.8.0)
@@ -431,6 +441,7 @@ DEPENDENCIES
   importmap-rails
   jbuilder
   kamal
+  mission_control-jobs
   mocha
   propshaft
   puma (>= 5.0)
