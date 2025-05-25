@@ -12,4 +12,9 @@ class AgentTest < ActiveSupport::TestCase
     assert_includes agent.errors[:name], "can't be blank"
     assert_includes agent.errors[:docker_image], "can't be blank"
   end
+
+  test "prompt and script are optional" do
+    agent = Agent.new(name: "Name", docker_image: "img")
+    assert_valid agent
+  end
 end
