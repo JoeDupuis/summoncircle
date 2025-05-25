@@ -24,4 +24,4 @@ This is a rails project using the default stack:
 
 # Github
 - On all PRs, if you aree claude add the claude label, if you are codex, add the codex label.
-- Always make sure it passes tests, linter and static analysis before considering the task done or submitting a PR.
+- Always make sure it passes tests, linter and static analysis before considering the task done or submitting a PR. Run them in parallel.
