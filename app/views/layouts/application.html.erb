@@ -27,6 +27,9 @@
   <body>
     <%= render "nav" %>
     <main>
+      <div id="flash-messages">
+        <%= render 'flash_messages' %>
+      </div>
       <%= yield %>
     </main>
   </body>
