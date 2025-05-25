@@ -1,0 +1,14 @@
+<h1><%= @agent.name %></h1>
+
+<p>
+  Docker Image: <%= @agent.docker_image %>
+</p>
+
+<h2>Prompt</h2>
+<pre><code><%= @agent.agent_prompt %></code></pre>
+
+<h2>Setup Script</h2>
+<pre><code><%= @agent.setup_script %></code></pre>
+
+<%= link_to 'Edit', edit_agent_path(@agent) %> |
+<%= link_to 'Back', agents_path %>
