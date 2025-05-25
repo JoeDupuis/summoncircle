@@ -7,5 +7,4 @@ class RunJobTest < ActiveJob::TestCase
       task.run("test prompt")
     end
   end
-
 end

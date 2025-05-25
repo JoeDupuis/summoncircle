@@ -1,7 +1,6 @@
 require "test_helper"
 
 class RunTest < ActiveSupport::TestCase
-
   test "should identify first run correctly" do
     # Create a new task with no runs
     task = Task.create!(
