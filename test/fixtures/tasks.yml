@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  project: one
+  agent: one
+  status: MyString
+  started_at: 2025-05-24 19:14:19
+  archived_at: 2025-05-24 19:14:19
+
+two:
+  project: two
+  agent: two
+  status: MyString
+  started_at: 2025-05-24 19:14:19
+  archived_at: 2025-05-24 19:14:19
