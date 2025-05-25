@@ -13,5 +13,6 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     get root_url
     assert_response :success
     assert_match projects_path, @response.body
+    assert_match agents_path, @response.body
   end
 end
