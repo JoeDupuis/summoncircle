@@ -3,4 +3,14 @@ class Agent < ApplicationRecord
 
   validates :name, presence: true
   validates :docker_image, presence: true
+
+  def start_arguments=(value)
+    parsed = value.is_a?(String) && value.present? ? JSON.parse(value) : value
+    super(parsed)
+  end
+
+  def continue_arguments=(value)
+    parsed = value.is_a?(String) && value.present? ? JSON.parse(value) : value
+    super(parsed)
+  end
 end

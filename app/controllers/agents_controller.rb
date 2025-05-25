@@ -43,6 +43,7 @@ class AgentsController < ApplicationController
     end
 
     def agent_params
-      params.require(:agent).permit(:name, :docker_image, :agent_prompt, :setup_script, start_arguments: {}, continue_arguments: {})
+      params.require(:agent)
+            .permit(:name, :docker_image, :agent_prompt, :setup_script, :start_arguments, :continue_arguments)
     end
 end
