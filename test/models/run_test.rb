@@ -30,11 +30,26 @@ class RunTest < ActiveSupport::TestCase
     assert run.failed?
   end
 
-  test "should track is_initial flag" do
+  test "should have siblings through task" do
     run = runs(:one)
-    assert run.is_initial
+    assert_respond_to run, :siblings
+    assert_equal 2, run.siblings.count
+    assert_includes run.siblings, runs(:two)
+  end
 
-    run2 = runs(:two)
-    assert_not run2.is_initial
+  test "should identify first run correctly" do
+    # Create a new task with no runs
+    task = Task.create!(
+      project: projects(:one),
+      agent: agents(:one),
+      status: "active",
+      started_at: Time.current
+    )
+
+    first_run = task.runs.create!(prompt: "first")
+    assert first_run.first_run?
+
+    second_run = task.runs.create!(prompt: "second")
+    assert_not second_run.first_run?
   end
 end

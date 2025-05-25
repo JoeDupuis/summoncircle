@@ -23,15 +23,7 @@ class TaskTest < ActiveSupport::TestCase
         run = task.run("test command")
         assert_equal "test command", run.prompt
         assert run.pending?
-        assert run.is_initial # should be true since task two has no runs
       end
     end
-  end
-
-  test "run method should set is_initial false for subsequent runs" do
-    task = tasks(:one) # already has runs
-
-    run = task.run("another command")
-    assert_not run.is_initial
   end
 end

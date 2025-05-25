@@ -4,11 +4,7 @@ class Task < ApplicationRecord
   has_many :runs, dependent: :destroy
 
   def run(prompt)
-    is_initial = runs.count == 0
-    run = runs.create!(
-      prompt: prompt,
-      is_initial: is_initial
-    )
+    run = runs.create!(prompt: prompt)
     RunJob.perform_later(run.id)
     run
   end

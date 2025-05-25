@@ -9,7 +9,7 @@ class RunJob < ApplicationJob
 
     begin
       # Build command array based on whether this is initial or continue
-      command_template = run.is_initial ? agent.start_arguments : agent.continue_arguments
+      command_template = run.first_run? ? agent.start_arguments : agent.continue_arguments
       command = command_template.map do |arg|
         arg.gsub("{PROMPT}", run.prompt)
       end
