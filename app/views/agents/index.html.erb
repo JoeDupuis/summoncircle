@@ -1,0 +1,11 @@
+<h1>Agents</h1>
+
+<%= link_to 'New Agent', new_agent_path %>
+
+<ul>
+  <% @agents.each do |agent| %>
+    <li>
+      <%= link_to agent.name, agent_path(agent) %>
+    </li>
+  <% end %>
+</ul>
