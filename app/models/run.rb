@@ -17,7 +17,10 @@ class Run < ApplicationRecord
       container.start
       container.wait
 
-      self.output = container.logs(stdout: true, stderr: true)
+      logs = container.logs(stdout: true, stderr: true)
+      # Docker logs prefix each line with 8 bytes of metadata that we need to strip
+      clean_logs = logs.gsub(/^.{8}/m, '').force_encoding('UTF-8').scrub.strip
+      self.output = clean_logs
       completed!
     rescue => e
       self.output = "Error: #{e.message}"
