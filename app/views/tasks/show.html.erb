@@ -2,14 +2,39 @@
 
 <p>Agent: <%= @task.agent.name %></p>
 
+<h2>New Run</h2>
+<%= form_with model: [@project, @task, Run.new], url: project_task_runs_path(@project, @task), data: { turbo: false } do |form| %>
+  <div>
+    <%= form.label :prompt %><br>
+    <%= form.text_area :prompt, required: true, rows: 4, cols: 50 %>
+  </div>
+  <div>
+    <%= form.submit "Run" %>
+  </div>
+<% end %>
+
 <h2>Runs</h2>
-<ul>
+<% if @runs.any? %>
   <% @runs.each do |run| %>
-    <li>
-      <strong>Prompt:</strong> <%= run.prompt %><br>
-      <pre><code><%= run.output %></code></pre>
-    </li>
+    <div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+      <p>
+        <strong>Status:</strong> <%= run.status %>
+        <% if run.started_at %>
+          | <strong>Started:</strong> <%= run.started_at.strftime("%Y-%m-%d %H:%M:%S") %>
+        <% end %>
+        <% if run.completed_at %>
+          | <strong>Completed:</strong> <%= run.completed_at.strftime("%Y-%m-%d %H:%M:%S") %>
+        <% end %>
+      </p>
+      <p><strong>Prompt:</strong> <%= run.prompt %></p>
+      <% if run.output.present? %>
+        <p><strong>Output:</strong></p>
+        <pre style="background: #f0f0f0; padding: 10px; overflow: auto;"><%= run.output %></pre>
+      <% end %>
+    </div>
   <% end %>
-</ul>
+<% else %>
+  <p>No runs yet.</p>
+<% end %>
 
 <%= link_to 'Back', project_tasks_path(@project) %>

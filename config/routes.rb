@@ -3,7 +3,9 @@ Rails.application.routes.draw do
   resources :passwords, param: :token
   resources :agents
   resources :projects do
-    resources :tasks, only: %i[index new create show]
+    resources :tasks, only: %i[index new create show] do
+      resources :runs, only: %i[create]
+    end
   end
 
   mount MissionControl::Jobs::Engine, at: "/jobs"
