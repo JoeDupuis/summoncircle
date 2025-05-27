@@ -18,7 +18,7 @@ class TasksController < ApplicationController
     @task = @project.tasks.new(task_params)
     if @task.save
       @task.update!(started_at: Time.current)
-      @task.run(params[:task][:prompt]) if params[:task][:prompt].present?
+      @task.run(params[:task][:prompt])
       redirect_to [ @project, @task ], notice: "Task was successfully launched."
     else
       render :new, status: :unprocessable_entity
