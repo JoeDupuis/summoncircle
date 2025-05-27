@@ -1,6 +1,8 @@
 require "test_helper"
 
 class RunTest < ActiveSupport::TestCase
+  # Docker prefixes logs with 8 bytes of metadata
+  DOCKER_LOG_HEADER = "\x01\x00\x00\x00\x00\x00\x00"
   test "should identify first run correctly" do
     # Create a new task with no runs
     task = Task.create!(
@@ -61,7 +63,7 @@ class RunTest < ActiveSupport::TestCase
 
     mock_container.expects(:start)
     mock_container.expects(:wait)
-    mock_container.expects(:logs).with(stdout: true, stderr: true).returns("hello world")
+    mock_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "\x0bhello world")
     mock_container.expects(:delete).with(force: true)
 
     run.execute!
@@ -91,7 +93,7 @@ class RunTest < ActiveSupport::TestCase
 
     mock_container.expects(:start)
     mock_container.expects(:wait)
-    mock_container.expects(:logs).with(stdout: true, stderr: true).returns("continued output")
+    mock_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "\x10continued output")
     mock_container.expects(:delete).with(force: true)
 
     run.execute!
