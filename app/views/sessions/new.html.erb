@@ -9,3 +9,7 @@
 <br>
 
 <%= link_to "Forgot password?", new_password_path %>
+
+<% if Rails.env.development? %>
+  <%= button_to "Dev Sign In (admin)", session_path, params: { email_address: "dev@example.com", password: "password" } %>
+<% end %>
