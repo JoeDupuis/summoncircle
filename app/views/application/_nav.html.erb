@@ -4,6 +4,9 @@
       <li><%= link_to "SummonCircle", root_path, class: (current_page?(root_path) ? "current" : nil) %></li>
       <li><%= link_to "Projects", projects_path, class: (current_page?(projects_path) ? "current" : nil) %></li>
       <li><%= link_to "Agents", agents_path, class: (current_page?(agents_path) ? "current" : nil) %></li>
+      <% if authenticated? %>
+        <li><%= link_to "Sign out", session_path, method: :delete %></li>
+      <% end %>
     </ul>
   </nav>
 </header>
