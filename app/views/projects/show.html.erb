@@ -6,6 +6,12 @@
   Repository URL: <%= safe_external_link(@project.repository_url, @project.repository_url) %>
 </p>
 
+<h2>Actions</h2>
+<p>
+  <%= link_to 'View Tasks', project_tasks_path(@project), class: 'button' %> |
+  <%= link_to 'New Task', new_project_task_path(@project), class: 'button' %>
+</p>
+
 <h2>Setup Script</h2>
 <pre><code><%= @project.setup_script %></code></pre>
 
