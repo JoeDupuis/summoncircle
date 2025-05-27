@@ -61,7 +61,8 @@ class RunTest < ActiveSupport::TestCase
 
     mock_container.expects(:start)
     mock_container.expects(:wait)
-    mock_container.expects(:logs).with(stdout: true, stderr: true).returns("hello world")
+    # Docker prefixes logs with 8 bytes of metadata
+    mock_container.expects(:logs).with(stdout: true, stderr: true).returns("\x01\x00\x00\x00\x00\x00\x00\x0bhello world")
     mock_container.expects(:delete).with(force: true)
 
     run.execute!
@@ -91,7 +92,8 @@ class RunTest < ActiveSupport::TestCase
 
     mock_container.expects(:start)
     mock_container.expects(:wait)
-    mock_container.expects(:logs).with(stdout: true, stderr: true).returns("continued output")
+    # Docker prefixes logs with 8 bytes of metadata
+    mock_container.expects(:logs).with(stdout: true, stderr: true).returns("\x01\x00\x00\x00\x00\x00\x00\x10continued output")
     mock_container.expects(:delete).with(force: true)
 
     run.execute!
