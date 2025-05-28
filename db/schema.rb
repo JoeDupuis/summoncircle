@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_25_021550) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_28_010426) do
   create_table "agents", force: :cascade do |t|
     t.string "name"
     t.string "docker_image"
@@ -73,8 +73,29 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_25_021550) do
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
+  create_table "volume_mounts", force: :cascade do |t|
+    t.integer "volume_id", null: false
+    t.integer "task_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["task_id"], name: "index_volume_mounts_on_task_id"
+    t.index ["volume_id"], name: "index_volume_mounts_on_volume_id"
+  end
+
+  create_table "volumes", force: :cascade do |t|
+    t.string "name"
+    t.string "path"
+    t.integer "agent_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agent_id"], name: "index_volumes_on_agent_id"
+  end
+
   add_foreign_key "runs", "tasks"
   add_foreign_key "sessions", "users"
   add_foreign_key "tasks", "agents"
   add_foreign_key "tasks", "projects"
+  add_foreign_key "volume_mounts", "tasks"
+  add_foreign_key "volume_mounts", "volumes"
+  add_foreign_key "volumes", "agents"
 end
