@@ -13,8 +13,9 @@ class AgentsController < ApplicationController
   end
 
   def create
-    @agent = Agent.new(agent_params)
+    @agent = Agent.new(agent_params.except(:volumes_config))
     if @agent.save
+      create_volumes_from_config(@agent, params[:agent][:volumes_config])
       redirect_to @agent, notice: "Agent was successfully created."
     else
       render :new, status: :unprocessable_entity
@@ -25,7 +26,9 @@ class AgentsController < ApplicationController
   end
 
   def update
-    if @agent.update(agent_params)
+    if @agent.update(agent_params.except(:volumes_config))
+      @agent.volumes.destroy_all
+      create_volumes_from_config(@agent, params[:agent][:volumes_config])
       redirect_to @agent, notice: "Agent was successfully updated."
     else
       render :edit, status: :unprocessable_entity
@@ -44,6 +47,17 @@ class AgentsController < ApplicationController
 
     def agent_params
       params.require(:agent)
-            .permit(:name, :docker_image, :agent_prompt, :setup_script, :start_arguments, :continue_arguments)
+            .permit(:name, :docker_image, :agent_prompt, :setup_script, :start_arguments, :continue_arguments, :volumes_config)
+    end
+
+    def create_volumes_from_config(agent, volumes_config)
+      return unless volumes_config.present?
+
+      volumes_data = JSON.parse(volumes_config)
+      volumes_data.each do |volume_name, path|
+        agent.volumes.create!(name: volume_name, path: path)
+      end
+    rescue JSON::ParserError
+      Rails.logger.error "Invalid JSON in volumes_config"
     end
 end

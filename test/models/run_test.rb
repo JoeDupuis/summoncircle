@@ -39,10 +39,17 @@ class RunTest < ActiveSupport::TestCase
   end
 
   test "execute! calls Docker container methods correctly for first run" do
+    # Create a fresh agent with no volumes
+    agent = Agent.create!(
+      name: "Test Agent",
+      docker_image: "example/image:latest",
+      start_arguments: [ "echo", "STARTING: {PROMPT}" ],
+      continue_arguments: [ "{PROMPT}" ]
+    )
     # Create a fresh task with no runs
     task = Task.create!(
       project: projects(:one),
-      agent: agents(:one),
+      agent: agent,
       status: "active",
       started_at: Time.current
     )
@@ -57,7 +64,7 @@ class RunTest < ActiveSupport::TestCase
       "Cmd" => [ "echo", "STARTING: test command" ],  # start_arguments with substitution
       "WorkingDir" => "/workspace",
       "HostConfig" => {
-        "Binds" => [ "task_#{task.id}_volume:/workspace" ]
+        "Binds" => []
       }
     ).returns(mock_container)
 
@@ -87,7 +94,7 @@ class RunTest < ActiveSupport::TestCase
       "Cmd" => [ "echo hello" ],  # continue_arguments: ["{PROMPT}"] with "echo hello"
       "WorkingDir" => "/workspace",
       "HostConfig" => {
-        "Binds" => [ "task_#{task.id}_volume:/workspace" ]
+        "Binds" => [ "MyString_#{task.id}_volume:MyString" ]
       }
     ).returns(mock_container)
 
