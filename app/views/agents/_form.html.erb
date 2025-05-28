@@ -41,6 +41,11 @@
   </div>
 
   <div>
+    <%= form.label :volumes_config, "Volumes (JSON format)" %><br>
+    <%= form.text_area :volumes_config %>
+  </div>
+
+  <div>
     <%= form.submit %>
   </div>
 <% end %>
