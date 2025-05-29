@@ -3,6 +3,7 @@ require "test_helper"
 class RunTest < ActiveSupport::TestCase
   # Docker prefixes logs with 8 bytes of metadata
   DOCKER_LOG_HEADER = "\x01\x00\x00\x00\x00\x00\x00"
+  
   test "should identify first run correctly" do
     # Create a new task with no runs
     task = Task.create!(
@@ -55,9 +56,6 @@ class RunTest < ActiveSupport::TestCase
     )
     run = task.runs.create!(prompt: "test command", status: :pending)
 
-    # Create mock container
-    mock_container = mock("container")
-
     # For first run, it uses start_arguments
     Docker::Container.expects(:create).with(
       "Image" => "example/image:latest",
@@ -66,12 +64,7 @@ class RunTest < ActiveSupport::TestCase
       "HostConfig" => {
         "Binds" => []
       }
-    ).returns(mock_container)
-
-    mock_container.expects(:start)
-    mock_container.expects(:wait)
-    mock_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "\x0bhello world")
-    mock_container.expects(:delete).with(force: true)
+    ).returns(mock_container_with_output("\x0bhello world"))
 
     run.execute!
 
@@ -85,9 +78,6 @@ class RunTest < ActiveSupport::TestCase
     run = runs(:one)
     run.update!(status: :pending, started_at: nil, completed_at: nil, output: nil)
 
-    # Mock container
-    mock_container = mock("container")
-
     # For non-first run, it uses continue_arguments
     Docker::Container.expects(:create).with(
       "Image" => "example/image:latest",
@@ -96,12 +86,7 @@ class RunTest < ActiveSupport::TestCase
       "HostConfig" => {
         "Binds" => [ "MyString_#{task.id}_volume:MyString" ]
       }
-    ).returns(mock_container)
-
-    mock_container.expects(:start)
-    mock_container.expects(:wait)
-    mock_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "\x10continued output")
-    mock_container.expects(:delete).with(force: true)
+    ).returns(mock_container_with_output("\x10continued output"))
 
     run.execute!
 
@@ -131,12 +116,7 @@ class RunTest < ActiveSupport::TestCase
     Docker.expects(:url=).with(original_url)
 
     # Mock container creation and execution
-    mock_container = mock("container")
-    Docker::Container.expects(:create).returns(mock_container)
-    mock_container.expects(:start)
-    mock_container.expects(:wait)
-    mock_container.expects(:logs).returns(DOCKER_LOG_HEADER + "\x04test")
-    mock_container.expects(:delete).with(force: true)
+    Docker::Container.expects(:create).returns(mock_container_with_output("\x04test"))
 
     run.execute!
 
@@ -161,12 +141,7 @@ class RunTest < ActiveSupport::TestCase
     Docker.expects(:url=).once
 
     # Mock container creation and execution
-    mock_container = mock("container")
-    Docker::Container.expects(:create).returns(mock_container)
-    mock_container.expects(:start)
-    mock_container.expects(:wait)
-    mock_container.expects(:logs).returns(DOCKER_LOG_HEADER + "\x04test")
-    mock_container.expects(:delete).with(force: true)
+    Docker::Container.expects(:create).returns(mock_container_with_output("\x04test"))
 
     run.execute!
 
@@ -192,12 +167,7 @@ class RunTest < ActiveSupport::TestCase
     run = task.runs.create!(prompt: "test", status: :pending)
 
     # Mock container creation and execution
-    mock_container = mock("container")
-    Docker::Container.expects(:create).returns(mock_container)
-    mock_container.expects(:start)
-    mock_container.expects(:wait)
-    mock_container.expects(:logs).returns(DOCKER_LOG_HEADER + "\x04test")
-    mock_container.expects(:delete).with(force: true)
+    Docker::Container.expects(:create).returns(mock_container_with_output("\x04test"))
 
     run.execute!
 
@@ -230,5 +200,16 @@ class RunTest < ActiveSupport::TestCase
 
     assert run.failed?
     assert_equal original_url, Docker.url
+  end
+
+  private
+
+  def mock_container_with_output(output)
+    mock_container = mock("container")
+    mock_container.expects(:start)
+    mock_container.expects(:wait)
+    mock_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + output)
+    mock_container.expects(:delete).with(force: true)
+    mock_container
   end
 end
