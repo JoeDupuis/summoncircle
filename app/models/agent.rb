@@ -7,6 +7,13 @@ class Agent < ApplicationRecord
 
   attr_accessor :volumes_config
 
+  def volumes_config
+    return @volumes_config if @volumes_config.present?
+    return "" if volumes.empty?
+
+    volumes.pluck(:name, :path).to_h.to_json
+  end
+
   def start_arguments=(value)
     parsed = value.is_a?(String) && value.present? ? JSON.parse(value) : value
     super(parsed)

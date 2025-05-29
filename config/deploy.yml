@@ -68,7 +68,6 @@ aliases:
 # Recommended to change this to a mounted volume path that is backed up off server.
 volumes:
   - "summoncircle_storage:/rails/storage"
-  - "/var/run/docker.sock:/var/run/docker.sock"
 
 
 # Bridge fingerprinted assets, like JS and CSS, between versions to avoid

@@ -47,7 +47,10 @@
 
   <div>
     <%= form.label :volumes_config, "Volumes (JSON format)" %><br>
-    <%= form.text_area :volumes_config %>
+    <%= form.text_area :volumes_config, readonly: !agent.new_record? %>
+    <% unless agent.new_record? %>
+      <small style="color: #666;">Volumes cannot be edited after creation</small>
+    <% end %>
   </div>
 
   <div>
