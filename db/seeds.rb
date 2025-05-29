@@ -17,8 +17,8 @@ if Rails.env.development?
 
   claude_agent = Agent.find_or_create_by!(name: "Claude") do |agent|
     agent.docker_image = "claude_max:latest"
-    agent.start_arguments = ["--dangerously-skip-permissions", "-p", "{PROMPT}"]
-    agent.continue_arguments = ["-c", "--dangerously-skip-permissions", "-p", "{PROMPT}"]
+    agent.start_arguments = [ "--dangerously-skip-permissions", "-p", "{PROMPT}" ]
+    agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "-p", "{PROMPT}" ]
   end
 
   Volume.find_or_create_by!(agent: claude_agent, name: "workspace") do |volume|

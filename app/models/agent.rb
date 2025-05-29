@@ -10,7 +10,7 @@ class Agent < ApplicationRecord
   def volumes_config
     return @volumes_config if @volumes_config.present?
     return "" if volumes.empty?
-    
+
     volumes.pluck(:name, :path).to_h.to_json
   end
 
