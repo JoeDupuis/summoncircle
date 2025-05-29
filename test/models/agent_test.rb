@@ -17,15 +17,4 @@ class AgentTest < ActiveSupport::TestCase
     agent = Agent.new(name: "Name", docker_image: "img")
     assert_valid agent
   end
-
-  test "docker_host is optional" do
-    agent = Agent.new(name: "Test Agent", docker_image: "test/image")
-    assert agent.valid?
-  end
-
-  test "can set docker_host" do
-    agent = Agent.new(name: "Test Agent", docker_image: "test/image", docker_host: "tcp://192.168.1.100:2375")
-    assert agent.valid?
-    assert_equal "tcp://192.168.1.100:2375", agent.docker_host
-  end
 end

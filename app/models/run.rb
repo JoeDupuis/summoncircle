@@ -12,6 +12,7 @@ class Run < ApplicationRecord
     running!
     update!(started_at: Time.current)
 
+    original_docker_url = Docker.url
     begin
       configure_docker_host
       container = create_container
@@ -27,6 +28,7 @@ class Run < ApplicationRecord
       self.output = "Error: #{e.message}"
       failed!
     ensure
+      Docker.url = original_docker_url
       update!(completed_at: Time.current)
       save!
       container&.delete(force: true) if defined?(container)
