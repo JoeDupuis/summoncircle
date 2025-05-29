@@ -28,4 +28,8 @@ if Rails.env.development?
   Volume.find_or_create_by!(agent: claude_agent, name: "home") do |volume|
     volume.path = "/home/claude"
   end
+
+  Project.find_or_create_by!(name: "SummonCircle") do |project|
+    project.repository_url = "https://github.com/JoeDupuis/summoncircle"
+  end
 end
