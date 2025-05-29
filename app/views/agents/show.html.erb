@@ -10,5 +10,20 @@
 <h2>Setup Script</h2>
 <pre><code><%= @agent.setup_script %></code></pre>
 
+<h2>Start Arguments</h2>
+<pre><code><%= @agent.start_arguments.to_json %></code></pre>
+
+<h2>Continue Arguments</h2>
+<pre><code><%= @agent.continue_arguments.to_json %></code></pre>
+
+<% if @agent.volumes.any? %>
+  <h2>Volumes</h2>
+  <ul>
+    <% @agent.volumes.each do |volume| %>
+      <li><strong><%= volume.name %>:</strong> <%= volume.path %></li>
+    <% end %>
+  </ul>
+<% end %>
+
 <%= link_to 'Edit', edit_agent_path(@agent) %> |
 <%= link_to 'Back', agents_path %>
