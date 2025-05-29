@@ -3,7 +3,7 @@ require "test_helper"
 class RunTest < ActiveSupport::TestCase
   # Docker prefixes logs with 8 bytes of metadata
   DOCKER_LOG_HEADER = "\x01\x00\x00\x00\x00\x00\x00"
-  
+
   test "should identify first run correctly" do
     # Create a new task with no runs
     task = Task.create!(
