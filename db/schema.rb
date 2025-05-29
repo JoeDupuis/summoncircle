@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_28_010426) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_29_063027) do
   create_table "agents", force: :cascade do |t|
     t.string "name"
     t.string "docker_image"
@@ -20,6 +20,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_28_010426) do
     t.json "continue_arguments"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "docker_host"
   end
 
   create_table "projects", force: :cascade do |t|

@@ -4,6 +4,12 @@
   Docker Image: <%= @agent.docker_image %>
 </p>
 
+<% if @agent.docker_host.present? %>
+<p>
+  Docker Host: <%= @agent.docker_host %>
+</p>
+<% end %>
+
 <h2>Prompt</h2>
 <pre><code><%= @agent.agent_prompt %></code></pre>
 

@@ -108,4 +108,65 @@ class RunTest < ActiveSupport::TestCase
     assert run.completed?
     assert_equal "continued output", run.output
   end
+
+  test "execute! configures Docker host when specified" do
+    agent = Agent.create!(
+      name: "Test Agent with Docker Host",
+      docker_image: "example/image:latest",
+      docker_host: "tcp://192.168.1.100:2375",
+      start_arguments: [ "echo", "{PROMPT}" ]
+    )
+    task = Task.create!(
+      project: projects(:one),
+      agent: agent,
+      status: "active",
+      started_at: Time.current
+    )
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    # Mock Docker.url= to verify it's called with the correct host
+    Docker.expects(:url=).with("tcp://192.168.1.100:2375")
+
+    # Mock container creation and execution
+    mock_container = mock("container")
+    Docker::Container.expects(:create).returns(mock_container)
+    mock_container.expects(:start)
+    mock_container.expects(:wait)
+    mock_container.expects(:logs).returns(DOCKER_LOG_HEADER + "\x04test")
+    mock_container.expects(:delete).with(force: true)
+
+    run.execute!
+
+    assert run.completed?
+  end
+
+  test "execute! skips Docker host configuration when not specified" do
+    agent = Agent.create!(
+      name: "Test Agent without Docker Host",
+      docker_image: "example/image:latest",
+      start_arguments: [ "echo", "{PROMPT}" ]
+    )
+    task = Task.create!(
+      project: projects(:one),
+      agent: agent,
+      status: "active",
+      started_at: Time.current
+    )
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    # Docker.url= should not be called
+    Docker.expects(:url=).never
+
+    # Mock container creation and execution
+    mock_container = mock("container")
+    Docker::Container.expects(:create).returns(mock_container)
+    mock_container.expects(:start)
+    mock_container.expects(:wait)
+    mock_container.expects(:logs).returns(DOCKER_LOG_HEADER + "\x04test")
+    mock_container.expects(:delete).with(force: true)
+
+    run.execute!
+
+    assert run.completed?
+  end
 end

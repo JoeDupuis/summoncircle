@@ -13,6 +13,7 @@ class Run < ApplicationRecord
     update!(started_at: Time.current)
 
     begin
+      configure_docker_host
       container = create_container
       container.start
       container.wait
@@ -33,6 +34,13 @@ class Run < ApplicationRecord
   end
 
   private
+
+  def configure_docker_host
+    agent = task.agent
+    return unless agent.docker_host.present?
+
+    Docker.url = agent.docker_host
+  end
 
   def create_container
     agent = task.agent
