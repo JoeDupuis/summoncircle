@@ -27,8 +27,12 @@ class AgentsController < ApplicationController
 
   def update
     if @agent.update(agent_params.except(:volumes_config))
-      @agent.volumes.destroy_all
-      create_volumes_from_config(@agent, params[:agent][:volumes_config])
+      volumes_config = params[:agent][:volumes_config]
+      # Only update volumes if volumes_config is present and different from current
+      if volumes_config.present? && volumes_config != @agent.volumes_config
+        @agent.volumes.destroy_all
+        create_volumes_from_config(@agent, volumes_config)
+      end
       redirect_to @agent, notice: "Agent was successfully updated."
     else
       render :edit, status: :unprocessable_entity
