@@ -23,4 +23,8 @@ class Agent < ApplicationRecord
     parsed = value.is_a?(String) && value.present? ? JSON.parse(value) : value
     super(parsed)
   end
+
+  def log_processor_class
+    "LogProcessor::#{log_processor}".constantize
+  end
 end

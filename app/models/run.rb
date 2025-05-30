@@ -23,7 +23,9 @@ class Run < ApplicationRecord
       logs = container.logs(stdout: true, stderr: true)
       # Docker logs prefix each line with 8 bytes of metadata that we need to strip
       clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
-      steps.create!(raw_response: clean_logs)
+
+      # Process logs and create steps
+      create_steps_from_logs(clean_logs)
       completed!
     rescue => e
       steps.create!(raw_response: "Error: #{e.message}")
@@ -66,5 +68,14 @@ class Run < ApplicationRecord
         "Binds" => binds
       }
     )
+  end
+
+  def create_steps_from_logs(logs)
+    processor_class = task.agent.log_processor_class
+    step_data_list = processor_class.process(logs)
+
+    step_data_list.each do |step_data|
+      steps.create!(raw_response: step_data[:raw_response])
+    end
   end
 end
