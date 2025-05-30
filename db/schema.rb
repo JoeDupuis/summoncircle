@@ -36,7 +36,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_30_025441) do
   create_table "runs", force: :cascade do |t|
     t.integer "task_id", null: false
     t.text "prompt"
-    t.text "output"
     t.integer "status", default: 0, null: false
     t.datetime "started_at"
     t.datetime "completed_at"
