@@ -3,6 +3,7 @@ require "test_helper"
 class RunTest < ActiveSupport::TestCase
   # Docker prefixes logs with 8 bytes of metadata
   DOCKER_LOG_HEADER = "\x01\x00\x00\x00\x00\x00\x00"
+
   test "should identify first run correctly" do
     # Create a new task with no runs
     task = Task.create!(
@@ -55,9 +56,6 @@ class RunTest < ActiveSupport::TestCase
     )
     run = task.runs.create!(prompt: "test command", status: :pending)
 
-    # Create mock container
-    mock_container = mock("container")
-
     # For first run, it uses start_arguments
     Docker::Container.expects(:create).with(
       "Image" => "example/image:latest",
@@ -66,12 +64,7 @@ class RunTest < ActiveSupport::TestCase
       "HostConfig" => {
         "Binds" => []
       }
-    ).returns(mock_container)
-
-    mock_container.expects(:start)
-    mock_container.expects(:wait)
-    mock_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "\x0bhello world")
-    mock_container.expects(:delete).with(force: true)
+    ).returns(mock_container_with_output("\x0bhello world"))
 
     run.execute!
 
@@ -85,9 +78,6 @@ class RunTest < ActiveSupport::TestCase
     run = runs(:one)
     run.update!(status: :pending, started_at: nil, completed_at: nil, output: nil)
 
-    # Mock container
-    mock_container = mock("container")
-
     # For non-first run, it uses continue_arguments
     Docker::Container.expects(:create).with(
       "Image" => "example/image:latest",
@@ -96,16 +86,130 @@ class RunTest < ActiveSupport::TestCase
       "HostConfig" => {
         "Binds" => [ "MyString_#{task.id}_volume:MyString" ]
       }
-    ).returns(mock_container)
-
-    mock_container.expects(:start)
-    mock_container.expects(:wait)
-    mock_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "\x10continued output")
-    mock_container.expects(:delete).with(force: true)
+    ).returns(mock_container_with_output("\x10continued output"))
 
     run.execute!
 
     assert run.completed?
     assert_equal "continued output", run.output
+  end
+
+  test "execute! configures Docker host when specified" do
+    original_url = Docker.url
+
+    agent = Agent.create!(
+      name: "Test Agent with Docker Host",
+      docker_image: "example/image:latest",
+      docker_host: "tcp://192.168.1.100:2375",
+      start_arguments: [ "echo", "{PROMPT}" ]
+    )
+    task = Task.create!(
+      project: projects(:one),
+      agent: agent,
+      status: "active",
+      started_at: Time.current
+    )
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    # Mock Docker.url= to verify it's called with the correct host and then reset
+    Docker.expects(:url=).with("tcp://192.168.1.100:2375")
+    Docker.expects(:url=).with(original_url)
+
+    # Mock container creation and execution
+    Docker::Container.expects(:create).returns(mock_container_with_output("\x04test"))
+
+    run.execute!
+
+    assert run.completed?
+  end
+
+  test "execute! skips Docker host configuration when not specified" do
+    agent = Agent.create!(
+      name: "Test Agent without Docker Host",
+      docker_image: "example/image:latest",
+      start_arguments: [ "echo", "{PROMPT}" ]
+    )
+    task = Task.create!(
+      project: projects(:one),
+      agent: agent,
+      status: "active",
+      started_at: Time.current
+    )
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    # Docker.url= should only be called once (in the ensure block to reset)
+    Docker.expects(:url=).once
+
+    # Mock container creation and execution
+    Docker::Container.expects(:create).returns(mock_container_with_output("\x04test"))
+
+    run.execute!
+
+    assert run.completed?
+  end
+
+  test "execute! resets Docker host after run completes" do
+    original_url = "unix:///var/run/docker.sock"
+    Docker.url = original_url
+
+    agent = Agent.create!(
+      name: "Test Agent with Docker Host",
+      docker_image: "example/image:latest",
+      docker_host: "tcp://192.168.1.100:2375",
+      start_arguments: [ "echo", "{PROMPT}" ]
+    )
+    task = Task.create!(
+      project: projects(:one),
+      agent: agent,
+      status: "active",
+      started_at: Time.current
+    )
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    # Mock container creation and execution
+    Docker::Container.expects(:create).returns(mock_container_with_output("\x04test"))
+
+    run.execute!
+
+    assert run.completed?
+    assert_equal original_url, Docker.url
+  end
+
+  test "execute! resets Docker host even when run fails" do
+    original_url = "unix:///var/run/docker.sock"
+    Docker.url = original_url
+
+    agent = Agent.create!(
+      name: "Test Agent with Docker Host",
+      docker_image: "example/image:latest",
+      docker_host: "tcp://192.168.1.100:2375",
+      start_arguments: [ "echo", "{PROMPT}" ]
+    )
+    task = Task.create!(
+      project: projects(:one),
+      agent: agent,
+      status: "active",
+      started_at: Time.current
+    )
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    # Mock Docker to fail
+    Docker::Container.expects(:create).raises(Docker::Error::NotFoundError, "Image not found")
+
+    run.execute!
+
+    assert run.failed?
+    assert_equal original_url, Docker.url
+  end
+
+  private
+
+  def mock_container_with_output(output)
+    mock_container = mock("container")
+    mock_container.expects(:start)
+    mock_container.expects(:wait)
+    mock_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + output)
+    mock_container.expects(:delete).with(force: true)
+    mock_container
   end
 end

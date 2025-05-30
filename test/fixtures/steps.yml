@@ -1,0 +1,19 @@
+text_step:
+  run: one
+  raw_response: 
+    type: text
+    text: "Hello, world!"
+
+tool_use_step:
+  run: one
+  raw_response:
+    type: tool_use
+    name: read_file
+    parameters:
+      path: "/test/file.txt"
+
+tool_result_step:
+  run: one
+  raw_response:
+    type: tool_result
+    result: "File contents here"

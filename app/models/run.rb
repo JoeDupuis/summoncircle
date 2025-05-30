@@ -1,6 +1,7 @@
 class Run < ApplicationRecord
   belongs_to :task
   has_many :siblings, through: :task, source: :runs
+  has_many :steps, dependent: :destroy
 
   enum :status, { pending: 0, running: 1, completed: 2, failed: 3 }, default: :pending
 
@@ -12,7 +13,9 @@ class Run < ApplicationRecord
     running!
     update!(started_at: Time.current)
 
+    original_docker_url = Docker.url
     begin
+      configure_docker_host
       container = create_container
       container.start
       container.wait
@@ -26,6 +29,7 @@ class Run < ApplicationRecord
       self.output = "Error: #{e.message}"
       failed!
     ensure
+      Docker.url = original_docker_url
       update!(completed_at: Time.current)
       save!
       container&.delete(force: true) if defined?(container)
@@ -33,6 +37,13 @@ class Run < ApplicationRecord
   end
 
   private
+
+  def configure_docker_host
+    agent = task.agent
+    return unless agent.docker_host.present?
+
+    Docker.url = agent.docker_host
+  end
 
   def create_container
     agent = task.agent

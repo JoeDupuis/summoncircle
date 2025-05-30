@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_28_010426) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_30_014329) do
   create_table "agents", force: :cascade do |t|
     t.string "name"
     t.string "docker_image"
@@ -20,6 +20,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_28_010426) do
     t.json "continue_arguments"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "docker_host"
   end
 
   create_table "projects", force: :cascade do |t|
@@ -50,6 +51,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_28_010426) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_sessions_on_user_id"
+  end
+
+  create_table "steps", force: :cascade do |t|
+    t.integer "run_id", null: false
+    t.json "raw_response"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["run_id"], name: "index_steps_on_run_id"
   end
 
   create_table "tasks", force: :cascade do |t|
@@ -93,6 +102,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_28_010426) do
 
   add_foreign_key "runs", "tasks"
   add_foreign_key "sessions", "users"
+  add_foreign_key "steps", "runs"
   add_foreign_key "tasks", "agents"
   add_foreign_key "tasks", "projects"
   add_foreign_key "volume_mounts", "tasks"
