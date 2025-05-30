@@ -4,7 +4,6 @@ class Agent < ApplicationRecord
 
   validates :name, presence: true
   validates :docker_image, presence: true
-  validates :log_processor, inclusion: { in: %w[LogProcessor LogProcessor::ClaudeStreamingJson] }
 
   attr_accessor :volumes_config
 
@@ -26,6 +25,6 @@ class Agent < ApplicationRecord
   end
 
   def log_processor_class
-    log_processor.constantize
+    "LogProcessor::#{log_processor}".constantize
   end
 end

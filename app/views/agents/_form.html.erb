@@ -57,8 +57,8 @@
     <%= form.label :log_processor %><br>
     <%= form.select :log_processor, 
         options_for_select([
-          ["Default", "LogProcessor"],
-          ["Claude Streaming JSON", "LogProcessor::ClaudeStreamingJson"]
+          ["Text", "Text"],
+          ["Claude Streaming JSON", "ClaudeStreamingJson"]
         ], agent.log_processor), 
         {}, 
         { class: "form-select" } %>
