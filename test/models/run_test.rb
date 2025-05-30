@@ -244,8 +244,7 @@ class RunTest < ActiveSupport::TestCase
     )
     run = task.runs.create!(prompt: "test")
 
-    logs = '{"type": "system", "message": "Starting"}
-{"type": "user", "content": "Hello"}'
+    logs = '[{"type": "system", "message": "Starting"}, {"type": "user", "content": "Hello"}]'
     run.send(:create_steps_from_logs, logs)
 
     assert_equal 2, run.steps.count
