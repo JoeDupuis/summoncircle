@@ -9,6 +9,6 @@ class LogProcessor
   end
 
   def process(logs)
-    [{ raw_response: logs }]
+    raise NotImplementedError, "Subclasses must implement #process"
   end
 end
