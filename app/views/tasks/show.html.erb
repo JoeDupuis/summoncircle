@@ -27,9 +27,9 @@
         <% end %>
       </p>
       <p><strong>Prompt:</strong> <%= run.prompt %></p>
-      <% if run.output.present? %>
+      <% if run.steps.any? %>
         <p><strong>Output:</strong></p>
-        <pre style="background: #f0f0f0; padding: 10px; overflow: auto;"><%= run.output %></pre>
+        <pre style="background: #f0f0f0; padding: 10px; overflow: auto;"><%= run.steps.first.raw_response %></pre>
       <% end %>
     </div>
   <% end %>
