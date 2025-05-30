@@ -56,10 +56,10 @@
   <div>
     <%= form.label :log_processor %><br>
     <%= form.select :log_processor, 
-        options_for_select([
-          ["Text", "Text"],
-          ["Claude Streaming JSON", "ClaudeStreamingJson"]
-        ], agent.log_processor), 
+        options_for_select(
+          LogProcessor::ALL.map { |klass| [klass.name.demodulize.humanize, klass.name.demodulize] }, 
+          agent.log_processor
+        ), 
         {}, 
         { class: "form-select" } %>
   </div>

@@ -1,4 +1,9 @@
 class LogProcessor
+  ALL = [
+    LogProcessor::Text,
+    LogProcessor::ClaudeStreamingJson
+  ].freeze
+
   def self.process(logs)
     new.process(logs)
   end
