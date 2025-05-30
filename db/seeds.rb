@@ -28,4 +28,18 @@ if Rails.env.development?
   Volume.find_or_create_by!(agent: claude_agent, name: "home") do |volume|
     volume.path = "/home/claude"
   end
+
+  claude_stream_agent = Agent.find_or_create_by!(name: "Claude Stream") do |agent|
+    agent.docker_image = "claude_max:latest"
+    agent.start_arguments = [ "--dangerously-skip-permissions", "--output-format", "json", "--verbose", "-p", "{PROMPT}" ]
+    agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--output-format", "json", "--verbose", "-p", "{PROMPT}" ]
+  end
+
+  Volume.find_or_create_by!(agent: claude_stream_agent, name: "workspace") do |volume|
+    volume.path = "/workspace"
+  end
+
+  Volume.find_or_create_by!(agent: claude_stream_agent, name: "home") do |volume|
+    volume.path = "/home/claude"
+  end
 end
