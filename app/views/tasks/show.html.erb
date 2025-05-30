@@ -29,7 +29,11 @@
       <p><strong>Prompt:</strong> <%= run.prompt %></p>
       <% if run.steps.any? %>
         <p><strong>Output:</strong></p>
-        <pre style="background: #f0f0f0; padding: 10px; overflow: auto;"><%= run.steps.first.raw_response %></pre>
+        <div style="background: #f0f0f0; padding: 10px; overflow: auto;">
+          <% run.steps.each do |step| %>
+            <pre style="margin: 5px 0;"><%= step.raw_response %></pre>
+          <% end %>
+        </div>
       <% end %>
     </div>
   <% end %>
