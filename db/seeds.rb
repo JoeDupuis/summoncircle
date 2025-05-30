@@ -33,6 +33,7 @@ if Rails.env.development?
     agent.docker_image = "claude_max:latest"
     agent.start_arguments = [ "--dangerously-skip-permissions", "--output-format", "json", "--verbose", "-p", "{PROMPT}" ]
     agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--output-format", "json", "--verbose", "-p", "{PROMPT}" ]
+    agent.log_processor = "ClaudeStreamingJson"
   end
 
   Volume.find_or_create_by!(agent: claude_stream_agent, name: "workspace") do |volume|
