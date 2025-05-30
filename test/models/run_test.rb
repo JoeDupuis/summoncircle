@@ -213,7 +213,7 @@ class RunTest < ActiveSupport::TestCase
       name: "Text Agent",
       docker_image: "example/image:latest",
       log_processor: "Text",
-      start_arguments: ["echo", "test"]
+      start_arguments: [ "echo", "test" ]
     )
     task = Task.create!(
       project: projects(:one),
@@ -233,9 +233,9 @@ class RunTest < ActiveSupport::TestCase
     # Create agent with ClaudeStreamingJson processor
     agent = Agent.create!(
       name: "JSON Agent",
-      docker_image: "example/image:latest", 
+      docker_image: "example/image:latest",
       log_processor: "ClaudeStreamingJson",
-      start_arguments: ["echo", "test"]
+      start_arguments: [ "echo", "test" ]
     )
     task = Task.create!(
       project: projects(:one),
