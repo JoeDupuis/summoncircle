@@ -1,19 +1,15 @@
 class LogProcessor::ClaudeStreamingJson < LogProcessor
   def process(logs)
-    steps = []
+    begin
+      parsed_array = JSON.parse(logs.strip)
 
-    logs.split("\n").each do |line|
-      line = line.strip
-      next if line.empty?
-
-      begin
-        parsed_json = JSON.parse(line)
-        steps << { raw_response: parsed_json }
-      rescue JSON::ParserError
-        steps << { raw_response: line }
+      if parsed_array.is_a?(Array)
+        parsed_array.map { |item| { raw_response: item } }
+      else
+        [ { raw_response: parsed_array } ]
       end
+    rescue JSON::ParserError
+      [ { raw_response: logs } ]
     end
-
-    steps.empty? ? [ { raw_response: logs } ] : steps
   end
 end
