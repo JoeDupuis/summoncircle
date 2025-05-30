@@ -22,7 +22,8 @@ class RunTest < ActiveSupport::TestCase
 
   test "execute! handles errors gracefully" do
     run = runs(:one)
-    run.update!(status: :pending, started_at: nil, completed_at: nil, output: nil)
+    run.update!(status: :pending, started_at: nil, completed_at: nil)
+    run.steps.destroy_all
 
     # Mock Docker::Container to raise an error
     Docker::Container.expects(:create).raises(Docker::Error::NotFoundError, "Image not found")
@@ -35,8 +36,9 @@ class RunTest < ActiveSupport::TestCase
     assert run.failed?
     assert_not_nil run.started_at
     assert_not_nil run.completed_at
-    assert_includes run.output, "Error:"
-    assert_includes run.output, "Image not found"
+    assert_equal 1, run.steps.count
+    assert_includes run.steps.first.raw_response, "Error:"
+    assert_includes run.steps.first.raw_response, "Image not found"
   end
 
   test "execute! calls Docker container methods correctly for first run" do
@@ -69,14 +71,16 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal "hello world", run.output
+    assert_equal 1, run.steps.count
+    assert_equal "hello world", run.steps.first.raw_response
   end
 
   test "execute! uses continue_arguments for subsequent runs" do
     # Use existing task with runs
     task = tasks(:one)
     run = runs(:one)
-    run.update!(status: :pending, started_at: nil, completed_at: nil, output: nil)
+    run.update!(status: :pending, started_at: nil, completed_at: nil)
+    run.steps.destroy_all
 
     # For non-first run, it uses continue_arguments
     Docker::Container.expects(:create).with(
@@ -91,7 +95,8 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal "continued output", run.output
+    assert_equal 1, run.steps.count
+    assert_equal "continued output", run.steps.first.raw_response
   end
 
   test "execute! configures Docker host when specified" do

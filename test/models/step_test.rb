@@ -4,13 +4,13 @@ class StepTest < ActiveSupport::TestCase
   test "should be valid with valid attributes" do
     step = Step.new(
       run: runs(:one),
-      raw_response: { type: "text", text: "Hello" }
+      raw_response: "Hello"
     )
     assert step.valid?
   end
 
   test "should require run" do
-    step = Step.new(raw_response: { type: "text" })
+    step = Step.new(raw_response: "text")
     assert_not step.valid?
     assert_includes step.errors[:run], "must exist"
   end
@@ -32,7 +32,7 @@ class StepTest < ActiveSupport::TestCase
     initial_step_count = run.steps.count
     step = Step.create!(
       run: run,
-      raw_response: { type: "text", text: "Test" }
+      raw_response: "Test"
     )
 
     assert_difference "Step.count", -(initial_step_count + 1) do
