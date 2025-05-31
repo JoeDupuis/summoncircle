@@ -10,7 +10,7 @@ class RunsController < ApplicationController
         format.turbo_stream
         format.html { redirect_to project_task_path(@project, @task), notice: "Run started successfully." }
       else
-        format.turbo_stream { render turbo_stream: turbo_stream.replace("run-form", partial: "tasks/run_form", locals: { task: @task, project: @project, run: @run }) }
+        format.turbo_stream { redirect_to project_task_path(@project, @task), alert: "Failed to start run: #{@run.errors.full_messages.join(', ')}" }
         format.html { redirect_to project_task_path(@project, @task), alert: "Failed to start run: #{@run.errors.full_messages.join(', ')}" }
       end
     end
