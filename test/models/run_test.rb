@@ -83,14 +83,13 @@ class RunTest < ActiveSupport::TestCase
     run.steps.destroy_all
 
     # For non-first run, it uses continue_arguments
-    Docker::Container.expects(:create).with(
-      "Image" => "example/image:latest",
-      "Cmd" => [ "echo hello" ],  # continue_arguments: ["{PROMPT}"] with "echo hello"
-      "WorkingDir" => "/workspace",
-      "HostConfig" => {
-        "Binds" => [ "MyString_#{task.id}_volume:MyString" ]
-      }
-    ).returns(mock_container_with_output("\x10continued output"))
+    Docker::Container.expects(:create).with do |params|
+      params["Image"] == "example/image:latest" &&
+      params["Cmd"] == [ "echo hello" ] &&
+      params["WorkingDir"] == "/workspace" &&
+      params["HostConfig"]["Binds"].size == 1 &&
+      params["HostConfig"]["Binds"].first.match?(/^summoncircle_MyString_volume_[0-9a-f-]{36}:MyString$/)
+    end.returns(mock_container_with_output("\x10continued output"))
 
     run.execute!
 
