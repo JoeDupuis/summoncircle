@@ -6,26 +6,7 @@
 <% end %>
 
 <h2>New Run</h2>
-<% if @task.project %>
-  <%= render "run_form", task: @task, project: @task.project, run: Run.new %>
-<% else %>
-  <%= form_with model: [@task, Run.new], url: task_runs_path(@task), id: "run-form", data: { controller: "prompt", action: "turbo:submit-end->prompt#clearForm" } do |form| %>
-    <div>
-      <%= form.label :prompt %><br>
-      <%= form.text_area :prompt, required: true, rows: 4, cols: 50, data: { prompt_target: "textarea", action: "keydown->prompt#keydown" } %>
-      <% if Run.new.errors.any? %>
-        <div style="color: red;">
-          <% Run.new.errors.full_messages.each do |message| %>
-            <div><%= message %></div>
-          <% end %>
-        </div>
-      <% end %>
-    </div>
-    <div>
-      <%= form.submit "Run" %>
-    </div>
-  <% end %>
-<% end %>
+<%= render "run_form", task: @task, project: @task.project, run: Run.new %>
 
 <h2>Runs</h2>
 <% if @task.runs.any? %>
