@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_31_020138) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_31_043829) do
   create_table "agents", force: :cascade do |t|
     t.string "name"
     t.string "docker_image"
@@ -56,7 +56,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_31_020138) do
     t.json "raw_response"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "type"
+    t.text "content"
     t.index ["run_id"], name: "index_steps_on_run_id"
+    t.index ["type"], name: "index_steps_on_type"
   end
 
   create_table "tasks", force: :cascade do |t|

@@ -247,8 +247,10 @@ class RunTest < ActiveSupport::TestCase
     run.send(:create_steps_from_logs, logs)
 
     assert_equal 2, run.steps.count
-    assert_equal({ "type" => "system", "message" => "Starting" }, run.steps.first.raw_response)
-    assert_equal({ "type" => "user", "content" => "Hello" }, run.steps.second.raw_response)
+    assert_equal '{"type":"system","message":"Starting"}', run.steps.first.raw_response
+    assert_equal '{"type":"user","content":"Hello"}', run.steps.second.raw_response
+    assert_equal "Step::System", run.steps.first.type
+    assert_equal "Step::ToolResult", run.steps.second.type
   end
 
   private

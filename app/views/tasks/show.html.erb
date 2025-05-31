@@ -30,9 +30,7 @@
       <% if run.steps.any? %>
         <p><strong>Output:</strong></p>
         <div style="background: #f0f0f0; padding: 10px; overflow: auto;">
-          <% run.steps.each do |step| %>
-            <pre style="margin: 5px 0;"><%= step.raw_response %></pre>
-          <% end %>
+          <%= render run.steps %>
         </div>
       <% end %>
     </div>

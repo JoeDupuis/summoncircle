@@ -28,7 +28,8 @@ class Run < ApplicationRecord
       create_steps_from_logs(clean_logs)
       completed!
     rescue => e
-      steps.create!(raw_response: "Error: #{e.message}")
+      error_message = "Error: #{e.message}"
+      steps.create!(raw_response: error_message, type: "Step::Text", content: error_message)
       failed!
     ensure
       Docker.url = original_docker_url
@@ -75,7 +76,7 @@ class Run < ApplicationRecord
     step_data_list = processor_class.process(logs)
 
     step_data_list.each do |step_data|
-      steps.create!(raw_response: step_data[:raw_response])
+      steps.create!(step_data)
     end
   end
 end
