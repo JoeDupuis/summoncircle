@@ -7,7 +7,7 @@ class LogProcessor::TextTest < ActiveSupport::TestCase
     result = processor.process(logs)
 
     assert_equal 1, result.size
-    assert_equal({ raw_response: logs }, result.first)
+    assert_equal({ raw_response: logs, type: "Step::Text", content: logs }, result.first)
   end
 
   test "class method process works" do
@@ -15,6 +15,6 @@ class LogProcessor::TextTest < ActiveSupport::TestCase
     result = LogProcessor::Text.process(logs)
 
     assert_equal 1, result.size
-    assert_equal({ raw_response: logs }, result.first)
+    assert_equal({ raw_response: logs, type: "Step::Text", content: logs }, result.first)
   end
 end

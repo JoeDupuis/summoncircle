@@ -8,9 +8,12 @@ class LogProcessor::ClaudeStreamingJsonTest < ActiveSupport::TestCase
     result = processor.process(logs)
 
     assert_equal 3, result.size
-    assert_equal({ raw_response: { "type" => "system", "message" => "Starting" } }, result[0])
-    assert_equal({ raw_response: { "type" => "user", "content" => "Hello" } }, result[1])
-    assert_equal({ raw_response: { "type" => "assistant", "response" => "Hi there" } }, result[2])
+    assert_equal "Step::System", result[0][:type]
+    assert_equal "Step::ToolResult", result[1][:type]
+    assert_equal "Step::Text", result[2][:type]
+    assert_equal '{"type":"system","message":"Starting"}', result[0][:raw_response]
+    assert_equal '{"type":"user","content":"Hello"}', result[1][:raw_response]
+    assert_equal '{"type":"assistant","response":"Hi there"}', result[2][:raw_response]
   end
 
   test "process handles single JSON object" do
@@ -20,7 +23,8 @@ class LogProcessor::ClaudeStreamingJsonTest < ActiveSupport::TestCase
     result = processor.process(logs)
 
     assert_equal 1, result.size
-    assert_equal({ raw_response: { "type" => "system", "message" => "Starting" } }, result[0])
+    assert_equal "Step::System", result[0][:type]
+    assert_equal '{"type":"system","message":"Starting"}', result[0][:raw_response]
   end
 
   test "process handles complex nested JSON from real example" do
@@ -30,8 +34,10 @@ class LogProcessor::ClaudeStreamingJsonTest < ActiveSupport::TestCase
     result = processor.process(logs)
 
     assert_equal 2, result.size
-    assert_equal "system", result[0][:raw_response]["type"]
-    assert_equal "assistant", result[1][:raw_response]["type"]
+    assert_equal "Step::Init", result[0][:type]
+    assert_equal "Step::Text", result[1][:type]
+    assert_includes result[0][:raw_response], '"type":"system"'
+    assert_includes result[1][:raw_response], '"type":"assistant"'
   end
 
   test "process returns single step for invalid JSON" do
@@ -39,11 +45,11 @@ class LogProcessor::ClaudeStreamingJsonTest < ActiveSupport::TestCase
 
     result = processor.process("Invalid JSON")
     assert_equal 1, result.size
-    assert_equal({ raw_response: "Invalid JSON" }, result.first)
+    assert_equal({ raw_response: "Invalid JSON", type: "Step::Text", content: "Invalid JSON" }, result.first)
 
     result = processor.process("")
     assert_equal 1, result.size
-    assert_equal({ raw_response: "" }, result.first)
+    assert_equal({ raw_response: "", type: "Step::Text", content: "" }, result.first)
   end
 
   test "class method process works" do
@@ -51,6 +57,33 @@ class LogProcessor::ClaudeStreamingJsonTest < ActiveSupport::TestCase
     result = LogProcessor::ClaudeStreamingJson.process(logs)
 
     assert_equal 1, result.size
-    assert_equal({ raw_response: { "type" => "test" } }, result.first)
+    assert_equal "Step::Text", result.first[:type]
+    assert_equal '{"type":"test"}', result.first[:raw_response]
+  end
+
+  test "process extracts tool name and inputs from tool calls" do
+    processor = LogProcessor::ClaudeStreamingJson.new
+    logs = '{
+      "type": "assistant",
+      "message": {
+        "content": [
+          {
+            "type": "tool_use",
+            "name": "WebFetch",
+            "input": {
+              "url": "https://example.com",
+              "prompt": "What is the title?"
+            }
+          }
+        ]
+      }
+    }'
+
+    result = processor.process(logs)
+
+    assert_equal 1, result.size
+    assert_equal "Step::ToolCall", result[0][:type]
+    expected_content = "name: WebFetch\ninputs: {\"url\":\"https://example.com\",\"prompt\":\"What is the title?\"}"
+    assert_equal expected_content, result[0][:content]
   end
 end
