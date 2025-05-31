@@ -60,7 +60,7 @@ class Run < ApplicationRecord
     command = command_template.map { |arg| arg.gsub("{PROMPT}", prompt) }
 
     workplace_mount = task.workplace_mount
-    working_dir = workplace_mount ? task.agent.workplace_path : "/workspace"
+    working_dir = task.agent.workplace_path
 
     Docker::Container.create(
       "Image" => agent.docker_image,

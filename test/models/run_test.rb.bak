@@ -60,13 +60,14 @@ class RunTest < ActiveSupport::TestCase
     run = task.runs.create!(prompt: "test command", status: :pending)
 
     # For first run, it uses start_arguments
-    Docker::Container.expects(:create).with do |params|
-      params["Image"] == "example/image:latest" &&
-      params["Cmd"] == [ "echo", "STARTING: test command" ] &&
-      params["WorkingDir"] == "/workspace" &&
-      params["HostConfig"]["Binds"].size == 1 &&
-      params["HostConfig"]["Binds"].any? { |bind| bind.match?(/summoncircle_workplace_volume_.*:\/workspace/) }
-    end.returns(mock_container_with_output("\x0bhello world"))
+    Docker::Container.expects(:create).with(
+      "Image" => "example/image:latest",
+      "Cmd" => [ "echo", "STARTING: test command" ],  # start_arguments with substitution
+      "WorkingDir" => "/workspace",
+      "HostConfig" => {
+        "Binds" => []
+      }
+    ).returns(mock_container_with_output("\x0bhello world"))
 
     run.execute!
 
@@ -133,7 +134,6 @@ class RunTest < ActiveSupport::TestCase
     agent = Agent.create!(
       name: "Test Agent without Docker Host",
       docker_image: "example/image:latest",
-      workplace_path: "/workspace",
       start_arguments: [ "echo", "{PROMPT}" ]
     )
     task = Task.create!(
@@ -162,7 +162,6 @@ class RunTest < ActiveSupport::TestCase
     agent = Agent.create!(
       name: "Test Agent with Docker Host",
       docker_image: "example/image:latest",
-      workplace_path: "/workspace",
       docker_host: "tcp://192.168.1.100:2375",
       start_arguments: [ "echo", "{PROMPT}" ]
     )
@@ -190,7 +189,6 @@ class RunTest < ActiveSupport::TestCase
     agent = Agent.create!(
       name: "Test Agent with Docker Host",
       docker_image: "example/image:latest",
-      workplace_path: "/workspace",
       docker_host: "tcp://192.168.1.100:2375",
       start_arguments: [ "echo", "{PROMPT}" ]
     )
@@ -216,7 +214,6 @@ class RunTest < ActiveSupport::TestCase
     agent = Agent.create!(
       name: "Text Agent",
       docker_image: "example/image:latest",
-      workplace_path: "/workspace",
       log_processor: "Text",
       start_arguments: [ "echo", "test" ]
     )
@@ -239,7 +236,6 @@ class RunTest < ActiveSupport::TestCase
     agent = Agent.create!(
       name: "JSON Agent",
       docker_image: "example/image:latest",
-      workplace_path: "/workspace",
       log_processor: "ClaudeJson",
       start_arguments: [ "echo", "test" ]
     )

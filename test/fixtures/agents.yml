@@ -3,6 +3,7 @@
 one:
   name: Example Agent
   docker_image: example/image:latest
+  workplace_path: "/workspace"
   start_arguments: ["echo", "STARTING: {PROMPT}"]
   continue_arguments: ["{PROMPT}"]
 
