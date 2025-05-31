@@ -15,14 +15,6 @@ class LogProcessor::ClaudeJson < LogProcessor
 
   private
 
-  def error_content?(content)
-    return false if content.blank?
-
-    content.match?(/\b(error|exception|failed|failure)\b/i) ||
-      content.match?(/\d{3}\s+(error|not found|forbidden|unauthorized)/i) ||
-      content.match?(/api\s+error/i)
-  end
-
   # TODO: Refactor this to both the process_item and extract_content
   def process_item(item)
     item_json = item.to_json
@@ -38,18 +30,14 @@ class LogProcessor::ClaudeJson < LogProcessor
       if has_tool_use?(item)
         { raw_response: item_json, type: "Step::ToolCall", content: extract_content(item) }
       else
-        content = extract_content(item)
-        type = error_content?(content) ? "Step::Error" : "Step::Text"
-        { raw_response: item_json, type: type, content: content }
+        { raw_response: item_json, type: "Step::Text", content: extract_content(item) }
       end
     when "user"
       { raw_response: item_json, type: "Step::ToolResult", content: extract_content(item) }
     when "result"
       { raw_response: item_json, type: "Step::Result", content: item["result"] || extract_content(item) }
     else
-      content = extract_content(item)
-      type = error_content?(content) ? "Step::Error" : "Step::Text"
-      { raw_response: item_json, type: type, content: content }
+      { raw_response: item_json, type: "Step::Text", content: extract_content(item) }
     end
   end
 
