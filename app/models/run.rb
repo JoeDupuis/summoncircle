@@ -59,11 +59,7 @@ class Run < ApplicationRecord
     command_template = first_run? ? agent.start_arguments : agent.continue_arguments
     command = command_template.map { |arg| arg.gsub("{PROMPT}", prompt) }
 
-    binds = []
-
-    task.volume_mounts.includes(:volume).each do |volume_mount|
-      binds << "#{volume_mount.volume_name}:#{volume_mount.container_path}"
-    end
+    binds = task.volume_mounts.includes(:volume).map(&:bind_string)
 
     workplace_mount = task.workplace_mount
     working_dir = workplace_mount ? task.agent.workplace_path : "/workspace"

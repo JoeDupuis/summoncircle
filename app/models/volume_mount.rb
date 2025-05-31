@@ -10,6 +10,10 @@ class VolumeMount < ApplicationRecord
     volume&.path || task.agent.workplace_path
   end
   
+  def bind_string
+    "#{volume_name}:#{container_path}"
+  end
+  
   private
   
   def generate_volume_name

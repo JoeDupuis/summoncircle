@@ -33,4 +33,10 @@ class VolumeMountTest < ActiveSupport::TestCase
     
     assert_equal "/workspace", volume_mount.container_path
   end
+  
+  test "bind_string returns volume_name:container_path" do
+    volume_mount = volume_mounts(:one)
+    expected = "#{volume_mount.volume_name}:#{volume_mount.container_path}"
+    assert_equal expected, volume_mount.bind_string
+  end
 end
