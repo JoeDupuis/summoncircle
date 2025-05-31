@@ -2,17 +2,6 @@
 
 <p>Agent: <%= @task.agent.name %></p>
 
-<h2>New Run</h2>
-<%= form_with model: [@project, @task, Run.new], url: project_task_runs_path(@project, @task), data: { turbo: false, controller: "prompt" } do |form| %>
-  <div>
-    <%= form.label :prompt %><br>
-    <%= form.text_area :prompt, required: true, rows: 4, cols: 50, data: { prompt_target: "textarea", action: "keydown->prompt#keydown" } %>
-  </div>
-  <div>
-    <%= form.submit "Run" %>
-  </div>
-<% end %>
-
 <h2>Runs</h2>
 <% if @task.runs.any? %>
   <% if @task.runs.count > 1 %>
@@ -30,6 +19,17 @@
   <% end %>
 <% else %>
   <p>No runs yet.</p>
+<% end %>
+
+<h2>New Run</h2>
+<%= form_with model: [@project, @task, Run.new], url: project_task_runs_path(@project, @task), data: { turbo: false, controller: "prompt" } do |form| %>
+  <div>
+    <%= form.label :prompt %><br>
+    <%= form.text_area :prompt, required: true, rows: 4, cols: 50, data: { prompt_target: "textarea", action: "keydown->prompt#keydown" } %>
+  </div>
+  <div>
+    <%= form.submit "Run" %>
+  </div>
 <% end %>
 
 <%= link_to 'Back', project_tasks_path(@project) %>
