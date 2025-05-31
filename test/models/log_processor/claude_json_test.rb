@@ -90,5 +90,4 @@ class LogProcessor::ClaudeJsonTest < ActiveSupport::TestCase
     expected_content = "name: WebFetch\ninputs: {\"url\":\"https://example.com\",\"prompt\":\"What is the title?\"}"
     assert_equal expected_content, result[0][:content]
   end
-
 end
