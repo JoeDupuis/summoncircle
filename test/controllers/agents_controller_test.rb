@@ -43,6 +43,13 @@ class AgentsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ 1 ], agent.continue_arguments
   end
 
+  test "create persists workplace_path" do
+    login @user
+    post agents_url, params: { agent: { name: "Workplace", docker_image: "img", workplace_path: "/workspace" } }
+    agent = Agent.last
+    assert_equal "/workspace", agent.workplace_path
+  end
+
   test "show requires authentication" do
     get agent_url(@agent)
     assert_redirected_to new_session_path

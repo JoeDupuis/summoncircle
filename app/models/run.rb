@@ -67,10 +67,17 @@ class Run < ApplicationRecord
       binds << "#{volume_name}:#{volume.path}"
     end
 
+    workplace_mount = task.workplace_mount
+    if workplace_mount
+      binds << "#{workplace_mount[:volume_name]}:#{workplace_mount[:container_path]}"
+    end
+
+    working_dir = workplace_mount&.dig(:container_path) || "/workspace"
+
     Docker::Container.create(
       "Image" => agent.docker_image,
       "Cmd" => command,
-      "WorkingDir" => "/workspace",
+      "WorkingDir" => working_dir,
       "HostConfig" => {
         "Binds" => binds
       }

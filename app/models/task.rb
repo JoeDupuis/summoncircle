@@ -11,6 +11,15 @@ class Task < ApplicationRecord
     run
   end
 
+  def workplace_mount
+    return nil unless agent.workplace_path.present?
+
+    {
+      volume_name: "summoncircle_workplace_volume_#{SecureRandom.uuid}",
+      container_path: agent.workplace_path
+    }
+  end
+
   private
 
   def create_volume_mounts

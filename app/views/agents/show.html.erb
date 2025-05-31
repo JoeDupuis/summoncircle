@@ -10,6 +10,12 @@
 </p>
 <% end %>
 
+<% if @agent.workplace_path.present? %>
+<p>
+  Workplace Path: <%= @agent.workplace_path %>
+</p>
+<% end %>
+
 <p>
   Log Processor: <%= @agent.log_processor %>
 </p>
