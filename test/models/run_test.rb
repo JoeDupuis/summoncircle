@@ -62,6 +62,7 @@ class RunTest < ActiveSupport::TestCase
     Docker::Container.expects(:create).with(
       "Image" => "example/image:latest",
       "Cmd" => [ "echo", "STARTING: test command" ],  # start_arguments with substitution
+      "Env" => [],
       "WorkingDir" => "/workspace",
       "HostConfig" => {
         "Binds" => []
@@ -86,6 +87,7 @@ class RunTest < ActiveSupport::TestCase
     Docker::Container.expects(:create).with do |params|
       params["Image"] == "example/image:latest" &&
       params["Cmd"] == [ "echo hello" ] &&
+      params["Env"] == [] &&
       params["WorkingDir"] == "/workspace" &&
       params["HostConfig"]["Binds"].size == 1 &&
       params["HostConfig"]["Binds"].first.match?(/^summoncircle_MyString_volume_[0-9a-f-]{36}:MyString$/)
@@ -251,6 +253,38 @@ class RunTest < ActiveSupport::TestCase
     assert_equal '{"type":"user","content":"Hello"}', run.steps.second.raw_response
     assert_equal "Step::System", run.steps.first.type
     assert_equal "Step::ToolResult", run.steps.second.type
+  end
+
+  test "execute! passes environment variables to Docker container" do
+    # Create agent with environment variables
+    agent = Agent.create!(
+      name: "Test Agent with Env Vars",
+      docker_image: "example/image:latest",
+      start_arguments: [ "echo", "{PROMPT}" ],
+      env_variables: { "NODE_ENV" => "development", "DEBUG" => "true" }
+    )
+    task = Task.create!(
+      project: projects(:one),
+      agent: agent,
+      status: "active",
+      started_at: Time.current
+    )
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    # Verify that environment variables are passed to Docker container
+    Docker::Container.expects(:create).with(
+      "Image" => "example/image:latest",
+      "Cmd" => [ "echo", "test" ],
+      "Env" => [ "NODE_ENV=development", "DEBUG=true" ],
+      "WorkingDir" => "/workspace",
+      "HostConfig" => {
+        "Binds" => []
+      }
+    ).returns(mock_container_with_output("\x04test"))
+
+    run.execute!
+
+    assert run.completed?
   end
 
   private

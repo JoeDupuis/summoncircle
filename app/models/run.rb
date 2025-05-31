@@ -67,9 +67,17 @@ class Run < ApplicationRecord
       binds << "#{volume_name}:#{volume.path}"
     end
 
+    env = []
+    if agent.env_variables.present?
+      agent.env_variables.each do |key, value|
+        env << "#{key}=#{value}"
+      end
+    end
+
     Docker::Container.create(
       "Image" => agent.docker_image,
       "Cmd" => command,
+      "Env" => env,
       "WorkingDir" => "/workspace",
       "HostConfig" => {
         "Binds" => binds
