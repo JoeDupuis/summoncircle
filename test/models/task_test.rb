@@ -17,7 +17,7 @@ class TaskTest < ActiveSupport::TestCase
 
   test "workplace_mount returns VolumeMount when agent has workplace_path" do
     task = tasks(:one)
-    
+
     workplace_mount = task.workplace_mount
     assert_not_nil workplace_mount
     assert_instance_of VolumeMount, workplace_mount
