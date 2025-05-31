@@ -1,0 +1,2 @@
+<%= turbo_stream.prepend "runs-list", partial: "tasks/run", locals: { run: @run } %>
+<%= turbo_stream.replace "run-form", partial: "tasks/run_form", locals: { task: @task, project: @project, run: Run.new } %>
