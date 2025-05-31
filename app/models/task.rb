@@ -1,10 +1,8 @@
 class Task < ApplicationRecord
-  belongs_to :project, optional: true
+  belongs_to :project
   belongs_to :agent
   has_many :runs, dependent: :destroy
   has_many :volume_mounts, dependent: :destroy
-
-  validates :project_id, presence: true
 
   after_create :create_volume_mounts
 
