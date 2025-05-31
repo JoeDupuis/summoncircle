@@ -1,5 +1,4 @@
 class TasksController < ApplicationController
-  before_action :set_project, only: [], if: -> { params[:project_id].present? }
   before_action :set_task, only: :show
 
   def index
