@@ -62,17 +62,17 @@ class Run < ApplicationRecord
     binds = []
 
     task.volume_mounts.includes(:volume).each do |volume_mount|
-      volume = volume_mount.volume
-      volume_name = "summoncircle_#{volume.name}_volume_#{SecureRandom.uuid}"
-      binds << "#{volume_name}:#{volume.path}"
+      if volume_mount.volume.present?
+        # Regular volume mount
+        binds << "#{volume_mount.volume_name}:#{volume_mount.volume.path}"
+      else
+        # Workplace mount
+        binds << "#{volume_mount.volume_name}:#{task.agent.workplace_path}"
+      end
     end
 
     workplace_mount = task.workplace_mount
-    if workplace_mount
-      binds << "#{workplace_mount[:volume_name]}:#{workplace_mount[:container_path]}"
-    end
-
-    working_dir = workplace_mount&.dig(:container_path) || "/workspace"
+    working_dir = workplace_mount ? task.agent.workplace_path : "/workspace"
 
     Docker::Container.create(
       "Image" => agent.docker_image,

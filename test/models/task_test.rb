@@ -20,15 +20,15 @@ class TaskTest < ActiveSupport::TestCase
     assert_nil task.workplace_mount
   end
 
-  test "workplace_mount returns hash when agent has workplace_path" do
+  test "workplace_mount returns VolumeMount when agent has workplace_path" do
     task = tasks(:one)
     task.agent.update!(workplace_path: "/workspace")
 
     workplace_mount = task.workplace_mount
     assert_not_nil workplace_mount
-    assert workplace_mount.key?(:volume_name)
-    assert workplace_mount.key?(:container_path)
-    assert_equal "/workspace", workplace_mount[:container_path]
-    assert_match(/summoncircle_workplace_volume_/, workplace_mount[:volume_name])
+    assert_instance_of VolumeMount, workplace_mount
+    assert_nil workplace_mount.volume
+    assert_equal task, workplace_mount.task
+    assert_match(/summoncircle_workplace_volume_/, workplace_mount.volume_name)
   end
 end

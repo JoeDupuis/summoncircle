@@ -3,7 +3,9 @@
 one:
   volume: one
   task: one
+  volume_name: "summoncircle_MyString_volume_12345678-1234-5678-9abc-123456789abc"
 
 two:
   volume: two
   task: two
+  volume_name: "summoncircle_MyOtherString_volume_87654321-4321-8765-cba9-987654321fed"

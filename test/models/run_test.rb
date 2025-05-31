@@ -88,7 +88,7 @@ class RunTest < ActiveSupport::TestCase
       params["Cmd"] == [ "echo hello" ] &&
       params["WorkingDir"] == "/workspace" &&
       params["HostConfig"]["Binds"].size == 1 &&
-      params["HostConfig"]["Binds"].first.match?(/^summoncircle_MyString_volume_[0-9a-f-]{36}:MyString$/)
+      params["HostConfig"]["Binds"].first == "summoncircle_MyString_volume_12345678-1234-5678-9abc-123456789abc:MyString"
     end.returns(mock_container_with_output("\x10continued output"))
 
     run.execute!
