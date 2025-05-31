@@ -62,6 +62,7 @@ class Run < ApplicationRecord
     Docker::Container.create(
       "Image" => agent.docker_image,
       "Cmd" => command,
+      "Env" => agent.env_strings,
       "WorkingDir" => task.agent.workplace_path,
       "HostConfig" => {
         "Binds" => task.volume_mounts.includes(:volume).map(&:bind_string)

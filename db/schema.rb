@@ -21,6 +21,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_31_230009) do
     t.string "docker_host"
     t.string "log_processor", default: "Text"
     t.string "workplace_path"
+    t.json "env_variables"
   end
 
   create_table "projects", force: :cascade do |t|
