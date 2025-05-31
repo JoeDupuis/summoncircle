@@ -39,4 +39,23 @@ class StepTest < ActiveSupport::TestCase
       run.destroy
     end
   end
+
+  test "parsed_response should return parsed JSON" do
+    json_data = { "message" => "hello", "status" => "success" }
+    step = Step.new(
+      run: runs(:one),
+      raw_response: json_data.to_json
+    )
+
+    assert_equal json_data, step.parsed_response
+  end
+
+  test "parsed_response should return raw_response for invalid JSON" do
+    step = Step.new(
+      run: runs(:one),
+      raw_response: "invalid json"
+    )
+
+    assert_equal "invalid json", step.parsed_response
+  end
 end
