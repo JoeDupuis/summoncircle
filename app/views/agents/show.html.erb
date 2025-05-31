@@ -36,5 +36,14 @@
   </ul>
 <% end %>
 
+<% if @agent.env_variables.present? %>
+  <h2>Environment Variables</h2>
+  <ul>
+    <% @agent.env_variables.each do |key, value| %>
+      <li><strong><%= key %>:</strong> <%= value %></li>
+    <% end %>
+  </ul>
+<% end %>
+
 <%= link_to 'Edit', edit_agent_path(@agent) %> |
 <%= link_to 'Back', agents_path %>
