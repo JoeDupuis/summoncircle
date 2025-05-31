@@ -27,8 +27,8 @@ class AgentTest < ActiveSupport::TestCase
     agent = Agent.new(name: "Name", docker_image: "img", log_processor: "Text")
     assert_equal LogProcessor::Text, agent.log_processor_class
 
-    agent.log_processor = "ClaudeStreamingJson"
-    assert_equal LogProcessor::ClaudeStreamingJson, agent.log_processor_class
+    agent.log_processor = "ClaudeJson"
+    assert_equal LogProcessor::ClaudeJson, agent.log_processor_class
   end
 
   test "log_processor_class raises error for invalid processor" do
