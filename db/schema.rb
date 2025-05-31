@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_31_043829) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_31_210350) do
   create_table "agents", force: :cascade do |t|
     t.string "name"
     t.string "docker_image"
@@ -20,6 +20,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_31_043829) do
     t.datetime "updated_at", null: false
     t.string "docker_host"
     t.string "log_processor", default: "Text"
+    t.string "workplace_path"
   end
 
   create_table "projects", force: :cascade do |t|
@@ -84,10 +85,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_31_043829) do
   end
 
   create_table "volume_mounts", force: :cascade do |t|
-    t.integer "volume_id", null: false
+    t.integer "volume_id"
     t.integer "task_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "volume_name"
     t.index ["task_id"], name: "index_volume_mounts_on_task_id"
     t.index ["volume_id"], name: "index_volume_mounts_on_volume_id"
   end
