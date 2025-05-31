@@ -15,6 +15,12 @@ if Rails.env.development?
     user.role = "admin"
   end
 
+  User.find_or_create_by!(email_address: "user@example.com") do |user|
+    user.password = "password"
+    user.password_confirmation = "password"
+    user.role = "standard"
+  end
+
   claude_agent = Agent.find_or_create_by!(name: "Claude") do |agent|
     agent.docker_image = "claude_max:latest"
     agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ]
