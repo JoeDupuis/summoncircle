@@ -17,9 +17,9 @@
     <%= form.collection_select :agent_id, Agent.all, :id, :name %>
   </div>
 
-  <div>
+  <div data-controller="prompt">
     <%= form.label :prompt %><br>
-    <%= form.text_area :prompt %>
+    <%= form.text_area :prompt, data: { prompt_target: "textarea", action: "keydown->prompt#keydown" } %>
   </div>
 
   <div>
