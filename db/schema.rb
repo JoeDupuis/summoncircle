@@ -10,12 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_30_025441) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_31_020138) do
   create_table "agents", force: :cascade do |t|
     t.string "name"
     t.string "docker_image"
-    t.text "agent_prompt"
-    t.text "setup_script"
     t.json "start_arguments"
     t.json "continue_arguments"
     t.datetime "created_at", null: false
