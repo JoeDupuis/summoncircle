@@ -25,19 +25,19 @@ class AgentsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create requires authentication" do
-    post agents_url, params: { agent: { name: "Test", docker_image: "img" } }
+    post agents_url, params: { agent: { name: "Test", docker_image: "img", workplace_path: "/workspace" } }
     assert_redirected_to new_session_path
 
     login @user
     assert_difference("Agent.count") do
-      post agents_url, params: { agent: { name: "Test", docker_image: "img" } }
+      post agents_url, params: { agent: { name: "Test", docker_image: "img", workplace_path: "/workspace" } }
     end
     assert_redirected_to agent_path(Agent.last)
   end
 
   test "create persists json arguments" do
     login @user
-    post agents_url, params: { agent: { name: "Args", docker_image: "img", start_arguments: "[\"a\", \"b\"]", continue_arguments: "[1]" } }
+    post agents_url, params: { agent: { name: "Args", docker_image: "img", workplace_path: "/workspace", start_arguments: "[\"a\", \"b\"]", continue_arguments: "[1]" } }
     agent = Agent.last
     assert_equal [ "a", "b" ], agent.start_arguments
     assert_equal [ 1 ], agent.continue_arguments
@@ -46,7 +46,7 @@ class AgentsControllerTest < ActionDispatch::IntegrationTest
   test "create persists environment variables" do
     login @user
     env_config = '{"NODE_ENV": "development", "DEBUG": "true"}'
-    post agents_url, params: { agent: { name: "EnvTest", docker_image: "img", env_variables_json: env_config } }
+    post agents_url, params: { agent: { name: "EnvTest", docker_image: "img", workplace_path: "/workspace", env_variables_json: env_config } }
     agent = Agent.last
     assert_equal({ "NODE_ENV" => "development", "DEBUG" => "true" }, agent.env_variables)
   end
