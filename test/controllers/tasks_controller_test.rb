@@ -120,4 +120,51 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "pre", text: "fallback raw data"
   end
+
+  test "show displays only last run by default" do
+    login @user
+    new_run = @task.runs.create!(prompt: "newest run", created_at: Time.current)
+
+    get project_task_url(@project, @task)
+    assert_response :success
+
+    assert_includes response.body, "newest run"
+    assert_not_includes response.body, "echo hello"
+  end
+
+  test "show displays all runs when show_all_runs parameter is true" do
+    login @user
+    new_run = @task.runs.create!(prompt: "newest run", created_at: Time.current)
+
+    get project_task_url(@project, @task, show_all_runs: true)
+    assert_response :success
+
+    assert_includes response.body, "newest run"
+    assert_includes response.body, "echo hello"
+    assert_includes response.body, "echo world"
+  end
+
+  test "show displays correct toggle button text when multiple runs exist" do
+    login @user
+    @task.runs.create!(prompt: "test run")
+
+    get project_task_url(@project, @task)
+    assert_response :success
+    assert_select "a", text: "Show All Runs"
+
+    get project_task_url(@project, @task, show_all_runs: true)
+    assert_response :success
+    assert_select "a", text: "Show Last Run Only"
+  end
+
+  test "show does not display toggle button when only one run exists" do
+    login @user
+    @task.runs.destroy_all
+    @task.runs.create!(prompt: "single run")
+
+    get project_task_url(@project, @task)
+    assert_response :success
+    assert_select "a", text: "Show All Runs", count: 0
+    assert_select "a", text: "Show Last Run Only", count: 0
+  end
 end
