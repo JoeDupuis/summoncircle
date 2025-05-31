@@ -3,10 +3,10 @@
 <p>Agent: <%= @task.agent.name %></p>
 
 <h2>New Run</h2>
-<%= form_with model: [@project, @task, Run.new], url: project_task_runs_path(@project, @task), data: { turbo: false } do |form| %>
+<%= form_with model: [@project, @task, Run.new], url: project_task_runs_path(@project, @task), data: { turbo: false, controller: "prompt" } do |form| %>
   <div>
     <%= form.label :prompt %><br>
-    <%= form.text_area :prompt, required: true, rows: 4, cols: 50 %>
+    <%= form.text_area :prompt, required: true, rows: 4, cols: 50, data: { prompt_target: "textarea", action: "keydown->prompt#keydown" } %>
   </div>
   <div>
     <%= form.submit "Run" %>

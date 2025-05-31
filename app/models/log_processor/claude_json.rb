@@ -1,4 +1,4 @@
-class LogProcessor::ClaudeStreamingJson < LogProcessor
+class LogProcessor::ClaudeJson < LogProcessor
   def process(logs)
     begin
       parsed_array = JSON.parse(logs.strip)

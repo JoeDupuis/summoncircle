@@ -14,8 +14,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_31_033829) do
   create_table "agents", force: :cascade do |t|
     t.string "name"
     t.string "docker_image"
-    t.text "agent_prompt"
-    t.text "setup_script"
     t.json "start_arguments"
     t.json "continue_arguments"
     t.datetime "created_at", null: false
@@ -41,7 +39,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_31_033829) do
     t.datetime "completed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index [ "task_id" ], name: "index_runs_on_task_id"
+    t.index ["task_id"], name: "index_runs_on_task_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -50,7 +48,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_31_033829) do
     t.string "user_agent"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index [ "user_id" ], name: "index_sessions_on_user_id"
+    t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
   create_table "steps", force: :cascade do |t|
@@ -60,7 +58,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_31_033829) do
     t.datetime "updated_at", null: false
     t.string "type"
     t.text "content"
-    t.index [ "run_id" ], name: "index_steps_on_run_id"
+    t.index ["run_id"], name: "index_steps_on_run_id"
   end
 
   create_table "tasks", force: :cascade do |t|
@@ -71,8 +69,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_31_033829) do
     t.datetime "archived_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index [ "agent_id" ], name: "index_tasks_on_agent_id"
-    t.index [ "project_id" ], name: "index_tasks_on_project_id"
+    t.index ["agent_id"], name: "index_tasks_on_agent_id"
+    t.index ["project_id"], name: "index_tasks_on_project_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -81,7 +79,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_31_033829) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "role"
-    t.index [ "email_address" ], name: "index_users_on_email_address", unique: true
+    t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
   create_table "volume_mounts", force: :cascade do |t|
@@ -89,8 +87,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_31_033829) do
     t.integer "task_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index [ "task_id" ], name: "index_volume_mounts_on_task_id"
-    t.index [ "volume_id" ], name: "index_volume_mounts_on_volume_id"
+    t.index ["task_id"], name: "index_volume_mounts_on_task_id"
+    t.index ["volume_id"], name: "index_volume_mounts_on_volume_id"
   end
 
   create_table "volumes", force: :cascade do |t|
@@ -99,7 +97,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_31_033829) do
     t.integer "agent_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index [ "agent_id" ], name: "index_volumes_on_agent_id"
+    t.index ["agent_id"], name: "index_volumes_on_agent_id"
   end
 
   add_foreign_key "runs", "tasks"

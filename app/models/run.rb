@@ -57,7 +57,7 @@ class Run < ApplicationRecord
 
     task.volume_mounts.includes(:volume).each do |volume_mount|
       volume = volume_mount.volume
-      volume_name = "#{volume.name}_#{task_id}_volume"
+      volume_name = "summoncircle_#{volume.name}_volume_#{SecureRandom.uuid}"
       binds << "#{volume_name}:#{volume.path}"
     end
 

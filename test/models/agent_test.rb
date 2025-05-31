@@ -7,13 +7,13 @@ class AgentTest < ActiveSupport::TestCase
   end
 
   test "requires name and docker image" do
-    agent = Agent.new(agent_prompt: "prompt", setup_script: "script", start_arguments: {}, continue_arguments: {})
+    agent = Agent.new(start_arguments: {}, continue_arguments: {})
     assert_not agent.valid?
     assert_includes agent.errors[:name], "can't be blank"
     assert_includes agent.errors[:docker_image], "can't be blank"
   end
 
-  test "prompt and script are optional" do
+  test "name and docker image are sufficient" do
     agent = Agent.new(name: "Name", docker_image: "img")
     assert_valid agent
   end
@@ -27,8 +27,8 @@ class AgentTest < ActiveSupport::TestCase
     agent = Agent.new(name: "Name", docker_image: "img", log_processor: "Text")
     assert_equal LogProcessor::Text, agent.log_processor_class
 
-    agent.log_processor = "ClaudeStreamingJson"
-    assert_equal LogProcessor::ClaudeStreamingJson, agent.log_processor_class
+    agent.log_processor = "ClaudeJson"
+    assert_equal LogProcessor::ClaudeJson, agent.log_processor_class
   end
 
   test "log_processor_class raises error for invalid processor" do

@@ -1,8 +1,8 @@
 require "test_helper"
 
-class LogProcessor::ClaudeStreamingJsonTest < ActiveSupport::TestCase
+class LogProcessor::ClaudeJsonTest < ActiveSupport::TestCase
   test "process parses JSON array into separate steps" do
-    processor = LogProcessor::ClaudeStreamingJson.new
+    processor = LogProcessor::ClaudeJson.new
     logs = '[{"type": "system", "message": "Starting"}, {"type": "user", "content": "Hello"}, {"type": "assistant", "response": "Hi there"}]'
 
     result = processor.process(logs)
@@ -17,7 +17,7 @@ class LogProcessor::ClaudeStreamingJsonTest < ActiveSupport::TestCase
   end
 
   test "process handles single JSON object" do
-    processor = LogProcessor::ClaudeStreamingJson.new
+    processor = LogProcessor::ClaudeJson.new
     logs = '{"type": "system", "message": "Starting"}'
 
     result = processor.process(logs)
@@ -28,7 +28,7 @@ class LogProcessor::ClaudeStreamingJsonTest < ActiveSupport::TestCase
   end
 
   test "process handles complex nested JSON from real example" do
-    processor = LogProcessor::ClaudeStreamingJson.new
+    processor = LogProcessor::ClaudeJson.new
     logs = '[{"type":"system","subtype":"init","session_id":"4ae13eec-ff85-4ea2-9d98-64a7cb25e874","tools":["Task","Bash"],"mcp_servers":[]},{"type":"assistant","message":{"id":"e3d7588f-fe40-450b-a83c-c7377cbdacae","model":"<synthetic>","role":"assistant","stop_reason":"stop_sequence","stop_sequence":"","type":"message","usage":{"input_tokens":0,"output_tokens":0},"content":[{"type":"text","text":"API Error: 401"}]},"session_id":"4ae13eec-ff85-4ea2-9d98-64a7cb25e874"}]'
 
     result = processor.process(logs)
@@ -41,7 +41,7 @@ class LogProcessor::ClaudeStreamingJsonTest < ActiveSupport::TestCase
   end
 
   test "process returns single step for invalid JSON" do
-    processor = LogProcessor::ClaudeStreamingJson.new
+    processor = LogProcessor::ClaudeJson.new
 
     result = processor.process("Invalid JSON")
     assert_equal 1, result.size
@@ -54,7 +54,7 @@ class LogProcessor::ClaudeStreamingJsonTest < ActiveSupport::TestCase
 
   test "class method process works" do
     logs = '{"type": "test"}'
-    result = LogProcessor::ClaudeStreamingJson.process(logs)
+    result = LogProcessor::ClaudeJson.process(logs)
 
     assert_equal 1, result.size
     assert_equal "Step::Text", result.first[:type]

@@ -25,19 +25,19 @@ class AgentsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create requires authentication" do
-    post agents_url, params: { agent: { name: "Test", docker_image: "img", agent_prompt: "prompt", setup_script: "setup" } }
+    post agents_url, params: { agent: { name: "Test", docker_image: "img" } }
     assert_redirected_to new_session_path
 
     login @user
     assert_difference("Agent.count") do
-      post agents_url, params: { agent: { name: "Test", docker_image: "img", agent_prompt: "prompt", setup_script: "setup" } }
+      post agents_url, params: { agent: { name: "Test", docker_image: "img" } }
     end
     assert_redirected_to agent_path(Agent.last)
   end
 
   test "create persists json arguments" do
     login @user
-    post agents_url, params: { agent: { name: "Args", docker_image: "img", agent_prompt: "prompt", setup_script: "script", start_arguments: "[\"a\", \"b\"]", continue_arguments: "[1]" } }
+    post agents_url, params: { agent: { name: "Args", docker_image: "img", start_arguments: "[\"a\", \"b\"]", continue_arguments: "[1]" } }
     agent = Agent.last
     assert_equal [ "a", "b" ], agent.start_arguments
     assert_equal [ 1 ], agent.continue_arguments
