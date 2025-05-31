@@ -59,13 +59,10 @@ class Run < ApplicationRecord
     command_template = first_run? ? agent.start_arguments : agent.continue_arguments
     command = command_template.map { |arg| arg.gsub("{PROMPT}", prompt) }
 
-    workplace_mount = task.workplace_mount
-    working_dir = task.agent.workplace_path
-
     Docker::Container.create(
       "Image" => agent.docker_image,
       "Cmd" => command,
-      "WorkingDir" => working_dir,
+      "WorkingDir" => task.agent.workplace_path,
       "HostConfig" => {
         "Binds" => task.volume_mounts.includes(:volume).map(&:bind_string)
       }

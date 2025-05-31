@@ -23,5 +23,6 @@ class Task < ApplicationRecord
     agent.volumes.each do |volume|
       volume_mounts.find_or_create_by!(volume: volume)
     end
+    workplace_mount # Create workplace mount
   end
 end
