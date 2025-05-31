@@ -58,7 +58,6 @@ class RunTest < ActiveSupport::TestCase
       started_at: Time.current
     )
     run = task.runs.create!(prompt: "test command", status: :pending)
-    task.send(:create_volume_mounts) # Ensure volume mounts are created
 
     # For first run, it uses start_arguments
     Docker::Container.expects(:create).with do |params|
@@ -79,7 +78,7 @@ class RunTest < ActiveSupport::TestCase
   test "execute! uses continue_arguments for subsequent runs" do
     # Use existing task with runs
     task = tasks(:one)
-    task.send(:create_volume_mounts) # Ensure volume mounts are created
+    task.workplace_mount # Ensure workplace mount exists for fixture task
     run = runs(:one)
     run.update!(status: :pending, started_at: nil, completed_at: nil)
     run.steps.destroy_all

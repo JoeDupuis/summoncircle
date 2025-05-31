@@ -4,9 +4,10 @@ class Task < ApplicationRecord
   has_many :runs, dependent: :destroy
   has_many :volume_mounts, dependent: :destroy
 
+  after_create :create_volume_mounts
+
   def run(prompt)
     run = runs.create!(prompt: prompt)
-    create_volume_mounts
     RunJob.perform_later(run.id)
     run
   end
