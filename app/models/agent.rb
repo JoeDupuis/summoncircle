@@ -5,7 +5,7 @@ class Agent < ApplicationRecord
   validates :name, presence: true
   validates :docker_image, presence: true
 
-  attr_accessor :volumes_config, :env_config
+  attr_accessor :volumes_config, :env_variables
 
   def volumes_config
     return @volumes_config if @volumes_config.present?
@@ -14,22 +14,22 @@ class Agent < ApplicationRecord
     volumes.pluck(:name, :path).to_h.to_json
   end
 
-  def env_config
-    return @env_config if @env_config.present?
+  def env_variables
+    return @env_variables if @env_variables.present?
     return "" if environment_variables.blank?
 
     environment_variables.to_json
   end
 
-  def env_config=(value)
-    @env_config = value
+  def env_variables=(value)
+    @env_variables = value
     return if value.blank?
 
     begin
       parsed = JSON.parse(value)
       write_attribute(:environment_variables, parsed)
     rescue JSON::ParserError
-      errors.add(:env_config, "must be valid JSON")
+      errors.add(:env_variables, "must be valid JSON")
     end
   end
 
