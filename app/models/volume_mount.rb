@@ -6,6 +6,10 @@ class VolumeMount < ApplicationRecord
   
   before_create :generate_volume_name
   
+  def container_path
+    volume&.path || task.agent.workplace_path
+  end
+  
   private
   
   def generate_volume_name

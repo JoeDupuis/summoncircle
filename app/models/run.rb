@@ -62,13 +62,7 @@ class Run < ApplicationRecord
     binds = []
 
     task.volume_mounts.includes(:volume).each do |volume_mount|
-      if volume_mount.volume.present?
-        # Regular volume mount
-        binds << "#{volume_mount.volume_name}:#{volume_mount.volume.path}"
-      else
-        # Workplace mount
-        binds << "#{volume_mount.volume_name}:#{task.agent.workplace_path}"
-      end
+      binds << "#{volume_mount.volume_name}:#{volume_mount.container_path}"
     end
 
     workplace_mount = task.workplace_mount
