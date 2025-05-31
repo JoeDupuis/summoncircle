@@ -38,7 +38,7 @@ class AgentTest < ActiveSupport::TestCase
   end
 
   test "env_variables can store JSON data" do
-    agent = Agent.new(name: "Name", docker_image: "img")
+    agent = Agent.new(name: "Name", docker_image: "img", workplace_path: "/workspace")
     env_vars = { "NODE_ENV" => "development", "DEBUG" => "true" }
     agent.env_variables = env_vars
     agent.save!

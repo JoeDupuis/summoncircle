@@ -267,6 +267,7 @@ class RunTest < ActiveSupport::TestCase
     agent = Agent.create!(
       name: "Test Agent with Env Vars",
       docker_image: "example/image:latest",
+      workplace_path: "/workspace",
       start_arguments: [ "echo", "{PROMPT}" ],
       env_variables: { "NODE_ENV" => "development", "DEBUG" => "true" }
     )
@@ -279,15 +280,14 @@ class RunTest < ActiveSupport::TestCase
     run = task.runs.create!(prompt: "test", status: :pending)
 
     # Verify that environment variables are passed to Docker container
-    Docker::Container.expects(:create).with(
-      "Image" => "example/image:latest",
-      "Cmd" => [ "echo", "test" ],
-      "Env" => [ "NODE_ENV=development", "DEBUG=true" ],
-      "WorkingDir" => "/workspace",
-      "HostConfig" => {
-        "Binds" => []
-      }
-    ).returns(mock_container_with_output("\x04test"))
+    Docker::Container.expects(:create).with do |params|
+      params["Image"] == "example/image:latest" &&
+      params["Cmd"] == [ "echo", "test" ] &&
+      params["Env"] == [ "NODE_ENV=development", "DEBUG=true" ] &&
+      params["WorkingDir"] == "/workspace" &&
+      params["HostConfig"]["Binds"].size == 1 &&
+      params["HostConfig"]["Binds"].any? { |bind| bind.match?(/summoncircle_workplace_volume_.*:\/workspace/) }
+    end.returns(mock_container_with_output("\x04test"))
 
     run.execute!
 
