@@ -24,31 +24,9 @@
       <% end %>
     </div>
   <% end %>
+  <%= turbo_stream_from @task %>
   <% @runs.each do |run| %>
-    <div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-      <p>
-        <strong>Status:</strong> <%= run.status %>
-        <% if run.started_at %>
-          | <strong>Started:</strong> <%= run.started_at.strftime("%Y-%m-%d %H:%M:%S") %>
-        <% end %>
-        <% if run.completed_at %>
-          | <strong>Completed:</strong> <%= run.completed_at.strftime("%Y-%m-%d %H:%M:%S") %>
-        <% end %>
-      </p>
-      <p><strong>Prompt:</strong> <%= run.prompt %></p>
-      <% if run.steps.any? %>
-        <p><strong>Output:</strong></p>
-        <div style="background: #f0f0f0; padding: 10px; overflow: auto;">
-          <%= render run.steps %>
-        </div>
-      <% elsif run.status == 'running' %>
-        <p><strong>Output:</strong></p>
-        <div class="run-spinner-container">
-          <div class="spinner"></div>
-          Processing...
-        </div>
-      <% end %>
-    </div>
+    <%= render "tasks/run", run: run %>
   <% end %>
 <% else %>
   <p>No runs yet.</p>
