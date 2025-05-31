@@ -5,6 +5,8 @@ class Run < ApplicationRecord
 
   enum :status, { pending: 0, running: 1, completed: 2, failed: 3 }, default: :pending
 
+  after_update_commit :broadcast_update
+
   def first_run?
     siblings.where.not(id: id).none?
   end
@@ -40,6 +42,10 @@ class Run < ApplicationRecord
   end
 
   private
+
+  def broadcast_update
+    broadcast_replace_later_to(task, target: self, partial: "tasks/run", locals: { run: self })
+  end
 
   def configure_docker_host
     agent = task.agent
