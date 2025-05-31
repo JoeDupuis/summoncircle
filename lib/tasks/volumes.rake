@@ -1,6 +1,6 @@
 namespace :volumes do
   desc "Flush all existing Docker volumes with summoncircle prefix"
-  task flush: :environment do
+  task :flush, [ :skip_confirmation ] => :environment do |task, args|
     require "docker"
 
     begin
@@ -15,8 +15,14 @@ namespace :volumes do
       puts "Found #{summoncircle_volumes.size} summoncircle volumes:"
       summoncircle_volumes.each { |volume| puts "  - #{volume.info["Name"]}" }
 
-      print "Are you sure you want to delete these volumes? (y/N): "
-      confirmation = $stdin.gets.chomp.downcase
+      skip_confirmation = args[:skip_confirmation] == "true"
+
+      if skip_confirmation
+        confirmation = "y"
+      else
+        print "Are you sure you want to delete these volumes? (y/N): "
+        confirmation = $stdin.gets&.chomp&.downcase || "n"
+      end
 
       if confirmation == "y" || confirmation == "yes"
         summoncircle_volumes.each do |volume|
