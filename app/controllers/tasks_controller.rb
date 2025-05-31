@@ -31,7 +31,7 @@ class TasksController < ApplicationController
       cookies[:preferred_agent_id] = { value: @task.agent_id, expires: 1.year.from_now }
       @task.update!(started_at: Time.current)
       @task.run(params[:task][:prompt])
-      redirect_to [ @project, @task ].compact, notice: "Task was successfully launched."
+      redirect_to [ @project, @task ], notice: "Task was successfully launched."
     else
       if @project.present?
         render :new, status: :unprocessable_entity
