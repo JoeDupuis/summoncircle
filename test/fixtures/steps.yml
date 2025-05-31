@@ -5,3 +5,9 @@ one:
 two:
   run: two
   raw_response: "world"
+
+error_step:
+  run: one
+  type: "Step::Error"
+  raw_response: '{"error": "Something went wrong"}'
+  content: "Error: Something went wrong"

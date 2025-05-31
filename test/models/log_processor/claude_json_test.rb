@@ -35,7 +35,7 @@ class LogProcessor::ClaudeJsonTest < ActiveSupport::TestCase
 
     assert_equal 2, result.size
     assert_equal "Step::Init", result[0][:type]
-    assert_equal "Step::Text", result[1][:type]
+    assert_equal "Step::Error", result[1][:type]
     assert_includes result[0][:raw_response], '"type":"system"'
     assert_includes result[1][:raw_response], '"type":"assistant"'
   end
@@ -50,6 +50,14 @@ class LogProcessor::ClaudeJsonTest < ActiveSupport::TestCase
     result = processor.process("")
     assert_equal 1, result.size
     assert_equal({ raw_response: "", type: "Step::Text", content: "" }, result.first)
+  end
+
+  test "process returns Step::Error for invalid JSON with error content" do
+    processor = LogProcessor::ClaudeJson.new
+
+    result = processor.process("Invalid JSON: Error occurred")
+    assert_equal 1, result.size
+    assert_equal({ raw_response: "Invalid JSON: Error occurred", type: "Step::Error", content: "Invalid JSON: Error occurred" }, result.first)
   end
 
   test "class method process works" do
@@ -85,5 +93,26 @@ class LogProcessor::ClaudeJsonTest < ActiveSupport::TestCase
     assert_equal "Step::ToolCall", result[0][:type]
     expected_content = "name: WebFetch\ninputs: {\"url\":\"https://example.com\",\"prompt\":\"What is the title?\"}"
     assert_equal expected_content, result[0][:content]
+  end
+
+  test "process detects errors in assistant text content" do
+    processor = LogProcessor::ClaudeJson.new
+    logs = '{
+      "type": "assistant",
+      "message": {
+        "content": [
+          {
+            "type": "text",
+            "text": "An error occurred while processing your request"
+          }
+        ]
+      }
+    }'
+
+    result = processor.process(logs)
+
+    assert_equal 1, result.size
+    assert_equal "Step::Error", result[0][:type]
+    assert_equal "An error occurred while processing your request", result[0][:content]
   end
 end
