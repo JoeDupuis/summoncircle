@@ -3,11 +3,7 @@ class TasksController < ApplicationController
   before_action :set_task, only: :show
 
   def index
-    @tasks = Task.includes(:agent, :project).order(created_at: :desc)
-    @tasks = @tasks.where(project: @project) if @project.present?
-    @task = Task.new
-    @projects = Project.all
-    @agents = Agent.all
+    @tasks = @project.tasks.includes(:agent, :project)
   end
 
   def show
