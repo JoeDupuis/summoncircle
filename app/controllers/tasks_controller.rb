@@ -1,16 +1,13 @@
 class TasksController < ApplicationController
+  before_action :set_project
   before_action :set_task, only: :show
 
   def index
-    if params[:project_id].present?
-      @project = Project.find(params[:project_id])
-      @tasks = @project.tasks.includes(:agent, :project)
-    else
-      @tasks = Task.includes(:agent, :project).order(created_at: :desc)
-      @task = Task.new
-      @projects = Project.all
-      @agents = Agent.all
-    end
+    @tasks = Task.includes(:agent, :project).order(created_at: :desc)
+    @tasks = @tasks.where(project: @project) if @project.present?
+    @task = Task.new
+    @projects = Project.all
+    @agents = Agent.all
   end
 
   def show
@@ -23,16 +20,14 @@ class TasksController < ApplicationController
   end
 
   def new
-    @project = Project.find(params[:project_id])
     @task = @project.tasks.new
     @task.agent_id = cookies[:preferred_agent_id] if cookies[:preferred_agent_id].present?
   end
 
   def create
-    if params[:project_id].present?
-      @project = Project.find(params[:project_id])
+    if @project.present?
       @task = @project.tasks.new(task_params)
-      redirect_path = [ @project, @task ]
+      redirect_path = [@project, @task]
     else
       @task = Task.new(task_params)
       redirect_path = @task
@@ -44,7 +39,7 @@ class TasksController < ApplicationController
       @task.run(params[:task][:prompt])
       redirect_to redirect_path, notice: "Task was successfully launched."
     else
-      if params[:project_id].present?
+      if @project.present?
         render :new, status: :unprocessable_entity
       else
         @tasks = Task.includes(:agent, :project).order(created_at: :desc)
@@ -62,8 +57,8 @@ class TasksController < ApplicationController
   end
 
   def set_task
-    if params[:project_id].present?
-      @task = Project.find(params[:project_id]).tasks.find(params[:id])
+    if @project.present?
+      @task = @project.tasks.find(params[:id])
     else
       @task = Task.find(params[:id])
     end
