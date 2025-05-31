@@ -15,6 +15,7 @@ class LogProcessor::ClaudeJson < LogProcessor
 
   private
 
+  # TODO: Refactor this to both the process_item and extract_content
   def process_item(item)
     item_json = item.to_json
 
@@ -46,6 +47,7 @@ class LogProcessor::ClaudeJson < LogProcessor
     item["message"]["content"].any? { |content_item| content_item["type"] == "tool_use" }
   end
 
+  # TODO: Refactor this to both the process_item and extract_content
   def extract_content(item)
     case item["type"]
     when "system"
