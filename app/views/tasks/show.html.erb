@@ -14,7 +14,16 @@
 <% end %>
 
 <h2>Runs</h2>
-<% if @runs.any? %>
+<% if @task.runs.any? %>
+  <% if @task.runs.count > 1 %>
+    <div style="margin-bottom: 15px;">
+      <% if @show_all_runs %>
+        <%= link_to "Show Last Run Only", project_task_path(@project, @task), style: "padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 4px;" %>
+      <% else %>
+        <%= link_to "Show All Runs", project_task_path(@project, @task, show_all_runs: true), style: "padding: 8px 16px; background: #28a745; color: white; text-decoration: none; border-radius: 4px;" %>
+      <% end %>
+    </div>
+  <% end %>
   <% @runs.each do |run| %>
     <div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
       <p>
