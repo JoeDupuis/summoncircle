@@ -25,19 +25,13 @@ class TasksController < ApplicationController
   end
 
   def create
-    if @project.present?
-      @task = @project.tasks.new(task_params)
-      redirect_path = [@project, @task]
-    else
-      @task = Task.new(task_params)
-      redirect_path = @task
-    end
+    @task = Task.new(task_params.with_defaults(project_id: @project&.id))
 
     if @task.save
       cookies[:preferred_agent_id] = { value: @task.agent_id, expires: 1.year.from_now }
       @task.update!(started_at: Time.current)
       @task.run(params[:task][:prompt])
-      redirect_to redirect_path, notice: "Task was successfully launched."
+      redirect_to [ @project, @task ].compact, notice: "Task was successfully launched."
     else
       if @project.present?
         render :new, status: :unprocessable_entity
