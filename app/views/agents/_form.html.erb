@@ -45,6 +45,12 @@
   </div>
 
   <div>
+    <%= form.label :environment_variables_config, "Environment Variables (JSON format)" %><br>
+    <%= form.text_area :environment_variables_config %>
+    <small style="color: #666;">Example: {"NODE_ENV": "development", "DEBUG": "true"}</small>
+  </div>
+
+  <div>
     <%= form.label :log_processor %><br>
     <%= form.select :log_processor, 
         options_for_select(

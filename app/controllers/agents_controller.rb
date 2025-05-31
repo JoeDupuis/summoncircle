@@ -51,7 +51,7 @@ class AgentsController < ApplicationController
 
     def agent_params
       params.require(:agent)
-            .permit(:name, :docker_image, :docker_host, :start_arguments, :continue_arguments, :volumes_config, :log_processor)
+            .permit(:name, :docker_image, :docker_host, :start_arguments, :continue_arguments, :volumes_config, :environment_variables_config, :log_processor)
     end
 
     def create_volumes_from_config(agent, volumes_config)

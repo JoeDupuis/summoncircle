@@ -35,4 +35,43 @@ class AgentTest < ActiveSupport::TestCase
     agent = Agent.new(name: "Name", docker_image: "img", log_processor: "InvalidProcessor")
     assert_raises(NameError) { agent.log_processor_class }
   end
+
+  test "environment_variables can store JSON data" do
+    agent = Agent.new(name: "Name", docker_image: "img")
+    env_vars = {"NODE_ENV" => "development", "DEBUG" => "true"}
+    agent.environment_variables = env_vars
+    agent.save!
+
+    agent.reload
+    assert_equal env_vars, agent.environment_variables
+  end
+
+  test "environment_variables_config returns JSON string" do
+    agent = Agent.new(name: "Name", docker_image: "img")
+    env_vars = {"NODE_ENV" => "development", "DEBUG" => "true"}
+    agent.environment_variables = env_vars
+
+    assert_equal env_vars.to_json, agent.environment_variables_config
+  end
+
+  test "environment_variables_config returns empty string when nil" do
+    agent = Agent.new(name: "Name", docker_image: "img")
+    assert_equal "", agent.environment_variables_config
+  end
+
+  test "environment_variables_config= parses JSON and sets environment_variables" do
+    agent = Agent.new(name: "Name", docker_image: "img")
+    json_string = '{"NODE_ENV": "development", "DEBUG": "true"}'
+    agent.environment_variables_config = json_string
+
+    expected = {"NODE_ENV" => "development", "DEBUG" => "true"}
+    assert_equal expected, agent.environment_variables
+  end
+
+  test "environment_variables_config= adds error for invalid JSON" do
+    agent = Agent.new(name: "Name", docker_image: "img")
+    agent.environment_variables_config = "invalid json"
+
+    assert_includes agent.errors[:environment_variables_config], "must be valid JSON"
+  end
 end
