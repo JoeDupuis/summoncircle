@@ -29,10 +29,10 @@
   </ul>
 <% end %>
 
-<% if @agent.environment_variables.present? %>
+<% if @agent.env_variables.present? %>
   <h2>Environment Variables</h2>
   <ul>
-    <% @agent.environment_variables.each do |key, value| %>
+    <% @agent.env_variables.each do |key, value| %>
       <li><strong><%= key %>:</strong> <%= value %></li>
     <% end %>
   </ul>

@@ -36,42 +36,42 @@ class AgentTest < ActiveSupport::TestCase
     assert_raises(NameError) { agent.log_processor_class }
   end
 
-  test "environment_variables can store JSON data" do
+  test "env_variables can store JSON data" do
     agent = Agent.new(name: "Name", docker_image: "img")
     env_vars = { "NODE_ENV" => "development", "DEBUG" => "true" }
-    agent.environment_variables = env_vars
+    agent.env_variables = env_vars
     agent.save!
 
     agent.reload
-    assert_equal env_vars, agent.environment_variables
+    assert_equal env_vars, agent.env_variables
   end
 
-  test "env_variables returns JSON string" do
+  test "env_variables_json returns JSON string" do
     agent = Agent.new(name: "Name", docker_image: "img")
     env_vars = { "NODE_ENV" => "development", "DEBUG" => "true" }
-    agent.environment_variables = env_vars
+    agent.env_variables = env_vars
 
-    assert_equal env_vars.to_json, agent.env_variables
+    assert_equal env_vars.to_json, agent.env_variables_json
   end
 
-  test "env_variables returns empty string when nil" do
+  test "env_variables_json returns empty string when nil" do
     agent = Agent.new(name: "Name", docker_image: "img")
-    assert_equal "", agent.env_variables
+    assert_equal "", agent.env_variables_json
   end
 
-  test "env_variables= parses JSON and sets environment_variables" do
+  test "env_variables_json= parses JSON and sets env_variables" do
     agent = Agent.new(name: "Name", docker_image: "img")
     json_string = '{"NODE_ENV": "development", "DEBUG": "true"}'
-    agent.env_variables = json_string
+    agent.env_variables_json = json_string
 
     expected = { "NODE_ENV" => "development", "DEBUG" => "true" }
-    assert_equal expected, agent.environment_variables
+    assert_equal expected, agent.env_variables
   end
 
-  test "env_variables= adds error for invalid JSON" do
+  test "env_variables_json= adds error for invalid JSON" do
     agent = Agent.new(name: "Name", docker_image: "img")
-    agent.env_variables = "invalid json"
+    agent.env_variables_json = "invalid json"
 
-    assert_includes agent.errors[:env_variables], "must be valid JSON"
+    assert_includes agent.errors[:env_variables_json], "must be valid JSON"
   end
 end
