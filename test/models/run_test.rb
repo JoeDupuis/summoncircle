@@ -229,12 +229,12 @@ class RunTest < ActiveSupport::TestCase
     assert_equal logs, run.steps.first.raw_response
   end
 
-  test "create_steps_from_logs with ClaudeStreamingJson processor" do
-    # Create agent with ClaudeStreamingJson processor
+  test "create_steps_from_logs with ClaudeJson processor" do
+    # Create agent with ClaudeJson processor
     agent = Agent.create!(
       name: "JSON Agent",
       docker_image: "example/image:latest",
-      log_processor: "ClaudeStreamingJson",
+      log_processor: "ClaudeJson",
       start_arguments: [ "echo", "test" ]
     )
     task = Task.create!(
