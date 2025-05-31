@@ -10,12 +10,6 @@
 </p>
 <% end %>
 
-<% if @agent.workplace_path.present? %>
-<p>
-  Workplace Path: <%= @agent.workplace_path %>
-</p>
-<% end %>
-
 <p>
   Log Processor: <%= @agent.log_processor %>
 </p>
@@ -25,6 +19,13 @@
 
 <h2>Continue Arguments</h2>
 <pre><code><%= @agent.continue_arguments.to_json %></code></pre>
+
+<% if @agent.workplace_path.present? %>
+<h2>Workplace</h2>
+<p>
+  Path: <%= @agent.workplace_path %>
+</p>
+<% end %>
 
 <% if @agent.volumes.any? %>
   <h2>Volumes</h2>
