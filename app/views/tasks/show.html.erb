@@ -5,9 +5,6 @@
   <p>Project: <%= @task.project.name %></p>
 <% end %>
 
-<h2>New Run</h2>
-<%= render "run_form", task: @task, project: @task.project, run: Run.new %>
-
 <h2>Runs</h2>
 <% if @task.runs.any? %>
   <% if @task.runs.count > 1 %>
@@ -38,6 +35,9 @@
     <p>No runs yet.</p>
   </div>
 <% end %>
+
+<h2>New Run</h2>
+<%= render "run_form", task: @task, project: @task.project, run: Run.new %>
 
 <% if @task.project %>
   <%= link_to 'Back', project_tasks_path(@task.project) %>
