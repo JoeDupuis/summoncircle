@@ -4,7 +4,7 @@ class VolumeMount < ApplicationRecord
 
   validates :volume_id, uniqueness: { scope: :task_id }, allow_nil: true
   
-  before_create :generate_volume_name
+  before_validation :generate_volume_name
   
   def container_path
     volume&.path || task.agent.workplace_path
