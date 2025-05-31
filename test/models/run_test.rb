@@ -78,7 +78,6 @@ class RunTest < ActiveSupport::TestCase
   test "execute! uses continue_arguments for subsequent runs" do
     # Use existing task with runs
     task = tasks(:one)
-    task.workplace_mount # Ensure workplace mount exists for fixture task
     run = runs(:one)
     run.update!(status: :pending, started_at: nil, completed_at: nil)
     run.steps.destroy_all
@@ -90,7 +89,7 @@ class RunTest < ActiveSupport::TestCase
       params["WorkingDir"] == "/workspace" &&
       params["HostConfig"]["Binds"].size == 2 &&
       params["HostConfig"]["Binds"].include?("summoncircle_MyString_volume_12345678-1234-5678-9abc-123456789abc:MyString") &&
-      params["HostConfig"]["Binds"].any? { |bind| bind.match?(/summoncircle_workplace_volume_.*:\/workspace/) }
+      params["HostConfig"]["Binds"].include?("summoncircle_workplace_volume_abcdef12-3456-7890-abcd-ef1234567890:/workspace")
     end.returns(mock_container_with_output("\x10continued output"))
 
     run.execute!
