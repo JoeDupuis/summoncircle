@@ -33,6 +33,12 @@ class Agent < ApplicationRecord
     end
   end
 
+  def env_strings
+    return [] if env_variables.blank?
+
+    env_variables.map { |key, value| "#{key}=#{value}" }
+  end
+
   def start_arguments=(value)
     parsed = value.is_a?(String) && value.present? ? JSON.parse(value) : value
     super(parsed)

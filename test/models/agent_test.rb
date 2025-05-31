@@ -74,4 +74,17 @@ class AgentTest < ActiveSupport::TestCase
 
     assert_includes agent.errors[:env_variables_json], "must be valid JSON"
   end
+
+  test "env_strings returns Docker-formatted environment variables" do
+    agent = Agent.new(name: "Name", docker_image: "img")
+    agent.env_variables = { "NODE_ENV" => "development", "DEBUG" => "true" }
+
+    expected = [ "NODE_ENV=development", "DEBUG=true" ]
+    assert_equal expected, agent.env_strings
+  end
+
+  test "env_strings returns empty array when no environment variables" do
+    agent = Agent.new(name: "Name", docker_image: "img")
+    assert_equal [], agent.env_strings
+  end
 end
