@@ -62,7 +62,7 @@ class LogProcessor::ClaudeJsonTest < ActiveSupport::TestCase
   end
 
   test "process extracts tool name and inputs from tool calls" do
-    processor = LogProcessor::ClaudeStreamingJson.new
+    processor = LogProcessor::ClaudeJson.new
     logs = '{
       "type": "assistant",
       "message": {
