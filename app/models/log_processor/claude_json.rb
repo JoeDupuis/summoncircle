@@ -9,8 +9,7 @@ class LogProcessor::ClaudeJson < LogProcessor
         [ process_item(parsed_array) ]
       end
     rescue JSON::ParserError
-      type = error_content?(logs) ? "Step::Error" : "Step::Text"
-      [ { raw_response: logs, type: type, content: logs } ]
+      [ { raw_response: logs, type: "Step::Error", content: logs } ]
     end
   end
 

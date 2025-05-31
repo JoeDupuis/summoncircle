@@ -40,20 +40,16 @@ class LogProcessor::ClaudeJsonTest < ActiveSupport::TestCase
     assert_includes result[1][:raw_response], '"type":"assistant"'
   end
 
-  test "process returns single step for invalid JSON" do
+  test "process returns Step::Error for invalid JSON" do
     processor = LogProcessor::ClaudeJson.new
 
     result = processor.process("Invalid JSON")
     assert_equal 1, result.size
-    assert_equal({ raw_response: "Invalid JSON", type: "Step::Text", content: "Invalid JSON" }, result.first)
+    assert_equal({ raw_response: "Invalid JSON", type: "Step::Error", content: "Invalid JSON" }, result.first)
 
     result = processor.process("")
     assert_equal 1, result.size
-    assert_equal({ raw_response: "", type: "Step::Text", content: "" }, result.first)
-  end
-
-  test "process returns Step::Error for invalid JSON with error content" do
-    processor = LogProcessor::ClaudeJson.new
+    assert_equal({ raw_response: "", type: "Step::Error", content: "" }, result.first)
 
     result = processor.process("Invalid JSON: Error occurred")
     assert_equal 1, result.size
