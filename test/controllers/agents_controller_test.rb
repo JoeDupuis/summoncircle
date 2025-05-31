@@ -43,6 +43,13 @@ class AgentsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ 1 ], agent.continue_arguments
   end
 
+  test "create persists environment variables" do
+    login @user
+    env_config = '{"NODE_ENV": "development", "DEBUG": "true"}'
+    post agents_url, params: { agent: { name: "EnvTest", docker_image: "img", workplace_path: "/workspace", env_variables_json: env_config } }
+    agent = Agent.last
+    assert_equal({ "NODE_ENV" => "development", "DEBUG" => "true" }, agent.env_variables)
+  end
 
   test "show requires authentication" do
     get agent_url(@agent)
