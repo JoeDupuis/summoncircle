@@ -1,4 +1,10 @@
-<div style="margin: 5px 0; padding: 5px; background: #d4edda; border-left: 3px solid #28a745;">
-  <strong>✅ Result</strong>
-  <pre style="margin: 5px 0 0 0;"><%= result.content %></pre>
-</div>
+<% if result.content.present? && result.run.steps.where.not(id: result.id).none? { |s| s.content == result.content } %>
+  <div style="margin: 5px 0; padding: 5px; background: #d4edda; border-left: 3px solid #28a745;">
+    <strong>✅ Result</strong>
+    <pre style="margin: 5px 0 0 0;"><%= result.content %></pre>
+  </div>
+<% else %>
+  <div style="margin: 5px 0; padding: 5px; background: #d4edda; border-left: 3px solid #28a745;">
+    <strong>✅ Result</strong>
+  </div>
+<% end %>
