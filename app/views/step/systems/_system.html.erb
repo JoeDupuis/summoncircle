@@ -1,4 +1,14 @@
 <div style="margin: 5px 0; padding: 5px; background: #f0f0f0; border-left: 3px solid #999; font-size: 0.9em;">
   <strong>🔧 System</strong>
-  <pre style="margin: 5px 0 0 0;"><%= system.content %></pre>
+  <% if system.content&.include?("Uncommitted diff:") %>
+    <% parts = system.content.split("\n\nUncommitted diff:\n", 2) %>
+    <p style="margin: 5px 0;"><%= parts[0] %></p>
+    <% if parts[1].present? %>
+      <div data-controller="diff" data-diff-diff-text-value="<%= html_escape(parts[1]) %>">
+        <div data-diff-target="output"></div>
+      </div>
+    <% end %>
+  <% else %>
+    <pre style="margin: 5px 0 0 0;"><%= system.content %></pre>
+  <% end %>
 </div>
