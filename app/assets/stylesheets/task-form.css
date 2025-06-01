@@ -1,0 +1,10 @@
+.task-form {
+  & .selectors {
+    display: flex;
+    gap: 1rem;
+  }
+
+  & .selectors .field {
+    flex: 1;
+  }
+}
