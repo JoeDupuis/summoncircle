@@ -27,7 +27,7 @@ class TasksController < ApplicationController
       cookies[:preferred_agent_id] = { value: @task.agent_id, expires: 1.year.from_now }
       @task.update!(started_at: Time.current)
       @task.run(params[:task][:prompt])
-      redirect_to [ @project, @task ], notice: "Task was successfully launched."
+      redirect_to task_path(@task), notice: "Task was successfully launched."
     else
       if @project.present?
         render :new, status: :unprocessable_entity
@@ -42,11 +42,7 @@ class TasksController < ApplicationController
 
   def destroy
     @task.discard
-    if @project.present?
-      redirect_to [ @project, :tasks ], notice: "Task was successfully archived."
-    else
-      redirect_to root_path, notice: "Task was successfully archived."
-    end
+    redirect_to project_tasks_path(@task.project), notice: "Task was successfully archived."
   end
 
   private

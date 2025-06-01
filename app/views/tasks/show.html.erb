@@ -8,9 +8,9 @@
   <% if @task.runs.count > 1 %>
     <div style="margin-bottom: 15px;">
       <% if @show_all_runs %>
-        <%= link_to "Show Last Run Only", [ @task.project, @task ], style: "padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 4px;" %>
+        <%= link_to "Show Last Run Only", task_path(@task), style: "padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 4px;" %>
       <% else %>
-        <%= link_to "Show All Runs", [ @task.project, @task, show_all_runs: true ], style: "padding: 8px 16px; background: #28a745; color: white; text-decoration: none; border-radius: 4px;" %>
+        <%= link_to "Show All Runs", task_path(@task, show_all_runs: true), style: "padding: 8px 16px; background: #28a745; color: white; text-decoration: none; border-radius: 4px;" %>
       <% end %>
     </div>
   <% end %>
@@ -27,10 +27,10 @@
 <% end %>
 
 <h2>New Run</h2>
-<%= render "run_form", task: @task, project: @task.project, run: Run.new %>
+<%= render "run_form", task: @task, run: Run.new %>
 
 <div class="task-actions">
-  <%= link_to 'Archive', project_task_path(@task.project, @task), 
+  <%= link_to 'Archive', task_path(@task), 
               data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to archive this task?' },
               class: 'archive' %> |
   <%= link_to 'Back', project_tasks_path(@task.project) %>
