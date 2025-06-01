@@ -6,14 +6,14 @@
         <%= task.agent.name %>
         <%= link_to 'Archive', project_task_path(@project, task), 
                     data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to archive this task?' },
-                    style: 'margin-left: 10px; color: #dc3545;' %>
+                    class: 'archive' %>
       <% else %>
         <%= link_to "Task ##{task.id}", task_path(task) %> -
         <%= task.agent.name %> in <%= task.project.name %>
         (<%= task.created_at.strftime("%m/%d %H:%M") %>)
         <%= link_to 'Archive', task_path(task), 
                     data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to archive this task?' },
-                    style: 'margin-left: 10px; color: #dc3545;' %>
+                    class: 'archive' %>
       <% end %>
     </li>
   <% end %>

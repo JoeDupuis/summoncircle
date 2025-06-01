@@ -8,7 +8,7 @@
       <%= link_to project.name, project_path(project) %>
       <%= link_to 'Archive', project_path(project), 
                   data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to archive this project?' },
-                  style: 'margin-left: 10px; color: #dc3545;' %>
+                  class: 'archive' %>
     </li>
   <% end %>
 </ul>

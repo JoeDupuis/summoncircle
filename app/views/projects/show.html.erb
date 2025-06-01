@@ -12,7 +12,7 @@
   <%= link_to 'New Task', new_project_task_path(@project), class: 'button' %> |
   <%= link_to 'Archive Project', project_path(@project), 
               data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to archive this project?' },
-              class: 'button', style: 'background-color: #dc3545; color: white;' %>
+              class: 'button archive -button' %>
 </p>
 
 <h2>Setup Script</h2>
