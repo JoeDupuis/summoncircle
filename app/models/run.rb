@@ -86,10 +86,11 @@ class Run < ApplicationRecord
     repo_path = project.repo_path.presence || ""
     working_dir = task.workplace_mount.container_path
     clone_target = repo_path.presence&.sub(/^\//, "") || "."
+    repository_url = project.repository_url_with_token(task.user)
 
     git_container = Docker::Container.create(
       "Image" => "alpine/git",
-      "Cmd" => [ "clone", project.repository_url, clone_target ],
+      "Cmd" => [ "clone", repository_url, clone_target ],
       "WorkingDir" => working_dir,
       "HostConfig" => {
         "Binds" => [ task.workplace_mount.bind_string ]

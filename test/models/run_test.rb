@@ -9,6 +9,7 @@ class RunTest < ActiveSupport::TestCase
     task = Task.create!(
       project: projects(:one),
       agent: agents(:one),
+      user: users(:one),
       status: "active",
       started_at: Time.current
     )
@@ -54,6 +55,7 @@ class RunTest < ActiveSupport::TestCase
     task = Task.create!(
       project: projects(:one),
       agent: agent,
+      user: users(:one),
       status: "active",
       started_at: Time.current
     )
@@ -135,6 +137,7 @@ class RunTest < ActiveSupport::TestCase
     task = Task.create!(
       project: projects(:one),
       agent: agent,
+      user: users(:one),
       status: "active",
       started_at: Time.current
     )
@@ -181,6 +184,7 @@ class RunTest < ActiveSupport::TestCase
     task = Task.create!(
       project: projects(:one),
       agent: agent,
+      user: users(:one),
       status: "active",
       started_at: Time.current
     )
@@ -230,6 +234,7 @@ class RunTest < ActiveSupport::TestCase
     task = Task.create!(
       project: projects(:one),
       agent: agent,
+      user: users(:one),
       status: "active",
       started_at: Time.current
     )
@@ -278,6 +283,7 @@ class RunTest < ActiveSupport::TestCase
     task = Task.create!(
       project: projects(:one),
       agent: agent,
+      user: users(:one),
       status: "active",
       started_at: Time.current
     )
@@ -304,6 +310,7 @@ class RunTest < ActiveSupport::TestCase
     task = Task.create!(
       project: projects(:one),
       agent: agent,
+      user: users(:one),
       status: "active"
     )
     run = task.runs.create!(prompt: "test")
@@ -327,6 +334,7 @@ class RunTest < ActiveSupport::TestCase
     task = Task.create!(
       project: projects(:one),
       agent: agent,
+      user: users(:one),
       status: "active"
     )
     run = task.runs.create!(prompt: "test")
@@ -353,6 +361,7 @@ class RunTest < ActiveSupport::TestCase
     task = Task.create!(
       project: projects(:one),
       agent: agent,
+      user: users(:one),
       status: "active",
       started_at: Time.current
     )
@@ -405,6 +414,7 @@ class RunTest < ActiveSupport::TestCase
     task = Task.create!(
       project: project,
       agent: agent,
+      user: users(:one),
       status: "active",
       started_at: Time.current
     )
@@ -456,6 +466,7 @@ class RunTest < ActiveSupport::TestCase
     task = Task.create!(
       project: project,
       agent: agent,
+      user: users(:one),
       status: "active",
       started_at: Time.current
     )
@@ -506,6 +517,7 @@ class RunTest < ActiveSupport::TestCase
     task = Task.create!(
       project: project,
       agent: agent,
+      user: users(:one),
       status: "active",
       started_at: Time.current
     )
@@ -560,7 +572,7 @@ class RunTest < ActiveSupport::TestCase
       workplace_path: "/workspace",
       start_arguments: [ "echo", "test" ]
     )
-    task = Task.create!(project: project, agent: agent, status: "active")
+    task = Task.create!(project: project, agent: agent, user: users(:one), status: "active")
     run = task.runs.create!(prompt: "test")
 
     assert_not run.send(:should_clone_repository?)
@@ -574,7 +586,7 @@ class RunTest < ActiveSupport::TestCase
       workplace_path: "/workspace",
       start_arguments: [ "echo", "test" ]
     )
-    task = Task.create!(project: project, agent: agent, status: "active")
+    task = Task.create!(project: project, agent: agent, user: users(:one), status: "active")
     run = task.runs.create!(prompt: "test")
 
     assert run.send(:should_clone_repository?)
@@ -595,6 +607,7 @@ class RunTest < ActiveSupport::TestCase
     task = Task.create!(
       project: project,
       agent: agent,
+      user: users(:one),
       status: "active",
       started_at: Time.current
     )

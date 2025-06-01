@@ -22,7 +22,7 @@ class TasksController < ApplicationController
   end
 
   def create
-    @task = Task.new(task_params.with_defaults(project_id: @project&.id))
+    @task = Task.new(task_params.with_defaults(project_id: @project&.id, user_id: Current.user.id))
 
     if @task.save
       cookies[:preferred_agent_id] = { value: @task.agent_id, expires: 1.year.from_now }

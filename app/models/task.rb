@@ -3,6 +3,7 @@ class Task < ApplicationRecord
 
   belongs_to :project
   belongs_to :agent
+  belongs_to :user
   has_many :runs, dependent: :destroy
   has_many :volume_mounts, dependent: :destroy
 

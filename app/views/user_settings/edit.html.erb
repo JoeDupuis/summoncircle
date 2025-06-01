@@ -1,0 +1,18 @@
+<h1>Edit User Settings</h1>
+
+<%= form_with(model: @user, url: user_settings_path, method: :patch) do |form| %>
+  <%= form_errors(@user) %>
+
+  <div>
+    <%= form.label :github_token, "GitHub Personal Access Token" %><br>
+    <%= form.password_field :github_token, placeholder: "Leave blank to keep current token" %>
+    <small>Used to clone private GitHub repositories. Token is encrypted and never displayed.</small>
+  </div>
+
+  <div>
+    <%= form.submit "Update Settings" %>
+  </div>
+<% end %>
+
+<%= link_to 'Show', user_settings_path %> |
+<%= link_to 'Back', root_path %>
