@@ -40,6 +40,7 @@ class Run < ApplicationRecord
       update!(completed_at: Time.current)
       save!
       container&.delete(force: true) if defined?(container)
+      task.user.cleanup_instructions_file
     end
   end
 
@@ -61,13 +62,20 @@ class Run < ApplicationRecord
     command_template = first_run? ? agent.start_arguments : agent.continue_arguments
     command = command_template.map { |arg| arg.gsub("{PROMPT}", prompt) }
 
+    binds = task.volume_mounts.includes(:volume).map(&:bind_string)
+
+    instructions_bind = task.user.instructions_bind_string(agent.instructions_mount_path)
+    if instructions_bind
+      binds << instructions_bind
+    end
+
     Docker::Container.create(
       "Image" => agent.docker_image,
       "Cmd" => command,
       "Env" => agent.env_strings,
       "WorkingDir" => task.agent.workplace_path,
       "HostConfig" => {
-        "Binds" => task.volume_mounts.includes(:volume).map(&:bind_string)
+        "Binds" => binds
       }
     )
   end

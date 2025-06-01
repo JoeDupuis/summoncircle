@@ -49,6 +49,34 @@
   </ul>
 <% end %>
 
+<h2>User Instructions</h2>
+<% if Current.user.instructions.present? && @agent.instructions_mount_path.present? %>
+  <p>
+    <strong>Mount Path:</strong> <code><%= @agent.instructions_mount_path %></code><br>
+    <strong>Status:</strong> <span class="status-indicator -success">Will be mounted</span>
+  </p>
+  <p>
+    <strong>Instructions Preview:</strong>
+  </p>
+  <pre class="instructions-preview -scrollable"><%= Current.user.instructions.truncate(500) %></pre>
+<% elsif Current.user.instructions.present? %>
+  <p>
+    <strong>Status:</strong> <span class="status-indicator -warning">User instructions set but no mount path configured for this agent</span>
+  </p>
+<% elsif @agent.instructions_mount_path.present? %>
+  <p>
+    <strong>Mount Path:</strong> <code><%= @agent.instructions_mount_path %></code><br>
+    <strong>Status:</strong> <span class="status-indicator -warning">Mount path set but no user instructions configured</span>
+  </p>
+<% else %>
+  <p>
+    <strong>Status:</strong> <span class="status-indicator -muted">No user instructions or mount path configured</span>
+  </p>
+<% end %>
+<p>
+  <%= link_to 'Configure Instructions', user_settings_path, class: 'button' %>
+</p>
+
 <div class="agent-actions">
   <%= link_to 'Edit', edit_agent_path(@agent) %> |
   <%= link_to 'Archive', agent_path(@agent), 
