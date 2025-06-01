@@ -19,9 +19,11 @@ class Run < ApplicationRecord
     begin
       configure_docker_host
       clone_repository if first_run? && should_clone_repository?
+
       container = create_container
       container.start
       container.wait
+
 
       logs = container.logs(stdout: true, stderr: true)
       # Docker logs prefix each line with 8 bytes of metadata that we need to strip
@@ -97,14 +99,15 @@ class Run < ApplicationRecord
     repository_url = project.repository_url_with_token(task.user)
 
     git_container = Docker::Container.create(
-      "Image" => "alpine/git",
-      "Cmd" => [ "clone", repository_url, clone_target ],
+      "Image" => task.agent.docker_image,
+      "Entrypoint" => [ "sh" ],
+      "Cmd" => [ "-c", "git clone #{repository_url} #{clone_target}" ],
       "WorkingDir" => working_dir,
+      "User" => task.agent.user_id.to_s,
       "HostConfig" => {
         "Binds" => [ task.workplace_mount.bind_string ]
       }
     )
-
     git_container.start
     wait_result = git_container.wait
     logs = git_container.logs(stdout: true, stderr: true)
@@ -114,12 +117,7 @@ class Run < ApplicationRecord
     if exit_code && exit_code != 0
       raise "Failed to clone repository: #{clean_logs}"
     end
-
-    fix_file_ownership(working_dir)
-  rescue Docker::Error::NotFoundError => e
-    raise "Alpine/git Docker image not found. Please pull alpine/git image."
   rescue => e
-    # Re-raise with more context
     raise "Git clone error: #{e.message} (#{e.class})"
   ensure
     git_container&.delete(force: true) if defined?(git_container)
@@ -167,20 +165,5 @@ class Run < ApplicationRecord
     Rails.logger.error "Failed to capture repository state: #{e.message}"
   ensure
     git_container&.delete(force: true) if defined?(git_container)
-  end
-
-  def fix_file_ownership(working_dir)
-    agent_uid = task.agent.user_id
-    chown_container = Docker::Container.create(
-      "Image" => "alpine",
-      "Cmd" => [ "chown", "-R", "#{agent_uid}:#{agent_uid}", "." ],
-      "WorkingDir" => working_dir,
-      "HostConfig" => {
-        "Binds" => [ task.workplace_mount.bind_string ]
-      }
-    )
-    chown_container.start
-    chown_container.wait
-    chown_container.delete(force: true)
   end
 end
