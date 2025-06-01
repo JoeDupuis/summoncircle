@@ -82,8 +82,8 @@ class Run < ApplicationRecord
 
   def clone_repository
     project = task.project
-    repo_path = project.repo_path.presence || "workspace"
-    full_path = File.join("/workspace", repo_path.sub(/^\//, ""))
+    repo_path = project.repo_path.presence || ""
+    full_path = repo_path.empty? ? "/workspace" : File.join("/workspace", repo_path.sub(/^\//, ""))
 
     git_container = Docker::Container.create(
       "Image" => "alpine/git",

@@ -383,13 +383,13 @@ class RunTest < ActiveSupport::TestCase
     git_container = mock("git_container")
     git_container.expects(:start)
     git_container.expects(:wait)
-    git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning into '/workspace/workspace'...")
+    git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning into '/workspace'...")
     git_container.expects(:info).returns({ "State" => { "ExitCode" => 0 } })
     git_container.expects(:delete).with(force: true)
 
     Docker::Container.expects(:create).with do |params|
       params["Image"] == "alpine/git" &&
-      params["Cmd"] == [ "clone", "https://github.com/test/repo.git", "/workspace/workspace" ] &&
+      params["Cmd"] == [ "clone", "https://github.com/test/repo.git", "/workspace" ] &&
       params["WorkingDir"] == "/workspace" &&
       params["HostConfig"]["Binds"].size == 1
     end.returns(git_container)
