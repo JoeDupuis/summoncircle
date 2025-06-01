@@ -83,15 +83,8 @@ class Run < ApplicationRecord
   def clone_repository
     project = task.project
     repo_path = project.repo_path.presence || ""
-
-    # Use the actual workplace path from the mount
     working_dir = task.workplace_mount.container_path
-
-    # Determine clone target
     clone_target = repo_path.empty? ? "." : repo_path.sub(/^\//, "")
-
-    Rails.logger.info "Cloning repository: #{project.repository_url} to #{clone_target} in #{working_dir}"
-    Rails.logger.info "Volume mount: #{task.workplace_mount.bind_string}"
 
     git_container = Docker::Container.create(
       "Image" => "alpine/git",
@@ -104,22 +97,13 @@ class Run < ApplicationRecord
 
     git_container.start
     wait_result = git_container.wait
-
     logs = git_container.logs(stdout: true, stderr: true)
     clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
-
-    Rails.logger.info "Git clone logs: #{clean_logs}"
-
-    # Check the exit status
     exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
 
-    # If exit code is not 0, the clone failed
     if exit_code && exit_code != 0
       raise "Failed to clone repository: #{clean_logs}"
     end
-
-    # Log success
-    Rails.logger.info "Git clone completed successfully"
   rescue Docker::Error::NotFoundError => e
     raise "Alpine/git Docker image not found. Please pull alpine/git image."
   rescue => e
