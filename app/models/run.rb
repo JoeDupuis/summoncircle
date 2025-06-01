@@ -83,10 +83,10 @@ class Run < ApplicationRecord
   def clone_repository
     project = task.project
     repo_path = project.repo_path.presence || ""
-    
+
     # Use the actual workplace path from the mount
     working_dir = task.workplace_mount.container_path
-    
+
     # Determine clone target
     clone_target = repo_path.empty? ? "." : repo_path.sub(/^\//, "")
 
