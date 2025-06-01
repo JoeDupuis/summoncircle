@@ -7,15 +7,17 @@
 </p>
 
 <h2>Actions</h2>
-<div class="project-actions">
+<p>
   <%= link_to 'View Tasks', project_tasks_path(@project), class: 'button' %> |
-  <%= link_to 'New Task', new_project_task_path(@project), class: 'button' %> |
-  <%= link_to 'Archive Project', project_path(@project), 
-              data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to archive this project?' },
-              class: 'button archive' %>
-</div>
+  <%= link_to 'New Task', new_project_task_path(@project), class: 'button' %>
+</p>
 
 <h2>Setup Script</h2>
 <pre><code><%= @project.setup_script %></code></pre>
 
-<%= link_to 'Back', projects_path %>
+<div class="project-actions">
+  <%= link_to 'Archive', project_path(@project), 
+              data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to archive this project?' },
+              class: 'archive' %> |
+  <%= link_to 'Back', projects_path %>
+</div>

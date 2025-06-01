@@ -29,4 +29,9 @@
 <h2>New Run</h2>
 <%= render "run_form", task: @task, project: @task.project, run: Run.new %>
 
-<%= link_to 'Back', project_tasks_path(@task.project) %>
+<div class="task-actions">
+  <%= link_to 'Archive', project_task_path(@task.project, @task), 
+              data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to archive this task?' },
+              class: 'archive' %> |
+  <%= link_to 'Back', project_tasks_path(@task.project) %>
+</div>

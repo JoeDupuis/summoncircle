@@ -1,13 +1,11 @@
-.task-list {
-  > .archive {
+.task-actions {
+  .archive {
     color: var(--color-danger);
     text-decoration: none;
-    margin-left: var(--spacing-sm);
-    font-size: 0.875rem;
   }
 
-  > .archive:hover,
-  > .archive:focus {
+  .archive:hover,
+  .archive:focus {
     color: var(--color-danger-hover);
     text-decoration: underline;
   }

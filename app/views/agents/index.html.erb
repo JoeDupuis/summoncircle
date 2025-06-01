@@ -2,13 +2,10 @@
 
 <%= link_to 'New Agent', new_agent_path %>
 
-<ul class="agent-list">
+<ul>
   <% @agents.each do |agent| %>
     <li>
       <%= link_to agent.name, agent_path(agent) %>
-      <%= link_to 'Archive', agent_path(agent), 
-                  data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to archive this agent?' },
-                  class: 'archive' %>
     </li>
   <% end %>
 </ul>

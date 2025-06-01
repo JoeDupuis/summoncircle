@@ -1,13 +1,12 @@
 .project-actions {
-  > .archive {
-    background-color: var(--color-danger);
-    color: var(--color-white);
+  .archive {
+    color: var(--color-danger);
+    text-decoration: none;
   }
 
-  > .archive:hover,
-  > .archive:focus {
-    background-color: var(--color-danger-hover);
-    color: var(--color-white);
-    text-decoration: none;
+  .archive:hover,
+  .archive:focus {
+    color: var(--color-danger-hover);
+    text-decoration: underline;
   }
 }
