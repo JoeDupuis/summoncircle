@@ -9,10 +9,6 @@
  * Consider organizing styles into separate files for maintainability.
  */
 
-@import url("components/instructions-preview.css");
-@import url("components/status-indicator.css");
-@import url("components/form-help.css");
-
 .spinner {
   display: inline-block;
   width: 20px;
