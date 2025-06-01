@@ -83,37 +83,48 @@ class Run < ApplicationRecord
   def clone_repository
     project = task.project
     repo_path = project.repo_path.presence || ""
-    full_path = repo_path.empty? ? "/workspace" : File.join("/workspace", repo_path.sub(/^\//, ""))
+    
+    # Determine the working directory and clone target
+    if repo_path.empty?
+      # Clone directly into /workspace using "."
+      working_dir = "/workspace"
+      clone_target = "."
+    else
+      # Clone into a subdirectory
+      working_dir = "/workspace"
+      clone_target = repo_path.sub(/^\//, "")
+    end
 
-    Rails.logger.info "Cloning repository: #{project.repository_url} to #{full_path}"
+    Rails.logger.info "Cloning repository: #{project.repository_url} to #{clone_target} in #{working_dir}"
     Rails.logger.info "Volume mount: #{task.workplace_mount.bind_string}"
 
     git_container = Docker::Container.create(
       "Image" => "alpine/git",
-      "Cmd" => [ "clone", project.repository_url, full_path ],
-      "WorkingDir" => "/workspace",
+      "Cmd" => [ "clone", project.repository_url, clone_target ],
+      "WorkingDir" => working_dir,
       "HostConfig" => {
         "Binds" => [ task.workplace_mount.bind_string ]
       }
     )
 
     git_container.start
-    git_container.wait
+    wait_result = git_container.wait
 
     logs = git_container.logs(stdout: true, stderr: true)
     clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
 
     Rails.logger.info "Git clone logs: #{clean_logs}"
 
-    container_info = git_container.info
-    if container_info.nil?
-      raise "Failed to get container info for git clone"
-    end
+    # Check the exit status
+    exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
     
-    exit_code = container_info.dig("State", "ExitCode")
-    unless exit_code == 0
+    # If exit code is not 0, the clone failed
+    if exit_code && exit_code != 0
       raise "Failed to clone repository: #{clean_logs}"
     end
+    
+    # Log success
+    Rails.logger.info "Git clone completed successfully"
   rescue Docker::Error::NotFoundError => e
     raise "Alpine/git Docker image not found. Please pull alpine/git image."
   rescue => e
