@@ -23,7 +23,13 @@ class Step < ApplicationRecord
     return message unless message.present?
     return message unless run&.task&.user&.github_token.present?
 
-    # Simple string replacement to filter out the token
-    message.gsub(run.task.user.github_token, "[FILTERED]")
+    # Use Rails ParameterFilter approach for consistency with Rails logging
+    # Create a filter that specifically looks for the token value
+    token = run.task.user.github_token
+    filter = ActiveSupport::ParameterFilter.new([token])
+    
+    # ParameterFilter works by filtering hash values, so we wrap the message
+    filtered_hash = filter.filter(message: message)
+    filtered_hash[:message]
   end
 end
