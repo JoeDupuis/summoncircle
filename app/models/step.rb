@@ -22,12 +22,10 @@ class Step < ApplicationRecord
   def filter_sensitive_info(message)
     return message unless message.present?
 
-    # Use Rails ParameterFilter with compact to handle nil tokens gracefully
+    # Simple string replacement - ParameterFilter is for filtering hash keys, not string content
     token = run&.task&.user&.github_token
-    filter = ActiveSupport::ParameterFilter.new([ token ].compact)
+    return message unless token.present?
 
-    # ParameterFilter works by filtering hash values, so we wrap the message
-    filtered_hash = filter.filter(message: message)
-    filtered_hash[:message]
+    message.gsub(token, "[FILTERED]")
   end
 end
