@@ -1,4 +1,9 @@
 module ApplicationHelper
+  def form_errors(instance, **locals)
+    locals[:instance] = instance
+    render partial: "application/form_errors", locals: locals
+  end
+
   def safe_external_link(text, url)
     return content_tag(:span, text) unless url.present?
     return content_tag(:span, text) unless url.start_with?("http://", "https://")

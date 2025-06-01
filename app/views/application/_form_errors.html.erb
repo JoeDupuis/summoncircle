@@ -1,0 +1,17 @@
+<% if instance.errors.any? %>
+  <div class="errors">
+    <h2>
+      <%= t(
+          ".title",
+          count: instance.errors.count,
+          name: (defined?(name) ? name : instance.class.model_name.human).downcase,
+      ) %>
+    </h2>
+
+    <ul>
+      <% instance.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>

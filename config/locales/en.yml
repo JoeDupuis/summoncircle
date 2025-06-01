@@ -29,3 +29,8 @@
 
 en:
   hello: "Hello world"
+  application:
+    form_errors:
+      title:
+        one: An error prohibited this %{name} from being saved
+        other: "%{count} errors prohibited this %{name} from being saved"
