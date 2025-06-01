@@ -111,18 +111,7 @@ class Run < ApplicationRecord
     end
 
     # Fix ownership to ensure the agent can access the cloned files
-    agent_uid = task.agent.user_id
-    chown_container = Docker::Container.create(
-      "Image" => "alpine",
-      "Cmd" => [ "chown", "-R", "#{agent_uid}:#{agent_uid}", "." ],
-      "WorkingDir" => working_dir,
-      "HostConfig" => {
-        "Binds" => [ task.workplace_mount.bind_string ]
-      }
-    )
-    chown_container.start
-    chown_container.wait
-    chown_container.delete(force: true)
+    fix_file_ownership(working_dir)
   rescue Docker::Error::NotFoundError => e
     raise "Alpine/git Docker image not found. Please pull alpine/git image."
   rescue => e
@@ -189,5 +178,20 @@ class Run < ApplicationRecord
   ensure
     Docker.url = original_docker_url if defined?(original_docker_url)
     git_container&.delete(force: true) if defined?(git_container)
+  end
+
+  def fix_file_ownership(working_dir)
+    agent_uid = task.agent.user_id
+    chown_container = Docker::Container.create(
+      "Image" => "alpine",
+      "Cmd" => [ "chown", "-R", "#{agent_uid}:#{agent_uid}", "." ],
+      "WorkingDir" => working_dir,
+      "HostConfig" => {
+        "Binds" => [ task.workplace_mount.bind_string ]
+      }
+    )
+    chown_container.start
+    chown_container.wait
+    chown_container.delete(force: true)
   end
 end
