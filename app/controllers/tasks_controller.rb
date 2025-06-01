@@ -18,6 +18,7 @@ class TasksController < ApplicationController
   def new
     @task = @project.tasks.new
     @task.agent_id = cookies[:preferred_agent_id] if cookies[:preferred_agent_id].present?
+    @task.project_id = cookies[:preferred_project_id] if cookies[:preferred_project_id].present?
   end
 
   def create
@@ -25,6 +26,7 @@ class TasksController < ApplicationController
 
     if @task.save
       cookies[:preferred_agent_id] = { value: @task.agent_id, expires: 1.year.from_now }
+      cookies[:preferred_project_id] = { value: @task.project_id, expires: 1.year.from_now }
       @task.update!(started_at: Time.current)
       @task.run(params[:task][:prompt])
       redirect_to task_path(@task), notice: "Task was successfully launched."
