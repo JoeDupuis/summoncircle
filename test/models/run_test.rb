@@ -93,7 +93,7 @@ class RunTest < ActiveSupport::TestCase
     assert run.completed?
     assert_equal 2, run.steps.count
     assert_equal "hello world", run.steps.first.raw_response
-    assert_equal "Repository state captured", run.steps.last.content
+    assert run.steps.last.content.start_with?("Repository state captured")
   end
 
   test "execute! uses continue_arguments for subsequent runs" do
@@ -643,7 +643,7 @@ class RunTest < ActiveSupport::TestCase
     git_diff_container.expects(:delete).with(force: true)
 
     Docker::Container.expects(:create).with do |params|
-      params["Entrypoint"] == [ "git" ] && params["Cmd"] == [ "diff", "HEAD" ] && params["User"] == "1000"
+      params["Entrypoint"] == [ "sh" ] && params["Cmd"] == [ "-c", "git add -N . && git diff HEAD" ] && params["User"] == "1000"
     end.returns(git_diff_container)
   end
 
