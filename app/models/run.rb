@@ -31,7 +31,7 @@ class Run < ApplicationRecord
       create_steps_from_logs(clean_logs)
       completed!
     rescue => e
-      error_message = "Error: #{filter_sensitive_info(e.message)}"
+      error_message = "Error: #{e.message}"
       steps.create!(raw_response: error_message, type: "Step::Text", content: error_message)
       failed!
     ensure
@@ -73,17 +73,9 @@ class Run < ApplicationRecord
 
   def create_steps_from_logs(logs)
     processor_class = task.agent.log_processor_class
-    filtered_logs = filter_sensitive_info(logs)
-    step_data_list = processor_class.process(filtered_logs)
+    step_data_list = processor_class.process(logs)
 
     step_data_list.each do |step_data|
-      # Also filter individual step content
-      if step_data[:content]
-        step_data[:content] = filter_sensitive_info(step_data[:content])
-      end
-      if step_data[:raw_response]
-        step_data[:raw_response] = filter_sensitive_info(step_data[:raw_response])
-      end
       steps.create!(step_data)
     end
   end
@@ -111,25 +103,18 @@ class Run < ApplicationRecord
     exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
 
     if exit_code && exit_code != 0
-      raise "Failed to clone repository: #{filter_sensitive_info(clean_logs)}"
+      raise "Failed to clone repository: #{clean_logs}"
     end
   rescue Docker::Error::NotFoundError => e
     raise "Alpine/git Docker image not found. Please pull alpine/git image."
   rescue => e
     # Re-raise with more context
-    raise "Git clone error: #{filter_sensitive_info(e.message)} (#{e.class})"
+    raise "Git clone error: #{e.message} (#{e.class})"
   ensure
     git_container&.delete(force: true) if defined?(git_container)
   end
 
   def should_clone_repository?
     task.project.repository_url.present?
-  end
-
-  def filter_sensitive_info(message)
-    return message unless task.user&.github_token.present?
-
-    # Simple string replacement to filter out the token
-    message.gsub(task.user.github_token, "[FILTERED]")
   end
 end
