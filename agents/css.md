@@ -17,7 +17,7 @@
    }
    ```
 4. **One component per file**
-   File: `css/components/comment-box.css`, then use CSS imports.
+   File: `app/assets/stylesheets/comment-box.css`.
 5. **Never nest more than one level**
    Two hops max: `.outer > .inner`. Deeper = maintenance nightmare.
 6. **Nested components stay independent**
