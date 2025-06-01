@@ -83,17 +83,12 @@ class Run < ApplicationRecord
   def clone_repository
     project = task.project
     repo_path = project.repo_path.presence || ""
-
-    # Determine the working directory and clone target
-    if repo_path.empty?
-      # Clone directly into /workspace using "."
-      working_dir = "/workspace"
-      clone_target = "."
-    else
-      # Clone into a subdirectory
-      working_dir = "/workspace"
-      clone_target = repo_path.sub(/^\//, "")
-    end
+    
+    # Use the actual workplace path from the mount
+    working_dir = task.workplace_mount.container_path
+    
+    # Determine clone target
+    clone_target = repo_path.empty? ? "." : repo_path.sub(/^\//, "")
 
     Rails.logger.info "Cloning repository: #{project.repository_url} to #{clone_target} in #{working_dir}"
     Rails.logger.info "Volume mount: #{task.workplace_mount.bind_string}"
