@@ -15,7 +15,12 @@
 
   <div>
     <%= form.label :repository_url %><br>
-    <%= form.text_field :repository_url %>
+    <%= form.text_field :repository_url, placeholder: "Optional: Git repository URL to clone" %>
+  </div>
+
+  <div>
+    <%= form.label :repo_path %><br>
+    <%= form.text_field :repo_path, placeholder: "Leave blank for /workspace, or specify subdirectory" %>
   </div>
 
   <div>

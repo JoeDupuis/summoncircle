@@ -2,9 +2,17 @@
 
 <p><%= simple_format(@project.description) %></p>
 
+<% if @project.repository_url.present? %>
 <p>
   Repository URL: <%= safe_external_link(@project.repository_url, @project.repository_url) %>
 </p>
+<% end %>
+
+<% if @project.repo_path.present? %>
+<p>
+  Repository Path: <%= @project.repo_path %>
+</p>
+<% end %>
 
 <h2>Actions</h2>
 <p>
