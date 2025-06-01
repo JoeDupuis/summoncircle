@@ -6,6 +6,9 @@
   <% @agents.each do |agent| %>
     <li>
       <%= link_to agent.name, agent_path(agent) %>
+      <%= link_to 'Archive', agent_path(agent), 
+                  data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to archive this agent?' },
+                  style: 'margin-left: 10px; color: #dc3545;' %>
     </li>
   <% end %>
 </ul>

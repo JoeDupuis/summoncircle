@@ -167,4 +167,16 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     assert_select "a", text: "Show All Runs", count: 0
     assert_select "a", text: "Show Last Run Only", count: 0
   end
+
+  test "destroy requires authentication" do
+    delete project_task_url(@project, @task)
+    assert_redirected_to new_session_path
+
+    login @user
+    assert_difference("Task.kept.count", -1) do
+      delete project_task_url(@project, @task)
+    end
+    assert_redirected_to project_tasks_path(@project)
+    assert @task.reload.discarded?
+  end
 end

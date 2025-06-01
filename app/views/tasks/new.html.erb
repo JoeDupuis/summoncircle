@@ -5,7 +5,7 @@
 
   <div>
     <%= form.label :agent_id, "Agent" %><br>
-    <%= form.collection_select :agent_id, Agent.all, :id, :name %>
+    <%= form.collection_select :agent_id, Agent.kept, :id, :name %>
   </div>
 
   <div data-controller="prompt">

@@ -85,9 +85,10 @@ class AgentsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_path
 
     login @user
-    assert_difference("Agent.count", -1) do
+    assert_difference("Agent.kept.count", -1) do
       delete agent_url(@agent)
     end
     assert_redirected_to agents_path
+    assert @agent.reload.discarded?
   end
 end

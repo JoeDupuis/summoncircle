@@ -1,8 +1,8 @@
 class DashboardController < ApplicationController
   def index
-    @tasks = Task.includes(:agent, :project).order(created_at: :desc)
+    @tasks = Task.kept.includes(:agent, :project).order(created_at: :desc)
     @task = Task.new
-    @projects = Project.all
-    @agents = Agent.all
+    @projects = Project.kept
+    @agents = Agent.kept
   end
 end

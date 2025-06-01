@@ -1,9 +1,9 @@
 class TasksController < ApplicationController
   before_action :set_project
-  before_action :set_task, only: :show
+  before_action :set_task, only: [ :show, :destroy ]
 
   def index
-    @tasks = @project.tasks.includes(:agent, :project)
+    @tasks = @project.tasks.kept.includes(:agent, :project)
   end
 
   def show
@@ -32,11 +32,20 @@ class TasksController < ApplicationController
       if @project.present?
         render :new, status: :unprocessable_entity
       else
-        @tasks = Task.includes(:agent, :project).order(created_at: :desc)
-        @projects = Project.all
-        @agents = Agent.all
+        @tasks = Task.kept.includes(:agent, :project).order(created_at: :desc)
+        @projects = Project.kept
+        @agents = Agent.kept
         render "dashboard/index", status: :unprocessable_entity
       end
+    end
+  end
+
+  def destroy
+    @task.discard
+    if @project.present?
+      redirect_to [ @project, :tasks ], notice: "Task was successfully archived."
+    else
+      redirect_to root_path, notice: "Task was successfully archived."
     end
   end
 

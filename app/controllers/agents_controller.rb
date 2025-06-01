@@ -2,7 +2,7 @@ class AgentsController < ApplicationController
   before_action :set_agent, only: %i[show edit update destroy]
 
   def index
-    @agents = Agent.all
+    @agents = Agent.kept
   end
 
   def show
@@ -40,8 +40,8 @@ class AgentsController < ApplicationController
   end
 
   def destroy
-    @agent.destroy
-    redirect_to agents_url, notice: "Agent was successfully destroyed."
+    @agent.discard
+    redirect_to agents_url, notice: "Agent was successfully archived."
   end
 
   private

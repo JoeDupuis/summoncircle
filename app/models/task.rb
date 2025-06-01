@@ -1,4 +1,6 @@
 class Task < ApplicationRecord
+  include Discard::Model
+
   belongs_to :project
   belongs_to :agent
   has_many :runs, dependent: :destroy

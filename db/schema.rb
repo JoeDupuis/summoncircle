@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_31_221419) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_01_005217) do
   create_table "agents", force: :cascade do |t|
     t.string "name"
     t.string "docker_image"
@@ -22,6 +22,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_31_221419) do
     t.string "log_processor", default: "Text"
     t.string "workplace_path"
     t.json "env_variables"
+    t.datetime "discarded_at"
+    t.index ["discarded_at"], name: "index_agents_on_discarded_at"
   end
 
   create_table "projects", force: :cascade do |t|
@@ -31,6 +33,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_31_221419) do
     t.text "setup_script"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "discarded_at"
+    t.index ["discarded_at"], name: "index_projects_on_discarded_at"
   end
 
   create_table "runs", force: :cascade do |t|
@@ -72,7 +76,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_31_221419) do
     t.datetime "archived_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "discarded_at"
     t.index ["agent_id"], name: "index_tasks_on_agent_id"
+    t.index ["discarded_at"], name: "index_tasks_on_discarded_at"
     t.index ["project_id"], name: "index_tasks_on_project_id"
   end
 
