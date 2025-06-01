@@ -1,15 +1,16 @@
 <h1>Task <%= @task.id %></h1>
 
 <p>Agent: <%= @task.agent.name %></p>
+<p>Project: <%= @task.project.name %></p>
 
 <h2>Runs</h2>
 <% if @task.runs.any? %>
   <% if @task.runs.count > 1 %>
     <div style="margin-bottom: 15px;">
       <% if @show_all_runs %>
-        <%= link_to "Show Last Run Only", project_task_path(@project, @task), style: "padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 4px;" %>
+        <%= link_to "Show Last Run Only", [ @task.project, @task ], style: "padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 4px;" %>
       <% else %>
-        <%= link_to "Show All Runs", project_task_path(@project, @task, show_all_runs: true), style: "padding: 8px 16px; background: #28a745; color: white; text-decoration: none; border-radius: 4px;" %>
+        <%= link_to "Show All Runs", [ @task.project, @task, show_all_runs: true ], style: "padding: 8px 16px; background: #28a745; color: white; text-decoration: none; border-radius: 4px;" %>
       <% end %>
     </div>
   <% end %>
@@ -26,6 +27,6 @@
 <% end %>
 
 <h2>New Run</h2>
-<%= render "run_form", task: @task, project: @project, run: Run.new %>
+<%= render "run_form", task: @task, project: @task.project, run: Run.new %>
 
-<%= link_to 'Back', project_tasks_path(@project) %>
+<%= link_to 'Back', project_tasks_path(@task.project) %>

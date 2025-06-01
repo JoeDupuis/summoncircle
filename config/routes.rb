@@ -7,6 +7,9 @@ Rails.application.routes.draw do
       resources :runs, only: %i[create]
     end
   end
+  resources :tasks, only: %i[index create show] do
+    resources :runs, only: %i[create]
+  end
 
   mount MissionControl::Jobs::Engine, at: "/jobs"
 

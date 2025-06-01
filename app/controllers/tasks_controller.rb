@@ -3,7 +3,7 @@ class TasksController < ApplicationController
   before_action :set_task, only: :show
 
   def index
-    @tasks = @project.tasks.includes(:agent)
+    @tasks = @project.tasks.includes(:agent, :project)
   end
 
   def show
@@ -21,28 +21,40 @@ class TasksController < ApplicationController
   end
 
   def create
-    @task = @project.tasks.new(task_params)
+    @task = Task.new(task_params.with_defaults(project_id: @project&.id))
+
     if @task.save
       cookies[:preferred_agent_id] = { value: @task.agent_id, expires: 1.year.from_now }
       @task.update!(started_at: Time.current)
       @task.run(params[:task][:prompt])
       redirect_to [ @project, @task ], notice: "Task was successfully launched."
     else
-      render :new, status: :unprocessable_entity
+      if @project.present?
+        render :new, status: :unprocessable_entity
+      else
+        @tasks = Task.includes(:agent, :project).order(created_at: :desc)
+        @projects = Project.all
+        @agents = Agent.all
+        render :index, status: :unprocessable_entity
+      end
     end
   end
 
   private
 
   def set_project
-    @project = Project.find(params[:project_id])
+    @project = Project.find(params[:project_id]) if params[:project_id].present?
   end
 
   def set_task
-    @task = @project.tasks.find(params[:id])
+    if @project.present?
+      @task = @project.tasks.find(params[:id])
+    else
+      @task = Task.find(params[:id])
+    end
   end
 
   def task_params
-    params.require(:task).permit(:agent_id)
+    params.require(:task).permit(:agent_id, :project_id)
   end
 end
