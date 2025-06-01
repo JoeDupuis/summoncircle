@@ -7,6 +7,7 @@ class Agent < ApplicationRecord
   validates :name, presence: true
   validates :docker_image, presence: true
   validates :workplace_path, presence: true
+  validates :user_id, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
   attr_accessor :volumes_config, :env_variables_json
 

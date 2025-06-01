@@ -29,6 +29,7 @@ class Run < ApplicationRecord
 
       # Process logs and create steps
       create_steps_from_logs(clean_logs)
+      capture_repository_state
       completed!
     rescue => e
       error_message = "Error: #{e.message}"
@@ -84,7 +85,7 @@ class Run < ApplicationRecord
     project = task.project
     repo_path = project.repo_path.presence || ""
     working_dir = task.workplace_mount.container_path
-    clone_target = repo_path.empty? ? "." : repo_path.sub(/^\//, "")
+    clone_target = repo_path.presence&.sub(/^\//, "") || "."
     repository_url = project.repository_url_with_token(task.user)
 
     git_container = Docker::Container.create(
@@ -105,6 +106,8 @@ class Run < ApplicationRecord
     if exit_code && exit_code != 0
       raise "Failed to clone repository: #{clean_logs}"
     end
+
+    fix_file_ownership(working_dir)
   rescue Docker::Error::NotFoundError => e
     raise "Alpine/git Docker image not found. Please pull alpine/git image."
   rescue => e
@@ -116,5 +119,58 @@ class Run < ApplicationRecord
 
   def should_clone_repository?
     task.project.repository_url.present?
+  end
+
+  def capture_repository_state
+    return unless should_clone_repository?
+
+    project = task.project
+    repo_path = project.repo_path.presence || ""
+    working_dir = task.workplace_mount.container_path
+
+    git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
+
+    git_container = Docker::Container.create(
+      "Image" => "alpine/git",
+      "Cmd" => [ "diff" ],
+      "WorkingDir" => git_working_dir,
+      "HostConfig" => {
+        "Binds" => [ task.workplace_mount.bind_string ]
+      }
+    )
+
+    git_container.start
+    wait_result = git_container.wait
+    logs = git_container.logs(stdout: true, stderr: true)
+    uncommitted_diff = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
+
+    repo_state_step = steps.create!(
+      raw_response: "Repository state captured",
+      type: "Step::System",
+      content: "Repository state captured"
+    )
+    repo_state_step.repo_states.create!(
+      uncommitted_diff: uncommitted_diff,
+      repository_path: git_working_dir
+    )
+  rescue => e
+    Rails.logger.error "Failed to capture repository state: #{e.message}"
+  ensure
+    git_container&.delete(force: true) if defined?(git_container)
+  end
+
+  def fix_file_ownership(working_dir)
+    agent_uid = task.agent.user_id
+    chown_container = Docker::Container.create(
+      "Image" => "alpine",
+      "Cmd" => [ "chown", "-R", "#{agent_uid}:#{agent_uid}", "." ],
+      "WorkingDir" => working_dir,
+      "HostConfig" => {
+        "Binds" => [ task.workplace_mount.bind_string ]
+      }
+    )
+    chown_container.start
+    chown_container.wait
+    chown_container.delete(force: true)
   end
 end

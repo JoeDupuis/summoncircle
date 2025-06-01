@@ -58,4 +58,19 @@ class StepTest < ActiveSupport::TestCase
 
     assert_equal "invalid json", step.parsed_response
   end
+
+  test "has many repo_states" do
+    step = steps(:one)
+    assert_respond_to step, :repo_states
+    assert_kind_of ActiveRecord::Associations::CollectionProxy, step.repo_states
+  end
+
+  test "destroying step should destroy associated repo_states" do
+    step = steps(:one)
+    initial_repo_states_count = step.repo_states.count
+
+    assert_difference "RepoState.count", -initial_repo_states_count do
+      step.destroy
+    end
+  end
 end

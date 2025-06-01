@@ -1,0 +1,22 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  uncommitted_diff: |
+    diff --git a/app/models/user.rb b/app/models/user.rb
+    index 1234567..890abcd 100644
+    --- a/app/models/user.rb
+    +++ b/app/models/user.rb
+    @@ -1,5 +1,6 @@
+     class User < ApplicationRecord
+       has_secure_password
+    +  has_many :projects
+     end
+  target_branch_diff:
+  repository_path: /workspace/myproject
+  step: one
+
+two:
+  uncommitted_diff: ""
+  target_branch_diff:
+  repository_path: /workspace/anotherproject
+  step: two
