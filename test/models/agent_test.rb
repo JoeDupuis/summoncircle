@@ -110,8 +110,5 @@ class AgentTest < ActiveSupport::TestCase
     agent.user_id = 1.5
     assert_not agent.valid?
     assert_includes agent.errors[:user_id], "must be an integer"
-
-    agent.user_id = nil
-    assert agent.valid? # nil is allowed
   end
 end

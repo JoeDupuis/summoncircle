@@ -111,7 +111,7 @@ class Run < ApplicationRecord
     end
 
     # Fix ownership to ensure the agent can access the cloned files
-    agent_uid = task.agent.user_id || 1000
+    agent_uid = task.agent.user_id
     chown_container = Docker::Container.create(
       "Image" => "alpine",
       "Cmd" => [ "chown", "-R", "#{agent_uid}:#{agent_uid}", "." ],

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_01_090249) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_01_095258) do
   create_table "agents", force: :cascade do |t|
     t.string "name"
     t.string "docker_image"
@@ -23,7 +23,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_01_090249) do
     t.string "workplace_path"
     t.json "env_variables"
     t.datetime "discarded_at"
-    t.integer "user_id", default: 1000
+    t.integer "user_id", default: 1000, null: false
     t.index ["discarded_at"], name: "index_agents_on_discarded_at"
   end
 
