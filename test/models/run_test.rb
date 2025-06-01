@@ -59,6 +59,18 @@ class RunTest < ActiveSupport::TestCase
     )
     run = task.runs.create!(prompt: "test command", status: :pending)
 
+    # Mock git container creation (first run clones the repo)
+    git_container = mock("git_container")
+    git_container.expects(:start)
+    git_container.expects(:wait)
+    git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning...")
+    git_container.expects(:info).returns({ "State" => { "ExitCode" => 0 } })
+    git_container.expects(:delete).with(force: true)
+
+    Docker::Container.expects(:create).with do |params|
+      params["Image"] == "alpine/git"
+    end.returns(git_container)
+
     # For first run, it uses start_arguments
     Docker::Container.expects(:create).with do |params|
       params["Image"] == "example/image:latest" &&
@@ -123,8 +135,22 @@ class RunTest < ActiveSupport::TestCase
     Docker.expects(:url=).with("tcp://192.168.1.100:2375")
     Docker.expects(:url=).with(original_url)
 
-    # Mock container creation and execution
-    Docker::Container.expects(:create).returns(mock_container_with_output("\x04test"))
+    # Mock git container creation
+    git_container = mock("git_container")
+    git_container.expects(:start)
+    git_container.expects(:wait)
+    git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning...")
+    git_container.expects(:info).returns({ "State" => { "ExitCode" => 0 } })
+    git_container.expects(:delete).with(force: true)
+
+    Docker::Container.expects(:create).with do |params|
+      params["Image"] == "alpine/git"
+    end.returns(git_container)
+
+    # Mock main container creation and execution
+    Docker::Container.expects(:create).with do |params|
+      params["Image"] == "example/image:latest"
+    end.returns(mock_container_with_output("\x04test"))
 
     run.execute!
 
@@ -149,8 +175,22 @@ class RunTest < ActiveSupport::TestCase
     # Docker.url= should only be called once (in the ensure block to reset)
     Docker.expects(:url=).once
 
-    # Mock container creation and execution
-    Docker::Container.expects(:create).returns(mock_container_with_output("\x04test"))
+    # Mock git container creation
+    git_container = mock("git_container")
+    git_container.expects(:start)
+    git_container.expects(:wait)
+    git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning...")
+    git_container.expects(:info).returns({ "State" => { "ExitCode" => 0 } })
+    git_container.expects(:delete).with(force: true)
+
+    Docker::Container.expects(:create).with do |params|
+      params["Image"] == "alpine/git"
+    end.returns(git_container)
+
+    # Mock main container creation and execution
+    Docker::Container.expects(:create).with do |params|
+      params["Image"] == "example/image:latest"
+    end.returns(mock_container_with_output("\x04test"))
 
     run.execute!
 
@@ -176,8 +216,22 @@ class RunTest < ActiveSupport::TestCase
     )
     run = task.runs.create!(prompt: "test", status: :pending)
 
-    # Mock container creation and execution
-    Docker::Container.expects(:create).returns(mock_container_with_output("\x04test"))
+    # Mock git container creation
+    git_container = mock("git_container")
+    git_container.expects(:start)
+    git_container.expects(:wait)
+    git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning...")
+    git_container.expects(:info).returns({ "State" => { "ExitCode" => 0 } })
+    git_container.expects(:delete).with(force: true)
+
+    Docker::Container.expects(:create).with do |params|
+      params["Image"] == "alpine/git"
+    end.returns(git_container)
+
+    # Mock main container creation and execution
+    Docker::Container.expects(:create).with do |params|
+      params["Image"] == "example/image:latest"
+    end.returns(mock_container_with_output("\x04test"))
 
     run.execute!
 
@@ -279,6 +333,18 @@ class RunTest < ActiveSupport::TestCase
     )
     run = task.runs.create!(prompt: "test", status: :pending)
 
+    # Mock git container creation
+    git_container = mock("git_container")
+    git_container.expects(:start)
+    git_container.expects(:wait)
+    git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning...")
+    git_container.expects(:info).returns({ "State" => { "ExitCode" => 0 } })
+    git_container.expects(:delete).with(force: true)
+
+    Docker::Container.expects(:create).with do |params|
+      params["Image"] == "alpine/git"
+    end.returns(git_container)
+
     # Verify that environment variables are passed to Docker container
     Docker::Container.expects(:create).with do |params|
       params["Image"] == "example/image:latest" &&
@@ -287,6 +353,182 @@ class RunTest < ActiveSupport::TestCase
       params["WorkingDir"] == "/workspace" &&
       params["HostConfig"]["Binds"].size == 1 &&
       params["HostConfig"]["Binds"].any? { |bind| bind.match?(/summoncircle_workplace_volume_.*:\/workspace/) }
+    end.returns(mock_container_with_output("\x04test"))
+
+    run.execute!
+
+    assert run.completed?
+  end
+
+  test "execute! clones repository on first run with default repo_path" do
+    project = Project.create!(
+      name: "Test Project",
+      repository_url: "https://github.com/test/repo.git"
+    )
+    agent = Agent.create!(
+      name: "Test Agent",
+      docker_image: "example/image:latest",
+      workplace_path: "/workspace",
+      start_arguments: [ "echo", "{PROMPT}" ]
+    )
+    task = Task.create!(
+      project: project,
+      agent: agent,
+      status: "active",
+      started_at: Time.current
+    )
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    # Mock git container creation and execution
+    git_container = mock("git_container")
+    git_container.expects(:start)
+    git_container.expects(:wait)
+    git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning into '/workspace/workspace'...")
+    git_container.expects(:info).returns({ "State" => { "ExitCode" => 0 } })
+    git_container.expects(:delete).with(force: true)
+
+    Docker::Container.expects(:create).with do |params|
+      params["Image"] == "alpine/git" &&
+      params["Cmd"] == [ "clone", "https://github.com/test/repo.git", "/workspace/workspace" ] &&
+      params["WorkingDir"] == "/workspace" &&
+      params["HostConfig"]["Binds"].size == 1
+    end.returns(git_container)
+
+    # Mock main container
+    Docker::Container.expects(:create).with do |params|
+      params["Image"] == "example/image:latest"
+    end.returns(mock_container_with_output("\x04test"))
+
+    run.execute!
+
+    assert run.completed?
+  end
+
+  test "execute! clones repository on first run with custom repo_path" do
+    project = Project.create!(
+      name: "Test Project",
+      repository_url: "https://github.com/test/repo.git",
+      repo_path: "myapp"
+    )
+    agent = Agent.create!(
+      name: "Test Agent",
+      docker_image: "example/image:latest",
+      workplace_path: "/workspace",
+      start_arguments: [ "echo", "{PROMPT}" ]
+    )
+    task = Task.create!(
+      project: project,
+      agent: agent,
+      status: "active",
+      started_at: Time.current
+    )
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    # Mock git container creation and execution
+    git_container = mock("git_container")
+    git_container.expects(:start)
+    git_container.expects(:wait)
+    git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning into '/workspace/myapp'...")
+    git_container.expects(:info).returns({ "State" => { "ExitCode" => 0 } })
+    git_container.expects(:delete).with(force: true)
+
+    Docker::Container.expects(:create).with do |params|
+      params["Image"] == "alpine/git" &&
+      params["Cmd"] == [ "clone", "https://github.com/test/repo.git", "/workspace/myapp" ] &&
+      params["WorkingDir"] == "/workspace" &&
+      params["HostConfig"]["Binds"].size == 1
+    end.returns(git_container)
+
+    # Mock main container
+    Docker::Container.expects(:create).with do |params|
+      params["Image"] == "example/image:latest"
+    end.returns(mock_container_with_output("\x04test"))
+
+    run.execute!
+
+    assert run.completed?
+  end
+
+  test "execute! handles git clone failure" do
+    project = Project.create!(
+      name: "Test Project",
+      repository_url: "https://github.com/test/repo.git"
+    )
+    agent = Agent.create!(
+      name: "Test Agent",
+      docker_image: "example/image:latest",
+      workplace_path: "/workspace",
+      start_arguments: [ "echo", "{PROMPT}" ]
+    )
+    task = Task.create!(
+      project: project,
+      agent: agent,
+      status: "active",
+      started_at: Time.current
+    )
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    # Mock git container creation and execution with failure
+    git_container = mock("git_container")
+    git_container.expects(:start)
+    git_container.expects(:wait)
+    git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "fatal: repository not found")
+    git_container.expects(:info).returns({ "State" => { "ExitCode" => 1 } })
+    git_container.expects(:delete).with(force: true)
+
+    Docker::Container.expects(:create).with do |params|
+      params["Image"] == "alpine/git"
+    end.returns(git_container)
+
+    run.execute!
+
+    assert run.failed?
+    assert_equal 1, run.steps.count
+    assert_includes run.steps.first.raw_response, "Failed to clone repository"
+  end
+
+  test "execute! skips git clone on subsequent runs" do
+    # Use existing task with runs to ensure it's not the first run
+    task = tasks(:one)
+    run = runs(:one)
+    run.update!(status: :pending, started_at: nil, completed_at: nil)
+    run.steps.destroy_all
+
+    # Ensure Docker::Container.create is only called once (for main container, not git)
+    Docker::Container.expects(:create).once.with do |params|
+      params["Image"] == "example/image:latest" # Only the main container
+    end.returns(mock_container_with_output("\x04test"))
+
+    run.execute!
+
+    assert run.completed?
+  end
+
+  test "execute! skips git clone when repository_url is blank" do
+    project = Project.create!(
+      name: "Test Project",
+      repository_url: "https://example.com/empty.git"
+    )
+    # Update to blank after creation to bypass validation
+    project.update_column(:repository_url, nil)
+    
+    agent = Agent.create!(
+      name: "Test Agent",
+      docker_image: "example/image:latest",
+      workplace_path: "/workspace",
+      start_arguments: [ "echo", "{PROMPT}" ]
+    )
+    task = Task.create!(
+      project: project,
+      agent: agent,
+      status: "active",
+      started_at: Time.current
+    )
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    # Ensure Docker::Container.create is only called once (for main container, not git)
+    Docker::Container.expects(:create).once.with do |params|
+      params["Image"] == "example/image:latest" # Only the main container
     end.returns(mock_container_with_output("\x04test"))
 
     run.execute!

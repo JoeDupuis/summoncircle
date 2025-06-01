@@ -18,6 +18,7 @@ class Run < ApplicationRecord
     original_docker_url = Docker.url
     begin
       configure_docker_host
+      clone_repository if first_run? && task.project.repository_url.present?
       container = create_container
       container.start
       container.wait
@@ -77,5 +78,32 @@ class Run < ApplicationRecord
     step_data_list.each do |step_data|
       steps.create!(step_data)
     end
+  end
+
+  def clone_repository
+    project = task.project
+    repo_path = project.repo_path.presence || "workspace"
+    full_path = File.join("/workspace", repo_path.sub(/^\//, ""))
+
+    git_container = Docker::Container.create(
+      "Image" => "alpine/git",
+      "Cmd" => [ "clone", project.repository_url, full_path ],
+      "WorkingDir" => "/workspace",
+      "HostConfig" => {
+        "Binds" => [ task.workplace_mount.bind_string ]
+      }
+    )
+
+    git_container.start
+    git_container.wait
+
+    logs = git_container.logs(stdout: true, stderr: true)
+    clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
+
+    unless git_container.info["State"]["ExitCode"] == 0
+      raise "Failed to clone repository: #{clean_logs}"
+    end
+  ensure
+    git_container&.delete(force: true) if defined?(git_container)
   end
 end
