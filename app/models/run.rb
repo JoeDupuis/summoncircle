@@ -132,7 +132,8 @@ class Run < ApplicationRecord
 
     git_container = Docker::Container.create(
       "Image" => "alpine/git",
-      "Cmd" => [ "diff" ],
+      "Entrypoint" => [ "sh" ],
+      "Cmd" => [ "-c", "git config --global --add safe.directory #{git_working_dir} && git diff HEAD" ],
       "WorkingDir" => git_working_dir,
       "HostConfig" => {
         "Binds" => [ task.workplace_mount.bind_string ]
