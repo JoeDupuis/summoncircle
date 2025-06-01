@@ -43,7 +43,3 @@ vendor/bundle
 # Local worktrees used by parallel agents
 /worktrees/*
 !/worktrees/.keep
-
-# Ignore test/temporary files
-aaa.json
-lol.png
