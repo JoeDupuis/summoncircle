@@ -70,6 +70,9 @@ class RunTest < ActiveSupport::TestCase
       params["Image"] == "alpine/git"
     end.returns(git_container)
 
+    # Expect chmod container after git clone
+    expect_chmod_container
+
     # For first run, it uses start_arguments
     Docker::Container.expects(:create).with do |params|
       params["Image"] == "example/image:latest" &&
@@ -138,8 +141,8 @@ class RunTest < ActiveSupport::TestCase
     run = task.runs.create!(prompt: "test", status: :pending)
 
     # Mock Docker.url= to verify it's called with the correct host and then reset
-    Docker.expects(:url=).with("tcp://192.168.1.100:2375").twice # Called for main container and git diff
-    Docker.expects(:url=).with(original_url).twice # Reset after main container and git diff
+    Docker.expects(:url=).with("tcp://192.168.1.100:2375").times(3) # Called for git clone, chmod, main container, and git diff
+    Docker.expects(:url=).with(original_url).times(3) # Reset after git clone, chmod, main container, and git diff
 
     # Mock git container creation
     git_container = mock("git_container")
@@ -151,6 +154,9 @@ class RunTest < ActiveSupport::TestCase
     Docker::Container.expects(:create).with do |params|
       params["Image"] == "alpine/git"
     end.returns(git_container)
+
+    # Expect chmod container after git clone
+    expect_chmod_container
 
     # Mock main container creation and execution
     Docker::Container.expects(:create).with do |params|
@@ -180,8 +186,8 @@ class RunTest < ActiveSupport::TestCase
     )
     run = task.runs.create!(prompt: "test", status: :pending)
 
-    # Docker.url= should be called twice (once to reset in main execute ensure block, and once to reset in capture_repository_state ensure block)
-    Docker.expects(:url=).twice
+    # Docker.url= should be called three times (once to reset after git clone, once to reset after chmod, once to reset in main execute ensure block, and once to reset in capture_repository_state ensure block)
+    Docker.expects(:url=).times(3)
 
     # Mock git container creation
     git_container = mock("git_container")
@@ -193,6 +199,9 @@ class RunTest < ActiveSupport::TestCase
     Docker::Container.expects(:create).with do |params|
       params["Image"] == "alpine/git"
     end.returns(git_container)
+
+    # Expect chmod container after git clone
+    expect_chmod_container
 
     # Mock main container creation and execution
     Docker::Container.expects(:create).with do |params|
@@ -236,6 +245,9 @@ class RunTest < ActiveSupport::TestCase
     Docker::Container.expects(:create).with do |params|
       params["Image"] == "alpine/git"
     end.returns(git_container)
+
+    # Expect chmod container after git clone
+    expect_chmod_container
 
     # Mock main container creation and execution
     Docker::Container.expects(:create).with do |params|
@@ -357,6 +369,9 @@ class RunTest < ActiveSupport::TestCase
       params["Image"] == "alpine/git"
     end.returns(git_container)
 
+    # Expect chmod container after git clone
+    expect_chmod_container
+
     # Verify that environment variables are passed to Docker container
     Docker::Container.expects(:create).with do |params|
       params["Image"] == "example/image:latest" &&
@@ -409,6 +424,9 @@ class RunTest < ActiveSupport::TestCase
       params["HostConfig"]["Binds"].size == 1
     end.returns(git_container)
 
+    # Expect chmod container after git clone
+    expect_chmod_container
+
     # Mock main container
     Docker::Container.expects(:create).with do |params|
       params["Image"] == "example/image:latest"
@@ -457,6 +475,9 @@ class RunTest < ActiveSupport::TestCase
       params["HostConfig"]["Binds"].size == 1
     end.returns(git_container)
 
+    # Expect chmod container after git clone
+    expect_chmod_container
+
     # Mock main container
     Docker::Container.expects(:create).with do |params|
       params["Image"] == "example/image:latest"
@@ -500,6 +521,8 @@ class RunTest < ActiveSupport::TestCase
     Docker::Container.expects(:create).with do |params|
       params["Image"] == "alpine/git"
     end.returns(git_container)
+
+    # No chmod container expected since git clone fails
 
     run.execute!
 
@@ -609,5 +632,16 @@ class RunTest < ActiveSupport::TestCase
     Docker::Container.expects(:create).with do |params|
       params["Image"] == "alpine/git" && params["Cmd"] == [ "diff" ]
     end.returns(git_diff_container)
+  end
+
+  def expect_chmod_container
+    chmod_container = mock("chmod_container")
+    chmod_container.expects(:start)
+    chmod_container.expects(:wait)
+    chmod_container.expects(:delete).with(force: true)
+
+    Docker::Container.expects(:create).with do |params|
+      params["Image"] == "alpine" && params["Cmd"] == [ "chmod", "-R", "777", "." ]
+    end.returns(chmod_container)
   end
 end

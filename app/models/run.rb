@@ -87,6 +87,10 @@ class Run < ApplicationRecord
     working_dir = task.workplace_mount.container_path
     clone_target = repo_path.empty? ? "." : repo_path.sub(/^\//, "")
 
+    # Configure docker host
+    original_docker_url = Docker.url
+    configure_docker_host
+
     git_container = Docker::Container.create(
       "Image" => "alpine/git",
       "Cmd" => [ "clone", project.repository_url, clone_target ],
@@ -105,12 +109,26 @@ class Run < ApplicationRecord
     if exit_code && exit_code != 0
       raise "Failed to clone repository: #{clean_logs}"
     end
+
+    # Fix permissions to ensure the agent can access the cloned files
+    chmod_container = Docker::Container.create(
+      "Image" => "alpine",
+      "Cmd" => [ "chmod", "-R", "777", "." ],
+      "WorkingDir" => working_dir,
+      "HostConfig" => {
+        "Binds" => [ task.workplace_mount.bind_string ]
+      }
+    )
+    chmod_container.start
+    chmod_container.wait
+    chmod_container.delete(force: true)
   rescue Docker::Error::NotFoundError => e
     raise "Alpine/git Docker image not found. Please pull alpine/git image."
   rescue => e
     # Re-raise with more context
     raise "Git clone error: #{e.message} (#{e.class})"
   ensure
+    Docker.url = original_docker_url if defined?(original_docker_url)
     git_container&.delete(force: true) if defined?(git_container)
   end
 
