@@ -149,7 +149,7 @@ class Run < ApplicationRecord
     repo_state_step = steps.create!(
       raw_response: "Repository state captured",
       type: "Step::System",
-      content: "Repository state captured"
+      content: "Repository state captured\n\nUncommitted diff:\n#{uncommitted_diff}"
     )
     repo_state_step.repo_states.create!(
       uncommitted_diff: uncommitted_diff,
