@@ -1,5 +1,5 @@
 class RunsController < ApplicationController
-  before_action :set_project_and_task
+  before_action :set_task
 
   def create
     @run = @task.runs.build(run_params)
@@ -8,19 +8,18 @@ class RunsController < ApplicationController
       if @run.save
         RunJob.perform_later(@run.id)
         format.turbo_stream
-        format.html { redirect_to project_task_path(@project, @task), notice: "Run started successfully." }
+        format.html { redirect_to task_path(@task), notice: "Run started successfully." }
       else
-        format.turbo_stream { redirect_to project_task_path(@project, @task), alert: "Failed to start run: #{@run.errors.full_messages.join(', ')}" }
-        format.html { redirect_to project_task_path(@project, @task), alert: "Failed to start run: #{@run.errors.full_messages.join(', ')}" }
+        format.turbo_stream { redirect_to task_path(@task), alert: "Failed to start run: #{@run.errors.full_messages.join(', ')}" }
+        format.html { redirect_to task_path(@task), alert: "Failed to start run: #{@run.errors.full_messages.join(', ')}" }
       end
     end
   end
 
   private
 
-  def set_project_and_task
-    @project = Project.find(params[:project_id])
-    @task = @project.tasks.find(params[:task_id])
+  def set_task
+    @task = Task.find(params[:task_id])
   end
 
   def run_params

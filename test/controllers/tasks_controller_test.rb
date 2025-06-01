@@ -34,15 +34,15 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     assert_difference([ "Task.count", "Run.count" ]) do
       post project_tasks_url(@project), params: { task: { agent_id: @agent.id, prompt: "hi" } }
     end
-    assert_redirected_to project_task_path(@project, Task.last)
+    assert_redirected_to task_path(Task.last)
   end
 
   test "show requires authentication" do
-    get project_task_url(@project, @task)
+    get task_url(@task)
     assert_redirected_to new_session_path
 
     login @user
-    get project_task_url(@project, @task)
+    get task_url(@task)
     assert_response :success
   end
 
@@ -51,7 +51,7 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     run = @task.runs.create!(prompt: "test")
     run.steps.create!(type: "Step::Text", content: "Hello world", raw_response: "raw data")
 
-    get project_task_url(@project, @task)
+    get task_url(@task)
     assert_response :success
     assert_select "pre", text: "Hello world"
   end
@@ -61,7 +61,7 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     run = @task.runs.create!(prompt: "test")
     run.steps.create!(type: "Step::Init", content: nil, raw_response: '{"type":"system","subtype":"init"}')
 
-    get project_task_url(@project, @task)
+    get task_url(@task)
     assert_response :success
     assert_select "div strong", text: "🚀 Session Initialized"
   end
@@ -72,7 +72,7 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     content = "name: WebFetch\ninputs: {\"url\":\"https://example.com\",\"prompt\":\"What is the title of this webpage?\"}"
     run.steps.create!(type: "Step::ToolCall", content: content, raw_response: '{"type":"assistant"}')
 
-    get project_task_url(@project, @task)
+    get task_url(@task)
     assert_response :success
     assert_select "div strong", text: "🔧 Tool Call"
     assert_select "pre", text: content
@@ -83,7 +83,7 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     run = @task.runs.create!(prompt: "test")
     run.steps.create!(type: "Step::ToolResult", content: "total 0", raw_response: '{"type":"user"}')
 
-    get project_task_url(@project, @task)
+    get task_url(@task)
     assert_response :success
     assert_select "div strong", text: "⚙️ Tool Result"
     assert_select "pre", text: "total 0"
@@ -94,7 +94,7 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     run = @task.runs.create!(prompt: "test")
     run.steps.create!(type: "Step::Result", content: "Task completed successfully", raw_response: '{"type":"result"}')
 
-    get project_task_url(@project, @task)
+    get task_url(@task)
     assert_response :success
     assert_select "div strong", text: "✅ Result"
     assert_select "pre", text: "Task completed successfully"
@@ -105,7 +105,7 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     run = @task.runs.create!(prompt: "test")
     run.steps.create!(type: "Step::System", content: "System message", raw_response: '{"type":"system"}')
 
-    get project_task_url(@project, @task)
+    get task_url(@task)
     assert_response :success
     assert_select "div strong", text: "🔧 System"
     assert_select "pre", text: "System message"
@@ -116,7 +116,7 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     run = @task.runs.create!(prompt: "test")
     run.steps.create!(content: "some content", raw_response: "fallback raw data")
 
-    get project_task_url(@project, @task)
+    get task_url(@task)
     assert_response :success
     assert_select "pre", text: "fallback raw data"
   end
@@ -125,7 +125,7 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     login @user
     new_run = @task.runs.create!(prompt: "newest run", created_at: Time.current)
 
-    get project_task_url(@project, @task)
+    get task_url(@task)
     assert_response :success
 
     assert_includes response.body, "newest run"
@@ -136,7 +136,7 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     login @user
     new_run = @task.runs.create!(prompt: "newest run", created_at: Time.current)
 
-    get project_task_url(@project, @task, show_all_runs: true)
+    get task_url(@task, show_all_runs: true)
     assert_response :success
 
     assert_includes response.body, "newest run"
@@ -148,11 +148,11 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     login @user
     @task.runs.create!(prompt: "test run")
 
-    get project_task_url(@project, @task)
+    get task_url(@task)
     assert_response :success
     assert_select "a", text: "Show All Runs"
 
-    get project_task_url(@project, @task, show_all_runs: true)
+    get task_url(@task, show_all_runs: true)
     assert_response :success
     assert_select "a", text: "Show Last Run Only"
   end
@@ -162,19 +162,19 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     @task.runs.destroy_all
     @task.runs.create!(prompt: "single run")
 
-    get project_task_url(@project, @task)
+    get task_url(@task)
     assert_response :success
     assert_select "a", text: "Show All Runs", count: 0
     assert_select "a", text: "Show Last Run Only", count: 0
   end
 
   test "destroy requires authentication" do
-    delete project_task_url(@project, @task)
+    delete task_url(@task)
     assert_redirected_to new_session_path
 
     login @user
     assert_difference("Task.kept.count", -1) do
-      delete project_task_url(@project, @task)
+      delete task_url(@task)
     end
     assert_redirected_to project_tasks_path(@project)
     assert @task.reload.discarded?
