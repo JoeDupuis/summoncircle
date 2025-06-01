@@ -30,4 +30,14 @@ module ApplicationHelper
       message
     end
   end
+
+  def current_git_branch
+    return nil unless Rails.env.development?
+
+    begin
+      `git rev-parse --abbrev-ref HEAD`.strip
+    rescue
+      nil
+    end
+  end
 end

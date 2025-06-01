@@ -9,6 +9,8 @@
  * Consider organizing styles into separate files for maintainability.
  */
 
+@import url("components/branch-indicator.css");
+
 .spinner {
   display: inline-block;
   width: 20px;

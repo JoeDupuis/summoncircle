@@ -1,0 +1,25 @@
+.branch-indicator {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #2d3748;
+  color: #e2e8f0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  border: 1px solid #4a5568;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  opacity: 0.9;
+  transition: opacity 0.2s ease;
+}
+
+.branch-indicator:hover {
+  opacity: 1;
+}
+
+.branch-indicator::before {
+  content: "⎇ ";
+  margin-right: 4px;
+}
