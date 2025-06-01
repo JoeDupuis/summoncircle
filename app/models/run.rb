@@ -133,7 +133,7 @@ class Run < ApplicationRecord
     git_container = Docker::Container.create(
       "Image" => task.agent.docker_image,
       "Entrypoint" => [ "sh" ],
-      "Cmd" => [ "-c", "git diff HEAD && echo '=== Untracked files ===' && git ls-files --others --exclude-standard" ],
+      "Cmd" => [ "-c", "git add -N . && git diff HEAD" ],
       "WorkingDir" => git_working_dir,
       "User" => task.agent.user_id.to_s,
       "HostConfig" => {
