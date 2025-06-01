@@ -10,10 +10,8 @@ export default class extends Controller {
   keydown(event) {
     if (event.key === "Enter") {
       if (this.isMobile()) {
-        // On mobile, Enter creates a new line, no form submission
         return
       } else {
-        // On desktop, maintain existing behavior
         if (event.shiftKey) {
           return
         } else {
@@ -36,12 +34,10 @@ export default class extends Controller {
   }
 
   isMobile() {
-    // Check for mobile device using multiple indicators
     const userAgent = navigator.userAgent.toLowerCase()
     const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
     const smallScreen = window.matchMedia("(max-width: 768px)").matches
     
-    // Check for mobile user agents
     const mobileUserAgents = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/
     
     return hasTouch && (smallScreen || mobileUserAgents.test(userAgent))
@@ -49,10 +45,8 @@ export default class extends Controller {
 
   updateTextareaAttributes() {
     if (this.isMobile()) {
-      // On mobile, set enterkeyhint to "go" for better UX
       this.textareaTarget.setAttribute('enterkeyhint', 'enter')
     } else {
-      // On desktop, set enterkeyhint to "send" 
       this.textareaTarget.setAttribute('enterkeyhint', 'send')
     }
   }
