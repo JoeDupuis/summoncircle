@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_01_034218) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_01_082414) do
   create_table "agents", force: :cascade do |t|
     t.string "name"
     t.string "docker_image"
@@ -36,6 +36,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_01_034218) do
     t.datetime "discarded_at"
     t.string "repo_path"
     t.index ["discarded_at"], name: "index_projects_on_discarded_at"
+  end
+
+  create_table "repo_states", force: :cascade do |t|
+    t.text "uncommitted_diff"
+    t.text "target_branch_diff"
+    t.string "repository_path"
+    t.integer "step_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["step_id"], name: "index_repo_states_on_step_id"
   end
 
   create_table "runs", force: :cascade do |t|
@@ -111,6 +121,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_01_034218) do
     t.index ["agent_id"], name: "index_volumes_on_agent_id"
   end
 
+  add_foreign_key "repo_states", "steps"
   add_foreign_key "runs", "tasks"
   add_foreign_key "sessions", "users"
   add_foreign_key "steps", "runs"

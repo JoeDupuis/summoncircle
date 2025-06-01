@@ -29,6 +29,7 @@ class Run < ApplicationRecord
 
       # Process logs and create steps
       create_steps_from_logs(clean_logs)
+      capture_repository_state
       completed!
     rescue => e
       error_message = "Error: #{e.message}"
@@ -115,5 +116,51 @@ class Run < ApplicationRecord
 
   def should_clone_repository?
     task.project.repository_url.present?
+  end
+
+  def capture_repository_state
+    return unless should_clone_repository?
+
+    project = task.project
+    repo_path = project.repo_path.presence || ""
+    working_dir = task.workplace_mount.container_path
+    repo_container_path = repo_path.empty? ? working_dir : File.join(working_dir, repo_path.sub(/^\//, ""))
+
+    # Configure docker host
+    original_docker_url = Docker.url
+    configure_docker_host
+
+    # Create a container to run git diff
+    git_container = Docker::Container.create(
+      "Image" => "alpine/git",
+      "Cmd" => [ "diff" ],
+      "WorkingDir" => repo_container_path,
+      "HostConfig" => {
+        "Binds" => [ task.workplace_mount.bind_string ]
+      }
+    )
+
+    git_container.start
+    wait_result = git_container.wait
+    logs = git_container.logs(stdout: true, stderr: true)
+    uncommitted_diff = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
+
+    # Create a system step to mark when repo state was captured
+    repo_state_step = steps.create!(
+      raw_response: "Repository state captured",
+      type: "Step::System",
+      content: "Repository state captured"
+    )
+
+    # Create the repo state record
+    repo_state_step.repo_states.create!(
+      uncommitted_diff: uncommitted_diff,
+      repository_path: repo_container_path
+    )
+  rescue => e
+    Rails.logger.error "Failed to capture repository state: #{e.message}"
+  ensure
+    Docker.url = original_docker_url if defined?(original_docker_url)
+    git_container&.delete(force: true) if defined?(git_container)
   end
 end

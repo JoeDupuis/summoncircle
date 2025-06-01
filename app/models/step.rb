@@ -1,5 +1,6 @@
 class Step < ApplicationRecord
   belongs_to :run
+  has_many :repo_states, dependent: :destroy
 
   validates :raw_response, presence: true
 
