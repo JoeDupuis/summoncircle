@@ -2,7 +2,7 @@
 
 <%= link_to 'New Agent', new_agent_path %>
 
-<ul>
+<ul class="agent-list">
   <% @agents.each do |agent| %>
     <li>
       <%= link_to agent.name, agent_path(agent) %>
