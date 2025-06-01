@@ -149,7 +149,7 @@ class RunTest < ActiveSupport::TestCase
     Docker.expects(:url=).with("tcp://192.168.1.100:2375").once
     Docker.expects(:url=).with(original_url).once
 
-    # Mock main container creation and execution only (no git clone for project without repo)
+    # Mock main container creation and execution
     Docker::Container.expects(:create).with do |params|
       params["Image"] == "example/image:latest"
     end.returns(mock_container_with_output("\x04test"))
@@ -183,7 +183,7 @@ class RunTest < ActiveSupport::TestCase
     # Docker.url= should be called once to reset in main execute ensure block
     Docker.expects(:url=).once
 
-    # Mock main container creation and execution only (no git clone for project without repo)
+    # Mock main container creation and execution
     Docker::Container.expects(:create).with do |params|
       params["Image"] == "example/image:latest"
     end.returns(mock_container_with_output("\x04test"))
@@ -218,7 +218,7 @@ class RunTest < ActiveSupport::TestCase
     )
     run = task.runs.create!(prompt: "test", status: :pending)
 
-    # Mock main container creation and execution only (no git clone for project without repo)
+    # Mock main container creation and execution
     Docker::Container.expects(:create).with do |params|
       params["Image"] == "example/image:latest"
     end.returns(mock_container_with_output("\x04test"))
