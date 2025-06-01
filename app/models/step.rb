@@ -9,14 +9,6 @@ class Step < ApplicationRecord
     raw_response
   end
 
-  def content=(value)
-    super(filter_sensitive_info(value))
-  end
-
-  def raw_response=(value)
-    super(filter_sensitive_info(value))
-  end
-
   def content
     filter_sensitive_info(super)
   end
