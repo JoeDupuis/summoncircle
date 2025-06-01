@@ -405,7 +405,7 @@ class RunTest < ActiveSupport::TestCase
     # Mock main container
     Docker::Container.expects(:create).with do |params|
       params["Image"] == "example/image:latest" &&
-        params["Cmd"] == ["echo", "test"]
+        params["Cmd"] == [ "echo", "test" ]
     end.returns(mock_container_with_output("\x04test"))
 
     # Expect git diff container to be created after run completes
@@ -460,7 +460,7 @@ class RunTest < ActiveSupport::TestCase
     # Mock main container
     Docker::Container.expects(:create).with do |params|
       params["Image"] == "example/image:latest" &&
-        params["Cmd"] == ["echo", "test"]
+        params["Cmd"] == [ "echo", "test" ]
     end.returns(mock_container_with_output("\x04test"))
 
     # Expect git diff container to be created after run completes
