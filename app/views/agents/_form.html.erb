@@ -35,14 +35,14 @@
     <%= form.label :volumes_config, "Volumes (JSON format)" %><br>
     <%= form.text_area :volumes_config, readonly: !agent.new_record? %>
     <% unless agent.new_record? %>
-      <small style="color: #666;">Volumes cannot be edited after creation</small>
+      <small class="form-help">Volumes cannot be edited after creation</small>
     <% end %>
   </div>
 
   <div>
     <%= form.label :env_variables_json, "Environment Variables (JSON format)" %><br>
     <%= form.text_area :env_variables_json %>
-    <small style="color: #666;">Example: {"NODE_ENV": "development", "DEBUG": "true"}</small>
+    <small class="form-help">Example: {"NODE_ENV": "development", "DEBUG": "true"}</small>
   </div>
 
   <div>
@@ -59,13 +59,13 @@
   <div>
     <%= form.label :user_id, "User ID (UID for file ownership)" %><br>
     <%= form.number_field :user_id, value: agent.user_id %>
-    <small style="color: #666;">Set to match the UID that your agent runs as. Current value: <%= agent.user_id %></small>
+    <small class="form-help">Set to match the UID that your agent runs as. Current value: <%= agent.user_id %></small>
   </div>
 
   <div>
     <%= form.label :instructions_mount_path, "User Instructions Mount Path" %><br>
     <%= form.text_field :instructions_mount_path, placeholder: "/workspace/.instructions" %>
-    <small style="color: #666;">Path where user instructions will be mounted (read-only). Leave blank to disable mounting.</small>
+    <small class="form-help">Path where user instructions will be mounted (read-only). Leave blank to disable mounting.</small>
   </div>
 
   <div>

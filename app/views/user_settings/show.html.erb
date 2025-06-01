@@ -20,8 +20,8 @@
 <div>
   <strong>Global Agent Instructions:</strong>
   <% if @user.instructions.present? %>
-    <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; white-space: pre-wrap;"><%= @user.instructions %></pre>
-    <small>Configure mount path in individual agent settings.</small>
+    <pre class="instructions-preview"><%= @user.instructions %></pre>
+    <small class="form-help">Configure mount path in individual agent settings.</small>
   <% else %>
     Not set
   <% end %>

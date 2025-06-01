@@ -1,0 +1,15 @@
+.status-indicator {
+  font-weight: normal;
+}
+
+.status-indicator.-success {
+  color: green;
+}
+
+.status-indicator.-warning {
+  color: orange;
+}
+
+.status-indicator.-muted {
+  color: #666;
+}

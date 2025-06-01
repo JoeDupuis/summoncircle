@@ -1,0 +1,11 @@
+.instructions-preview {
+  background-color: #f5f5f5;
+  padding: 10px;
+  border-radius: 4px;
+  white-space: pre-wrap;
+}
+
+.instructions-preview.-scrollable {
+  max-height: 200px;
+  overflow-y: auto;
+}
