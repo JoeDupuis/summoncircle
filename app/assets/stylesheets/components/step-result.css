@@ -1,0 +1,19 @@
+.step-result {
+  margin: 5px 0;
+  padding: 5px;
+  background: #d4edda;
+  border-left: 3px solid #28a745;
+}
+
+.step-result.-error {
+  background: #f8d7da;
+  border-left-color: #dc3545;
+}
+
+.step-result > .label {
+  font-weight: bold;
+}
+
+.step-result > .content {
+  margin: 5px 0 0 0;
+}
