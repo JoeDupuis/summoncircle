@@ -131,9 +131,11 @@ class Run < ApplicationRecord
     git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
 
     git_container = Docker::Container.create(
-      "Image" => "alpine/git",
-      "Cmd" => [ "diff" ],
+      "Image" => task.agent.docker_image,
+      "Entrypoint" => [ "sh" ],
+      "Cmd" => [ "-c", "git add -N . && git diff HEAD" ],
       "WorkingDir" => git_working_dir,
+      "User" => task.agent.user_id.to_s,
       "HostConfig" => {
         "Binds" => [ task.workplace_mount.bind_string ]
       }
@@ -147,7 +149,7 @@ class Run < ApplicationRecord
     repo_state_step = steps.create!(
       raw_response: "Repository state captured",
       type: "Step::System",
-      content: "Repository state captured"
+      content: "Repository state captured\n\nUncommitted diff:\n#{uncommitted_diff}"
     )
     repo_state_step.repo_states.create!(
       uncommitted_diff: uncommitted_diff,
