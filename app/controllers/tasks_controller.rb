@@ -35,7 +35,7 @@ class TasksController < ApplicationController
         @tasks = Task.includes(:agent, :project).order(created_at: :desc)
         @projects = Project.all
         @agents = Agent.all
-        render :index, status: :unprocessable_entity
+        render "dashboard/index", status: :unprocessable_entity
       end
     end
   end
