@@ -32,3 +32,16 @@
   color: #666;
   border-radius: 4px;
 }
+
+.task-form {
+  
+}
+
+.task-form > .selectors {
+  display: flex;
+  gap: 1rem;
+}
+
+.task-form > .selectors > .field {
+  flex: 1;
+}
