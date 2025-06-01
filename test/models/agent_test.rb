@@ -88,4 +88,30 @@ class AgentTest < ActiveSupport::TestCase
     agent = Agent.new(name: "Name", docker_image: "img")
     assert_equal [], agent.env_strings
   end
+
+  test "user_id defaults to 1000" do
+    agent = Agent.create!(name: "Name", docker_image: "img", workplace_path: "/workspace")
+    assert_equal 1000, agent.user_id
+  end
+
+  test "user_id must be a non-negative integer" do
+    agent = Agent.new(name: "Name", docker_image: "img", workplace_path: "/workspace")
+
+    agent.user_id = 1001
+    assert agent.valid?
+
+    agent.user_id = 0
+    assert agent.valid?
+
+    agent.user_id = -1
+    assert_not agent.valid?
+    assert_includes agent.errors[:user_id], "must be greater than or equal to 0"
+
+    agent.user_id = 1.5
+    assert_not agent.valid?
+    assert_includes agent.errors[:user_id], "must be an integer"
+
+    agent.user_id = nil
+    assert agent.valid? # nil is allowed
+  end
 end

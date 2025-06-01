@@ -70,8 +70,8 @@ class RunTest < ActiveSupport::TestCase
       params["Image"] == "alpine/git"
     end.returns(git_container)
 
-    # Expect chmod container after git clone
-    expect_chmod_container
+    # Expect chown container after git clone
+    expect_chown_container
 
     # For first run, it uses start_arguments
     Docker::Container.expects(:create).with do |params|
@@ -155,8 +155,8 @@ class RunTest < ActiveSupport::TestCase
       params["Image"] == "alpine/git"
     end.returns(git_container)
 
-    # Expect chmod container after git clone
-    expect_chmod_container
+    # Expect chown container after git clone
+    expect_chown_container
 
     # Mock main container creation and execution
     Docker::Container.expects(:create).with do |params|
@@ -200,8 +200,8 @@ class RunTest < ActiveSupport::TestCase
       params["Image"] == "alpine/git"
     end.returns(git_container)
 
-    # Expect chmod container after git clone
-    expect_chmod_container
+    # Expect chown container after git clone
+    expect_chown_container
 
     # Mock main container creation and execution
     Docker::Container.expects(:create).with do |params|
@@ -246,8 +246,8 @@ class RunTest < ActiveSupport::TestCase
       params["Image"] == "alpine/git"
     end.returns(git_container)
 
-    # Expect chmod container after git clone
-    expect_chmod_container
+    # Expect chown container after git clone
+    expect_chown_container
 
     # Mock main container creation and execution
     Docker::Container.expects(:create).with do |params|
@@ -369,8 +369,8 @@ class RunTest < ActiveSupport::TestCase
       params["Image"] == "alpine/git"
     end.returns(git_container)
 
-    # Expect chmod container after git clone
-    expect_chmod_container
+    # Expect chown container after git clone
+    expect_chown_container
 
     # Verify that environment variables are passed to Docker container
     Docker::Container.expects(:create).with do |params|
@@ -424,8 +424,8 @@ class RunTest < ActiveSupport::TestCase
       params["HostConfig"]["Binds"].size == 1
     end.returns(git_container)
 
-    # Expect chmod container after git clone
-    expect_chmod_container
+    # Expect chown container after git clone
+    expect_chown_container
 
     # Mock main container
     Docker::Container.expects(:create).with do |params|
@@ -475,8 +475,8 @@ class RunTest < ActiveSupport::TestCase
       params["HostConfig"]["Binds"].size == 1
     end.returns(git_container)
 
-    # Expect chmod container after git clone
-    expect_chmod_container
+    # Expect chown container after git clone
+    expect_chown_container
 
     # Mock main container
     Docker::Container.expects(:create).with do |params|
@@ -634,14 +634,14 @@ class RunTest < ActiveSupport::TestCase
     end.returns(git_diff_container)
   end
 
-  def expect_chmod_container
-    chmod_container = mock("chmod_container")
-    chmod_container.expects(:start)
-    chmod_container.expects(:wait)
-    chmod_container.expects(:delete).with(force: true)
+  def expect_chown_container(uid = 1000)
+    chown_container = mock("chown_container")
+    chown_container.expects(:start)
+    chown_container.expects(:wait)
+    chown_container.expects(:delete).with(force: true)
 
     Docker::Container.expects(:create).with do |params|
-      params["Image"] == "alpine" && params["Cmd"] == [ "chmod", "-R", "777", "." ]
-    end.returns(chmod_container)
+      params["Image"] == "alpine" && params["Cmd"] == [ "chown", "-R", "#{uid}:#{uid}", "." ]
+    end.returns(chown_container)
   end
 end

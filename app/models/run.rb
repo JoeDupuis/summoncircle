@@ -110,18 +110,19 @@ class Run < ApplicationRecord
       raise "Failed to clone repository: #{clean_logs}"
     end
 
-    # Fix permissions to ensure the agent can access the cloned files
-    chmod_container = Docker::Container.create(
+    # Fix ownership to ensure the agent can access the cloned files
+    agent_uid = task.agent.user_id || 1000
+    chown_container = Docker::Container.create(
       "Image" => "alpine",
-      "Cmd" => [ "chmod", "-R", "777", "." ],
+      "Cmd" => [ "chown", "-R", "#{agent_uid}:#{agent_uid}", "." ],
       "WorkingDir" => working_dir,
       "HostConfig" => {
         "Binds" => [ task.workplace_mount.bind_string ]
       }
     )
-    chmod_container.start
-    chmod_container.wait
-    chmod_container.delete(force: true)
+    chown_container.start
+    chown_container.wait
+    chown_container.delete(force: true)
   rescue Docker::Error::NotFoundError => e
     raise "Alpine/git Docker image not found. Please pull alpine/git image."
   rescue => e
