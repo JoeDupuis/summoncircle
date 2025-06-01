@@ -19,9 +19,11 @@ class Run < ApplicationRecord
     begin
       configure_docker_host
       clone_repository if first_run? && should_clone_repository?
+
       container = create_container
       container.start
       container.wait
+
 
       logs = container.logs(stdout: true, stderr: true)
       # Docker logs prefix each line with 8 bytes of metadata that we need to strip
@@ -98,7 +100,6 @@ class Run < ApplicationRecord
         "Binds" => [ task.workplace_mount.bind_string ]
       }
     )
-
     git_container.start
     wait_result = git_container.wait
     logs = git_container.logs(stdout: true, stderr: true)

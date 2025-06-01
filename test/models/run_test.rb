@@ -49,7 +49,8 @@ class RunTest < ActiveSupport::TestCase
       docker_image: "example/image:latest",
       workplace_path: "/workspace",
       start_arguments: [ "echo", "STARTING: {PROMPT}" ],
-      continue_arguments: [ "{PROMPT}" ]
+      continue_arguments: [ "{PROMPT}" ],
+      user_id: 1000
     )
     # Create a fresh task with no runs
     task = Task.create!(
@@ -360,6 +361,27 @@ class RunTest < ActiveSupport::TestCase
   end
 
   test "execute! clones repository on first run with default repo_path" do
+    # Mock git container creation and execution
+    git_container = mock("git_container")
+    git_container.expects(:start)
+    git_container.expects(:wait).returns({ "StatusCode" => 0 })
+    git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning into '.'...")
+    git_container.expects(:delete).with(force: true)
+
+    Docker::Container.expects(:create).with do |params|
+      params["Image"] == "example/image:latest" &&
+      params["Entrypoint"] == [ "sh" ] &&
+      params["User"] == "1000" &&
+      params["Cmd"] == [ "-c", "git clone https://github.com/test/repo.git ." ] &&
+      params["WorkingDir"] == "/workspace" &&
+      params["HostConfig"]["Binds"].size == 1
+    end.returns(git_container)
+
+    # Create a fresh project with repository URL
+    project = Project.create!(
+      name: "Test Project",
+      repository_url: "https://github.com/test/repo.git"
+    )
     # Create a fresh agent with required user_id for git operations
     agent = Agent.create!(
       name: "Test Agent",
@@ -371,7 +393,7 @@ class RunTest < ActiveSupport::TestCase
     )
     # Create a fresh task with no runs (this ensures first_run? returns true)
     task = Task.create!(
-      project: projects(:one), # Use fixture project that has repository_url
+      project: project,
       agent: agent,
       user: users(:one),
       status: "active",
@@ -379,23 +401,11 @@ class RunTest < ActiveSupport::TestCase
     )
     run = task.runs.create!(prompt: "test", status: :pending)
 
-    # Mock git container creation and execution
-    git_container = mock("git_container")
-    git_container.expects(:start)
-    git_container.expects(:wait).returns({ "StatusCode" => 0 })
-    git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning into '.'...")
-    git_container.expects(:delete).with(force: true)
-
-    Docker::Container.expects(:create).with do |params|
-      params["Image"] == "example/image:latest" && params["Entrypoint"] == [ "sh" ] && params["User"] == "1000" &&
-      params["Cmd"].first == "-c" && params["Cmd"][1].include?("git clone") &&
-      params["WorkingDir"] == "/workspace" &&
-      params["HostConfig"]["Binds"].size == 1
-    end.returns(git_container)
 
     # Mock main container
     Docker::Container.expects(:create).with do |params|
-      params["Image"] == "example/image:latest"
+      params["Image"] == "example/image:latest" &&
+        params["Cmd"] == ["echo", "test"]
     end.returns(mock_container_with_output("\x04test"))
 
     # Expect git diff container to be created after run completes
@@ -408,11 +418,13 @@ class RunTest < ActiveSupport::TestCase
   end
 
   test "execute! clones repository on first run with custom repo_path" do
+    # Create a fresh project with repository URL and custom repo path
     project = Project.create!(
       name: "Test Project",
       repository_url: "https://github.com/test/repo.git",
       repo_path: "myapp"
     )
+    # Create a fresh agent with required user_id for git operations
     agent = Agent.create!(
       name: "Test Agent",
       docker_image: "example/image:latest",
@@ -421,6 +433,7 @@ class RunTest < ActiveSupport::TestCase
       continue_arguments: [ "{PROMPT}" ],
       user_id: 1000
     )
+    # Create a fresh task with no runs (this ensures first_run? returns true)
     task = Task.create!(
       project: project,
       agent: agent,
@@ -446,7 +459,8 @@ class RunTest < ActiveSupport::TestCase
 
     # Mock main container
     Docker::Container.expects(:create).with do |params|
-      params["Image"] == "example/image:latest"
+      params["Image"] == "example/image:latest" &&
+        params["Cmd"] == ["echo", "test"]
     end.returns(mock_container_with_output("\x04test"))
 
     # Expect git diff container to be created after run completes
