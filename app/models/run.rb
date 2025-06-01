@@ -143,7 +143,15 @@ class Run < ApplicationRecord
     project = task.project
     repo_path = project.repo_path.presence || ""
     working_dir = task.workplace_mount.container_path
-    repo_container_path = repo_path.empty? ? working_dir : File.join(working_dir, repo_path.sub(/^\//, ""))
+    
+    # The git repository is located where we cloned it
+    # If repo_path is empty, we cloned with "." so the repo is directly in working_dir
+    # If repo_path is set, we cloned into that subdirectory
+    if repo_path.empty?
+      git_working_dir = working_dir
+    else
+      git_working_dir = File.join(working_dir, repo_path.sub(/^\//, ""))
+    end
 
     # Configure docker host
     original_docker_url = Docker.url
@@ -153,7 +161,7 @@ class Run < ApplicationRecord
     git_container = Docker::Container.create(
       "Image" => "alpine/git",
       "Cmd" => [ "diff" ],
-      "WorkingDir" => repo_container_path,
+      "WorkingDir" => git_working_dir,
       "HostConfig" => {
         "Binds" => [ task.workplace_mount.bind_string ]
       }
@@ -174,7 +182,7 @@ class Run < ApplicationRecord
     # Create the repo state record
     repo_state_step.repo_states.create!(
       uncommitted_diff: uncommitted_diff,
-      repository_path: repo_container_path
+      repository_path: git_working_dir
     )
   rescue => e
     Rails.logger.error "Failed to capture repository state: #{e.message}"
