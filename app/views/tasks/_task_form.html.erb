@@ -1,4 +1,4 @@
-<%= form_with(model: @task, local: true) do |form| %>
+<%= form_with(model: @task, local: true, class: "task-form") do |form| %>
   <% if @task.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(@task.errors.count, "error") %> prohibited this task from being saved:</h2>
@@ -10,14 +10,16 @@
     </div>
   <% end %>
 
-  <div>
-    <%= form.label :project_id, "Project" %><br>
-    <%= form.collection_select :project_id, @projects, :id, :name, { prompt: "Select a project" } %>
-  </div>
+  <div class="selectors">
+    <div class="field">
+      <%= form.label :project_id, "Project" %><br>
+      <%= form.collection_select :project_id, @projects, :id, :name, { prompt: "Select a project" } %>
+    </div>
 
-  <div>
-    <%= form.label :agent_id, "Agent" %><br>
-    <%= form.collection_select :agent_id, @agents, :id, :name, { prompt: "Select an agent" } %>
+    <div class="field">
+      <%= form.label :agent_id, "Agent" %><br>
+      <%= form.collection_select :agent_id, @agents, :id, :name, { prompt: "Select an agent" } %>
+    </div>
   </div>
 
   <div data-controller="prompt">
