@@ -17,6 +17,14 @@ class Step < ApplicationRecord
     super(filter_sensitive_info(value))
   end
 
+  def content
+    filter_sensitive_info(super)
+  end
+
+  def raw_response
+    filter_sensitive_info(super)
+  end
+
   private
 
   def filter_sensitive_info(message)
