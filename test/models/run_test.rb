@@ -89,7 +89,7 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal 2, run.steps.count # Now includes repo state system step
+    assert_equal 2, run.steps.count
     assert_equal "hello world", run.steps.first.raw_response
     assert_equal "Repository state captured", run.steps.last.content
   end
@@ -118,7 +118,7 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal 2, run.steps.count # Now includes repo state system step
+    assert_equal 2, run.steps.count
     assert_equal "continued output", run.steps.first.raw_response
   end
 
@@ -261,7 +261,7 @@ class RunTest < ActiveSupport::TestCase
 
     assert run.completed?
     assert_equal original_url, Docker.url
-    assert_equal 2, run.steps.count # Now includes repo state system step
+    assert_equal 2, run.steps.count
   end
 
   test "execute! resets Docker host even when run fails" do
@@ -388,7 +388,7 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal 2, run.steps.count # Now includes repo state system step
+    assert_equal 2, run.steps.count
   end
 
   test "execute! clones repository on first run with default repo_path" do
@@ -438,7 +438,7 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal 2, run.steps.count # Now includes repo state system step
+    assert_equal 2, run.steps.count
   end
 
   test "execute! clones repository on first run with custom repo_path" do
@@ -489,7 +489,7 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal 2, run.steps.count # Now includes repo state system step
+    assert_equal 2, run.steps.count
   end
 
   test "execute! handles git clone failure" do
@@ -549,7 +549,7 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal 2, run.steps.count # Now includes repo state system step
+    assert_equal 2, run.steps.count
   end
 
   test "should_clone_repository? returns false when repository_url is blank" do

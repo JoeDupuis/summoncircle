@@ -87,7 +87,7 @@ class Run < ApplicationRecord
     working_dir = task.workplace_mount.container_path
     clone_target = repo_path.presence&.sub(/^\//, "") || "."
 
-    # Configure docker host
+
     original_docker_url = Docker.url
     configure_docker_host
 
@@ -110,7 +110,6 @@ class Run < ApplicationRecord
       raise "Failed to clone repository: #{clean_logs}"
     end
 
-    # Fix ownership to ensure the agent can access the cloned files
     fix_file_ownership(working_dir)
   rescue Docker::Error::NotFoundError => e
     raise "Alpine/git Docker image not found. Please pull alpine/git image."
@@ -133,14 +132,12 @@ class Run < ApplicationRecord
     repo_path = project.repo_path.presence || ""
     working_dir = task.workplace_mount.container_path
     
-    # The git repository is located where we cloned it
     git_working_dir = File.join([working_dir, repo_path.presence&.sub(/^\//, "")].compact)
 
-    # Configure docker host
+
     original_docker_url = Docker.url
     configure_docker_host
 
-    # Create a container to run git diff
     git_container = Docker::Container.create(
       "Image" => "alpine/git",
       "Cmd" => [ "diff" ],
@@ -155,14 +152,11 @@ class Run < ApplicationRecord
     logs = git_container.logs(stdout: true, stderr: true)
     uncommitted_diff = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
 
-    # Create a system step to mark when repo state was captured
     repo_state_step = steps.create!(
       raw_response: "Repository state captured",
       type: "Step::System",
       content: "Repository state captured"
     )
-
-    # Create the repo state record
     repo_state_step.repo_states.create!(
       uncommitted_diff: uncommitted_diff,
       repository_path: git_working_dir
