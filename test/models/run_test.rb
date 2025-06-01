@@ -496,13 +496,39 @@ class RunTest < ActiveSupport::TestCase
     assert run.completed?
   end
 
+  test "should_clone_repository? returns false when repository_url is blank" do
+    project = Project.create!(name: "Test Project")
+    agent = Agent.create!(
+      name: "Test Agent",
+      docker_image: "example/image:latest",
+      workplace_path: "/workspace",
+      start_arguments: [ "echo", "test" ]
+    )
+    task = Task.create!(project: project, agent: agent, status: "active")
+    run = task.runs.create!(prompt: "test")
+
+    assert_not run.send(:should_clone_repository?)
+  end
+
+  test "should_clone_repository? returns true when repository_url is present" do
+    project = Project.create!(name: "Test Project", repository_url: "https://github.com/test/repo.git")
+    agent = Agent.create!(
+      name: "Test Agent",
+      docker_image: "example/image:latest",
+      workplace_path: "/workspace",
+      start_arguments: [ "echo", "test" ]
+    )
+    task = Task.create!(project: project, agent: agent, status: "active")
+    run = task.runs.create!(prompt: "test")
+
+    assert run.send(:should_clone_repository?)
+  end
+
   test "execute! skips git clone when repository_url is blank" do
     project = Project.create!(
-      name: "Test Project",
-      repository_url: "https://example.com/empty.git"
+      name: "Test Project"
+      # No repository_url - should skip git clone
     )
-    # Update to blank after creation to bypass validation
-    project.update_column(:repository_url, nil)
 
     agent = Agent.create!(
       name: "Test Agent",

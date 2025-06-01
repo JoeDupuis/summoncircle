@@ -7,10 +7,10 @@ class ProjectTest < ActiveSupport::TestCase
     assert_includes project.errors[:name], "can't be blank"
   end
 
-  test "validates presence of repository_url" do
+  test "allows blank repository_url" do
     project = Project.new(name: "Example")
-    assert_not project.valid?
-    assert_includes project.errors[:repository_url], "can't be blank"
+    assert project.valid?
+    assert_nil project.repository_url
   end
 
   test "repo_path can be nil" do

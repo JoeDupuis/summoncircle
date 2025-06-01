@@ -18,7 +18,7 @@ class Run < ApplicationRecord
     original_docker_url = Docker.url
     begin
       configure_docker_host
-      clone_repository if first_run? && task.project.repository_url.present?
+      clone_repository if first_run? && should_clone_repository?
       container = create_container
       container.start
       container.wait
@@ -127,5 +127,9 @@ class Run < ApplicationRecord
     raise "Git clone error: #{e.message} (#{e.class})"
   ensure
     git_container&.delete(force: true) if defined?(git_container)
+  end
+
+  def should_clone_repository?
+    task.project.repository_url.present?
   end
 end
