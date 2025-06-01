@@ -83,7 +83,7 @@ class Run < ApplicationRecord
   def clone_repository
     project = task.project
     repo_path = project.repo_path.presence || ""
-    
+
     # Determine the working directory and clone target
     if repo_path.empty?
       # Clone directly into /workspace using "."
@@ -117,12 +117,12 @@ class Run < ApplicationRecord
 
     # Check the exit status
     exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
-    
+
     # If exit code is not 0, the clone failed
     if exit_code && exit_code != 0
       raise "Failed to clone repository: #{clean_logs}"
     end
-    
+
     # Log success
     Rails.logger.info "Git clone completed successfully"
   rescue Docker::Error::NotFoundError => e

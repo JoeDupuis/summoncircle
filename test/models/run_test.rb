@@ -62,7 +62,7 @@ class RunTest < ActiveSupport::TestCase
     # Mock git container creation (first run clones the repo)
     git_container = mock("git_container")
     git_container.expects(:start)
-    git_container.expects(:wait).returns({"StatusCode" => 0})
+    git_container.expects(:wait).returns({ "StatusCode" => 0 })
     git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning...")
     git_container.expects(:delete).with(force: true)
 
@@ -137,7 +137,7 @@ class RunTest < ActiveSupport::TestCase
     # Mock git container creation
     git_container = mock("git_container")
     git_container.expects(:start)
-    git_container.expects(:wait).returns({"StatusCode" => 0})
+    git_container.expects(:wait).returns({ "StatusCode" => 0 })
     git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning...")
     git_container.expects(:delete).with(force: true)
 
@@ -176,7 +176,7 @@ class RunTest < ActiveSupport::TestCase
     # Mock git container creation
     git_container = mock("git_container")
     git_container.expects(:start)
-    git_container.expects(:wait).returns({"StatusCode" => 0})
+    git_container.expects(:wait).returns({ "StatusCode" => 0 })
     git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning...")
     git_container.expects(:delete).with(force: true)
 
@@ -216,7 +216,7 @@ class RunTest < ActiveSupport::TestCase
     # Mock git container creation
     git_container = mock("git_container")
     git_container.expects(:start)
-    git_container.expects(:wait).returns({"StatusCode" => 0})
+    git_container.expects(:wait).returns({ "StatusCode" => 0 })
     git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning...")
     git_container.expects(:delete).with(force: true)
 
@@ -332,7 +332,7 @@ class RunTest < ActiveSupport::TestCase
     # Mock git container creation
     git_container = mock("git_container")
     git_container.expects(:start)
-    git_container.expects(:wait).returns({"StatusCode" => 0})
+    git_container.expects(:wait).returns({ "StatusCode" => 0 })
     git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning...")
     git_container.expects(:delete).with(force: true)
 
@@ -377,7 +377,7 @@ class RunTest < ActiveSupport::TestCase
     # Mock git container creation and execution
     git_container = mock("git_container")
     git_container.expects(:start)
-    git_container.expects(:wait).returns({"StatusCode" => 0})
+    git_container.expects(:wait).returns({ "StatusCode" => 0 })
     git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning into '.'...")
     git_container.expects(:delete).with(force: true)
 
@@ -421,7 +421,7 @@ class RunTest < ActiveSupport::TestCase
     # Mock git container creation and execution
     git_container = mock("git_container")
     git_container.expects(:start)
-    git_container.expects(:wait).returns({"StatusCode" => 0})
+    git_container.expects(:wait).returns({ "StatusCode" => 0 })
     git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning into '/workspace/myapp'...")
     git_container.expects(:delete).with(force: true)
 
@@ -464,7 +464,7 @@ class RunTest < ActiveSupport::TestCase
     # Mock git container creation and execution with failure
     git_container = mock("git_container")
     git_container.expects(:start)
-    git_container.expects(:wait).returns({"StatusCode" => 1})
+    git_container.expects(:wait).returns({ "StatusCode" => 1 })
     git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "fatal: repository not found")
     git_container.expects(:delete).with(force: true)
 
@@ -503,7 +503,7 @@ class RunTest < ActiveSupport::TestCase
     )
     # Update to blank after creation to bypass validation
     project.update_column(:repository_url, nil)
-    
+
     agent = Agent.create!(
       name: "Test Agent",
       docker_image: "example/image:latest",
@@ -533,7 +533,7 @@ class RunTest < ActiveSupport::TestCase
   def mock_container_with_output(output)
     mock_container = mock("container")
     mock_container.expects(:start)
-    mock_container.expects(:wait).returns({"StatusCode" => 0})
+    mock_container.expects(:wait).returns({ "StatusCode" => 0 })
     mock_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + output)
     mock_container.expects(:delete).with(force: true)
     mock_container
