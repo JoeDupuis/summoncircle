@@ -85,7 +85,7 @@ class Run < ApplicationRecord
     project = task.project
     repo_path = project.repo_path.presence || ""
     working_dir = task.workplace_mount.container_path
-    clone_target = repo_path.empty? ? "." : repo_path.sub(/^\//, "")
+    clone_target = repo_path.presence&.sub(/^\//, "") || "."
 
     # Configure docker host
     original_docker_url = Docker.url
@@ -134,13 +134,7 @@ class Run < ApplicationRecord
     working_dir = task.workplace_mount.container_path
     
     # The git repository is located where we cloned it
-    # If repo_path is empty, we cloned with "." so the repo is directly in working_dir
-    # If repo_path is set, we cloned into that subdirectory
-    if repo_path.empty?
-      git_working_dir = working_dir
-    else
-      git_working_dir = File.join(working_dir, repo_path.sub(/^\//, ""))
-    end
+    git_working_dir = File.join([working_dir, repo_path.presence&.sub(/^\//, "")].compact)
 
     # Configure docker host
     original_docker_url = Docker.url
