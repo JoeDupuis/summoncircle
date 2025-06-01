@@ -22,7 +22,6 @@ class Step < ApplicationRecord
   def filter_sensitive_info(message)
     return message unless message.present?
 
-    # Simple string replacement - ParameterFilter is for filtering hash keys, not string content
     token = run&.task&.user&.github_token
     return message unless token.present?
 
