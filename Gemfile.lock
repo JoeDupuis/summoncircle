@@ -102,6 +102,8 @@ GEM
     debug (1.10.0)
       irb (~> 1.10)
       reline (>= 0.3.8)
+    discard (1.4.0)
+      activerecord (>= 4.2, < 9.0)
     docker-api (2.4.0)
       excon (>= 0.64.0)
       multi_json
@@ -437,6 +439,7 @@ DEPENDENCIES
   brakeman
   capybara
   debug
+  discard
   docker-api
   importmap-rails
   jbuilder

@@ -3,11 +3,11 @@ Rails.application.routes.draw do
   resources :passwords, param: :token
   resources :agents
   resources :projects do
-    resources :tasks, only: %i[index new create show] do
+    resources :tasks, only: %i[index new create show destroy] do
       resources :runs, only: %i[create]
     end
   end
-  resources :tasks, only: %i[index create show] do
+  resources :tasks, only: %i[index create show destroy] do
     resources :runs, only: %i[create]
   end
 

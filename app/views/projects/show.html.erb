@@ -15,4 +15,9 @@
 <h2>Setup Script</h2>
 <pre><code><%= @project.setup_script %></code></pre>
 
-<%= link_to 'Back', projects_path %>
+<div class="project-actions">
+  <%= link_to 'Archive', project_path(@project), 
+              data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to archive this project?' },
+              class: 'archive' %> |
+  <%= link_to 'Back', projects_path %>
+</div>

@@ -1,4 +1,6 @@
 class Agent < ApplicationRecord
+  include Discard::Model
+
   has_many :tasks, dependent: :destroy
   has_many :volumes, dependent: :destroy
 

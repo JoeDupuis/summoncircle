@@ -43,4 +43,16 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     get project_url(@project)
     assert_response :success
   end
+
+  test "destroy requires authentication" do
+    delete project_url(@project)
+    assert_redirected_to new_session_path
+
+    login @user
+    assert_difference("Project.kept.count", -1) do
+      delete project_url(@project)
+    end
+    assert_redirected_to projects_path
+    assert @project.reload.discarded?
+  end
 end

@@ -1,10 +1,16 @@
 class ProjectsController < ApplicationController
   def index
-    @projects = Project.all
+    @projects = Project.kept
   end
 
   def show
     @project = Project.find(params[:id])
+  end
+
+  def destroy
+    @project = Project.find(params[:id])
+    @project.discard
+    redirect_to projects_url, notice: "Project was successfully archived."
   end
 
   def new

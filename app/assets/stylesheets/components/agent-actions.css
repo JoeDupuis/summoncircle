@@ -1,0 +1,12 @@
+.agent-actions {
+  .archive {
+    color: var(--color-danger);
+    text-decoration: none;
+  }
+
+  .archive:hover,
+  .archive:focus {
+    color: var(--color-danger-hover);
+    text-decoration: underline;
+  }
+}
