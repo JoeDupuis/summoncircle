@@ -1,0 +1,37 @@
+<h1>Edit Project</h1>
+
+<%= form_with(model: @project) do |form| %>
+  <%= form_errors(@project) %>
+
+  <div>
+    <%= form.label :name %><br>
+    <%= form.text_field :name %>
+  </div>
+
+  <div>
+    <%= form.label :description %><br>
+    <%= form.text_area :description %>
+  </div>
+
+  <div>
+    <%= form.label :repository_url %><br>
+    <%= form.text_field :repository_url, placeholder: "Optional: Git repository URL to clone" %>
+  </div>
+
+  <div>
+    <%= form.label :repo_path %><br>
+    <%= form.text_field :repo_path, placeholder: "Leave blank for /workspace, or specify subdirectory" %>
+  </div>
+
+  <div>
+    <%= form.label :setup_script %><br>
+    <%= form.text_area :setup_script %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>
+
+<%= link_to 'Show', @project %> |
+<%= link_to 'Back', projects_path %>

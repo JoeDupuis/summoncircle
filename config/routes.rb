@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   resource :session
   resources :passwords, param: :token
+  resource :user_settings, only: %i[show edit update]
   resources :agents
   resources :projects do
     resources :tasks, shallow: true do
