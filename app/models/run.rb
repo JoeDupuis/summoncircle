@@ -127,8 +127,8 @@ class Run < ApplicationRecord
     project = task.project
     repo_path = project.repo_path.presence || ""
     working_dir = task.workplace_mount.container_path
-    
-    git_working_dir = File.join([working_dir, repo_path.presence&.sub(/^\//, "")].compact)
+
+    git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
 
     git_container = Docker::Container.create(
       "Image" => "alpine/git",
