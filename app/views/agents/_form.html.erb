@@ -58,8 +58,8 @@
 
   <div>
     <%= form.label :user_id, "User ID (UID for file ownership)" %><br>
-    <%= form.number_field :user_id %>
-    <small style="color: #666;">Default: 1000. Set to match the UID that your agent runs as.</small>
+    <%= form.number_field :user_id, value: agent.user_id %>
+    <small style="color: #666;">Default: 1000. Set to match the UID that your agent runs as. Current value: <%= agent.user_id %></small>
   </div>
 
   <div>
