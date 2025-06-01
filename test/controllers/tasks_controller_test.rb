@@ -105,7 +105,7 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     run = @task.runs.create!(prompt: "test")
     run.steps.create!(type: "Step::Result", content: "API Error occurred", raw_response: '{"type":"result","is_error":true}')
 
-    get project_task_url(@project, @task)
+    get task_url(@task)
     assert_response :success
     assert_select "div.step-result.-error"
     assert_select "div.label", text: "❌ Result (Error)"
