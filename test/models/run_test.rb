@@ -643,7 +643,7 @@ class RunTest < ActiveSupport::TestCase
     git_diff_container.expects(:delete).with(force: true)
 
     Docker::Container.expects(:create).with do |params|
-      params["Image"] == "alpine/git" && params["Cmd"] == [ "diff", "HEAD" ]
+      params["Entrypoint"] == [ "git" ] && params["Cmd"] == [ "diff", "HEAD" ] && params["User"] == "1000"
     end.returns(git_diff_container)
   end
 

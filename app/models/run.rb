@@ -131,10 +131,11 @@ class Run < ApplicationRecord
     git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
 
     git_container = Docker::Container.create(
-      "Image" => "alpine/git",
-      "Entrypoint" => [ "sh" ],
-      "Cmd" => [ "-c", "git config --global --add safe.directory #{git_working_dir} && git diff HEAD" ],
+      "Image" => task.agent.docker_image,
+      "Entrypoint" => [ "git" ],
+      "Cmd" => [ "diff", "HEAD" ],
       "WorkingDir" => git_working_dir,
+      "User" => task.agent.user_id.to_s,
       "HostConfig" => {
         "Binds" => [ task.workplace_mount.bind_string ]
       }
