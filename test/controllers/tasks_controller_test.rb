@@ -96,8 +96,20 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
 
     get task_url(@task)
     assert_response :success
-    assert_select "div strong", text: "✅ Result"
-    assert_select "pre", text: "Task completed successfully"
+    assert_select "div.label", text: "✅ Result"
+    assert_select "pre.content", text: "Task completed successfully"
+  end
+
+  test "show renders Step::Result with error styling when is_error is true" do
+    login @user
+    run = @task.runs.create!(prompt: "test")
+    run.steps.create!(type: "Step::Result", content: "API Error occurred", raw_response: '{"type":"result","is_error":true}')
+
+    get project_task_url(@project, @task)
+    assert_response :success
+    assert_select "div.step-result.-error"
+    assert_select "div.label", text: "❌ Result (Error)"
+    assert_select "pre.content", text: "API Error occurred"
   end
 
   test "show renders Step::System with system styling" do
