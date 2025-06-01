@@ -141,8 +141,8 @@ class RunTest < ActiveSupport::TestCase
     run = task.runs.create!(prompt: "test", status: :pending)
 
     # Mock Docker.url= to verify it's called with the correct host and then reset
-    Docker.expects(:url=).with("tcp://192.168.1.100:2375").times(3) # Called for git clone, chmod, main container, and git diff
-    Docker.expects(:url=).with(original_url).times(3) # Reset after git clone, chmod, main container, and git diff
+    Docker.expects(:url=).with("tcp://192.168.1.100:2375").once
+    Docker.expects(:url=).with(original_url).once
 
     # Mock git container creation
     git_container = mock("git_container")
@@ -186,8 +186,8 @@ class RunTest < ActiveSupport::TestCase
     )
     run = task.runs.create!(prompt: "test", status: :pending)
 
-    # Docker.url= should be called three times (once to reset after git clone, once to reset after chmod, once to reset in main execute ensure block, and once to reset in capture_repository_state ensure block)
-    Docker.expects(:url=).times(3)
+    # Docker.url= should be called once to reset in main execute ensure block
+    Docker.expects(:url=).once
 
     # Mock git container creation
     git_container = mock("git_container")

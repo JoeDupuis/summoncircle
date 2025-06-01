@@ -87,10 +87,6 @@ class Run < ApplicationRecord
     working_dir = task.workplace_mount.container_path
     clone_target = repo_path.presence&.sub(/^\//, "") || "."
 
-
-    original_docker_url = Docker.url
-    configure_docker_host
-
     git_container = Docker::Container.create(
       "Image" => "alpine/git",
       "Cmd" => [ "clone", project.repository_url, clone_target ],
@@ -117,7 +113,6 @@ class Run < ApplicationRecord
     # Re-raise with more context
     raise "Git clone error: #{e.message} (#{e.class})"
   ensure
-    Docker.url = original_docker_url if defined?(original_docker_url)
     git_container&.delete(force: true) if defined?(git_container)
   end
 
@@ -133,10 +128,6 @@ class Run < ApplicationRecord
     working_dir = task.workplace_mount.container_path
     
     git_working_dir = File.join([working_dir, repo_path.presence&.sub(/^\//, "")].compact)
-
-
-    original_docker_url = Docker.url
-    configure_docker_host
 
     git_container = Docker::Container.create(
       "Image" => "alpine/git",
@@ -164,7 +155,6 @@ class Run < ApplicationRecord
   rescue => e
     Rails.logger.error "Failed to capture repository state: #{e.message}"
   ensure
-    Docker.url = original_docker_url if defined?(original_docker_url)
     git_container&.delete(force: true) if defined?(git_container)
   end
 
