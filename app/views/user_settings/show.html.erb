@@ -17,6 +17,16 @@
   <% end %>
 </div>
 
+<div>
+  <strong>Global Agent Instructions:</strong>
+  <% if @user.instructions.present? %>
+    <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; white-space: pre-wrap;"><%= @user.instructions %></pre>
+    <small>Configure mount path in individual agent settings.</small>
+  <% else %>
+    Not set
+  <% end %>
+</div>
+
 <p>
   <%= link_to 'Edit Settings', edit_user_settings_path, class: 'button' %>
 </p>

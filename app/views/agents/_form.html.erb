@@ -63,6 +63,12 @@
   </div>
 
   <div>
+    <%= form.label :instructions_mount_path, "User Instructions Mount Path" %><br>
+    <%= form.text_field :instructions_mount_path, placeholder: "/workspace/.instructions" %>
+    <small style="color: #666;">Path where user instructions will be mounted (read-only). Leave blank to disable mounting.</small>
+  </div>
+
+  <div>
     <%= form.submit %>
   </div>
 <% end %>

@@ -49,6 +49,34 @@
   </ul>
 <% end %>
 
+<h2>User Instructions</h2>
+<% if Current.user.instructions.present? && @agent.instructions_mount_path.present? %>
+  <p>
+    <strong>Mount Path:</strong> <code><%= @agent.instructions_mount_path %></code><br>
+    <strong>Status:</strong> <span style="color: green;">Will be mounted</span>
+  </p>
+  <p>
+    <strong>Instructions Preview:</strong>
+  </p>
+  <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; white-space: pre-wrap; max-height: 200px; overflow-y: auto;"><%= Current.user.instructions.truncate(500) %></pre>
+<% elsif Current.user.instructions.present? %>
+  <p>
+    <strong>Status:</strong> <span style="color: orange;">User instructions set but no mount path configured for this agent</span>
+  </p>
+<% elsif @agent.instructions_mount_path.present? %>
+  <p>
+    <strong>Mount Path:</strong> <code><%= @agent.instructions_mount_path %></code><br>
+    <strong>Status:</strong> <span style="color: orange;">Mount path set but no user instructions configured</span>
+  </p>
+<% else %>
+  <p>
+    <strong>Status:</strong> <span style="color: #666;">No user instructions or mount path configured</span>
+  </p>
+<% end %>
+<p>
+  <%= link_to 'Configure Instructions', user_settings_path, class: 'button' %>
+</p>
+
 <div class="agent-actions">
   <%= link_to 'Edit', edit_agent_path(@agent) %> |
   <%= link_to 'Archive', agent_path(@agent), 
