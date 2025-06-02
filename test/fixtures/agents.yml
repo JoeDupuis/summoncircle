@@ -15,3 +15,10 @@ two:
   start_arguments: ["echo", "{PROMPT}"]
   continue_arguments: ["echo", "CONTINUE: {PROMPT}"]
   user_id: 1001
+
+with_docker_host:
+  name: Test Agent with Docker Host
+  docker_image: example/image:latest
+  workplace_path: "/workspace"
+  docker_host: "tcp://192.168.1.100:2375"
+  start_arguments: [ "echo", "{PROMPT}" ]

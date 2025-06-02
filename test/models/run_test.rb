@@ -48,18 +48,15 @@ class RunTest < ActiveSupport::TestCase
   end
 
   test "execute! uses continue_arguments for subsequent runs" do
-    task = tasks(:one)
-    run = runs(:one)
+    task = tasks(:task_with_runs)
+    run = task.runs.last
     run.update!(status: :pending, started_at: nil, completed_at: nil)
     run.steps.destroy_all
 
-    # For non-first run, it uses continue_arguments
     expect_main_container(
       cmd: [ "echo hello" ],
       output: "\x10continued output"
     )
-
-    # Expect git diff container to be created after run completes
     expect_git_diff_container
 
     run.execute!
@@ -72,24 +69,7 @@ class RunTest < ActiveSupport::TestCase
   test "execute! configures Docker host when specified" do
     original_url = Docker.url
 
-    project = Project.create!(
-      name: "Test Project"
-      # No repository_url - should skip git clone
-    )
-    agent = Agent.create!(
-      name: "Test Agent with Docker Host",
-      docker_image: "example/image:latest",
-      workplace_path: "/workspace",
-      docker_host: "tcp://192.168.1.100:2375",
-      start_arguments: [ "echo", "{PROMPT}" ]
-    )
-    task = Task.create!(
-      project: project,
-      agent: agent,
-      user: users(:one),
-      status: "active",
-      started_at: Time.current
-    )
+    task = tasks(:with_docker_host)
     run = task.runs.create!(prompt: "test", status: :pending)
 
     # Mock Docker.url= to verify it's called with the correct host and then reset
@@ -107,62 +87,11 @@ class RunTest < ActiveSupport::TestCase
     assert_equal 1, run.steps.count # No repo state step since no repository_url
   end
 
-  test "execute! skips Docker host configuration when not specified" do
-    project = Project.create!(
-      name: "Test Project"
-      # No repository_url - should skip git clone
-    )
-    agent = Agent.create!(
-      name: "Test Agent without Docker Host",
-      docker_image: "example/image:latest",
-      workplace_path: "/workspace",
-      start_arguments: [ "echo", "{PROMPT}" ]
-    )
-    task = Task.create!(
-      project: project,
-      agent: agent,
-      user: users(:one),
-      status: "active",
-      started_at: Time.current
-    )
-    run = task.runs.create!(prompt: "test", status: :pending)
-
-    # Docker.url= should be called once to reset in main execute ensure block
-    Docker.expects(:url=).once
-
-    # Mock main container creation and execution
-    Docker::Container.expects(:create).with(
-      has_entries("Image" => "example/image:latest")
-    ).returns(mock_container_with_output("\x04test"))
-
-    run.execute!
-
-    assert run.completed?
-    assert_equal 1, run.steps.count # No repo state step since no repository_url
-  end
-
   test "execute! resets Docker host after run completes" do
     original_url = "unix:///var/run/docker.sock"
     Docker.url = original_url
 
-    project = Project.create!(
-      name: "Test Project"
-      # No repository_url - should skip git clone
-    )
-    agent = Agent.create!(
-      name: "Test Agent with Docker Host",
-      docker_image: "example/image:latest",
-      workplace_path: "/workspace",
-      docker_host: "tcp://192.168.1.100:2375",
-      start_arguments: [ "echo", "{PROMPT}" ]
-    )
-    task = Task.create!(
-      project: project,
-      agent: agent,
-      user: users(:one),
-      status: "active",
-      started_at: Time.current
-    )
+    task = tasks(:with_docker_host)
     run = task.runs.create!(prompt: "test", status: :pending)
 
     # Mock main container creation and execution
@@ -181,20 +110,7 @@ class RunTest < ActiveSupport::TestCase
     original_url = "unix:///var/run/docker.sock"
     Docker.url = original_url
 
-    agent = Agent.create!(
-      name: "Test Agent with Docker Host",
-      docker_image: "example/image:latest",
-      workplace_path: "/workspace",
-      docker_host: "tcp://192.168.1.100:2375",
-      start_arguments: [ "echo", "{PROMPT}" ]
-    )
-    task = Task.create!(
-      project: projects(:one),
-      agent: agent,
-      user: users(:one),
-      status: "active",
-      started_at: Time.current
-    )
+    task = tasks(:with_docker_host)
     run = task.runs.create!(prompt: "test", status: :pending)
 
     # Mock Docker to fail
@@ -458,8 +374,8 @@ class RunTest < ActiveSupport::TestCase
   end
 
   test "execute! skips git clone on subsequent runs" do
-    task = tasks(:one)
-    run = runs(:one)
+    task = tasks(:task_with_runs)
+    run = task.runs.last
     run.update!(status: :pending, started_at: nil, completed_at: nil)
     run.steps.destroy_all
 

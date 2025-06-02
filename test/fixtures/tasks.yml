@@ -16,9 +16,23 @@ two:
   started_at: 2025-05-24 19:14:19
   archived_at: 2025-05-24 19:14:19
 
+task_with_runs: # Has existing runs - see runs.yml for run fixtures (existing_run, another_run, pending_run)
+  project: one
+  agent: one
+  user: one
+  status: active
+  started_at: 2025-05-24 19:14:19
+
 without_runs: # No runs - used for testing first run behavior
   project: one
   agent: one
+  user: one
+  status: active
+  started_at: 2025-05-24 19:14:19
+
+with_docker_host:
+  project: without_repo
+  agent: with_docker_host
   user: one
   status: active
   started_at: 2025-05-24 19:14:19

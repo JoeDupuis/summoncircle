@@ -11,3 +11,7 @@ two:
   description: MyText
   repository_url: http://example.com/two.git
   setup_script: MyText
+
+without_repo:
+  name: Test Project
+  # No repository_url - should skip git clone
