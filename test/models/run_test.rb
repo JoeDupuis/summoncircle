@@ -14,26 +14,45 @@ class RunTest < ActiveSupport::TestCase
     assert_not second_run.first_run?
   end
 
-  test "project_env_strings returns project secrets as environment variables" do
-    run = runs(:one)
-    project = run.task.project
-
+  test "execute! includes project secrets in container environment variables" do
+    task = tasks(:without_runs)
+    project = task.project
     project.secrets.create!(key: "API_KEY", value: "secret_123")
     project.secrets.create!(key: "DB_PASSWORD", value: "db_pass_456")
+    
+    run = task.runs.create!(prompt: "test command", status: :pending)
 
-    env_strings = run.send(:project_env_strings)
+    expect_git_clone_container
+    expect_main_container(
+      cmd: [ "echo", "STARTING: test command" ],
+      output: "\x0bhello world",
+      env: [ "API_KEY=secret_123", "DB_PASSWORD=db_pass_456" ]
+    )
+    expect_git_diff_container
 
-    assert_includes env_strings, "API_KEY=secret_123"
-    assert_includes env_strings, "DB_PASSWORD=db_pass_456"
-    assert_equal 2, env_strings.length
+    run.execute!
+
+    assert run.completed?
   end
 
-  test "project_env_strings returns empty array when no secrets" do
-    run = runs(:one)
+  test "execute! combines project secrets with agent environment variables" do
+    task = tasks(:with_env_vars)
+    project = task.project
+    project.secrets.create!(key: "API_KEY", value: "secret_123")
+    
+    run = task.runs.create!(prompt: "test command", status: :pending)
 
-    env_strings = run.send(:project_env_strings)
+    expect_git_clone_container
+    expect_main_container(
+      cmd: [ "echo", "test command" ],
+      output: "\x0bhello world",
+      env: [ "NODE_ENV=development", "DEBUG=true", "API_KEY=secret_123" ]
+    )
+    expect_git_diff_container
 
-    assert_equal [], env_strings
+    run.execute!
+
+    assert run.completed?
   end
 
   test "execute! handles errors gracefully" do
