@@ -9,8 +9,15 @@
   transition: opacity 0.2s;
 }
 
+.action-button:link,
+.action-button:visited {
+  color: white;
+  text-decoration: none;
+}
+
 .action-button:hover {
   opacity: 0.9;
+  color: white;
 }
 
 .action-button.-primary {
