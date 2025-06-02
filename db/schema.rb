@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_02_025218) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_02_034140) do
   create_table "agents", force: :cascade do |t|
     t.string "name"
     t.string "docker_image"
@@ -26,6 +26,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_02_025218) do
     t.integer "user_id", default: 1000, null: false
     t.string "instructions_mount_path"
     t.string "ssh_mount_path"
+    t.string "home_path"
     t.index ["discarded_at"], name: "index_agents_on_discarded_at"
   end
 
@@ -60,6 +61,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_02_025218) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["task_id"], name: "index_runs_on_task_id"
+  end
+
+  create_table "secrets", force: :cascade do |t|
+    t.integer "project_id", null: false
+    t.string "key", null: false
+    t.text "value"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id", "key"], name: "index_secrets_on_project_id_and_key", unique: true
+    t.index ["project_id"], name: "index_secrets_on_project_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -107,6 +118,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_02_025218) do
     t.text "github_token"
     t.text "instructions"
     t.text "ssh_key"
+    t.text "git_config"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
@@ -131,6 +143,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_02_025218) do
 
   add_foreign_key "repo_states", "steps"
   add_foreign_key "runs", "tasks"
+  add_foreign_key "secrets", "projects"
   add_foreign_key "sessions", "users"
   add_foreign_key "steps", "runs"
   add_foreign_key "tasks", "agents"

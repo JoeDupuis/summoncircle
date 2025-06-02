@@ -22,6 +22,17 @@
   </div>
 
   <div>
+    <%= form.label :git_config, "Git Configuration" %><br>
+    <%= form.text_area :git_config, rows: 10, placeholder: "Enter git configuration that will be mounted as ~/.gitconfig in agent containers..." %>
+    <small class="form-help">This configuration will be mounted as ~/.gitconfig in agent containers. Example:
+[user]
+    name = Your Name
+    email = your.email@example.com
+[core]
+    editor = nano</small>
+  </div>
+
+  <div>
     <%= form.submit "Update Settings" %>
   </div>
 <% end %>

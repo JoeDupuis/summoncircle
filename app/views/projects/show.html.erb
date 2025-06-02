@@ -23,6 +23,12 @@
 <h2>Setup Script</h2>
 <pre><code><%= @project.setup_script %></code></pre>
 
+<% if @project.secrets.any? %>
+<h2>Project Secrets</h2>
+<p>Configured secret keys: <strong><%= @project.secrets.pluck(:key).join(', ') %></strong></p>
+<p><small>Values are encrypted and hidden for security.</small></p>
+<% end %>
+
 <div class="project-actions">
   <%= link_to 'Edit', edit_project_path(@project), class: 'button' %> |
   <%= link_to 'Archive', project_path(@project), 

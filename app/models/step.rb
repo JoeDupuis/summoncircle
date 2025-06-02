@@ -25,9 +25,9 @@ class Step < ApplicationRecord
 
     filtered_message = message.dup
 
-    token = run&.task&.user&.github_token
-    if token.present?
-      filtered_message = filtered_message.gsub(token, "[FILTERED]")
+    github_token = run&.task&.user&.github_token
+    if github_token.present?
+      filtered_message = filtered_message.gsub(github_token, "[FILTERED]")
     end
 
     ssh_key = run&.task&.user&.ssh_key
@@ -36,6 +36,13 @@ class Step < ApplicationRecord
       ssh_key_lines.each do |line|
         filtered_message = filtered_message.gsub(line, "[FILTERED]")
       end
+    end
+
+    project_secret_values = run&.task&.project&.secret_values || []
+    project_secret_values.each do |secret_value|
+      next unless secret_value.present?
+
+      filtered_message = filtered_message.gsub(secret_value, "[FILTERED]")
     end
 
     filtered_message

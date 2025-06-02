@@ -77,6 +77,30 @@
   <%= link_to 'Configure Instructions', user_settings_path, class: 'button' %>
 </p>
 
+<h2>Git Configuration</h2>
+<% if Current.user.git_config.present? && @agent.home_path.present? %>
+  <p>
+    <strong>Mount Path:</strong> <code><%= @agent.home_path %>/.gitconfig</code><br>
+    <strong>Status:</strong> <span class="status-indicator -success">Will be mounted</span>
+  </p>
+<% elsif Current.user.git_config.present? %>
+  <p>
+    <strong>Status:</strong> <span class="status-indicator -warning">Git config set but no home path configured for this agent</span>
+  </p>
+<% elsif @agent.home_path.present? %>
+  <p>
+    <strong>Home Path:</strong> <code><%= @agent.home_path %></code><br>
+    <strong>Status:</strong> <span class="status-indicator -warning">Home path set but no git config configured</span>
+  </p>
+<% else %>
+  <p>
+    <strong>Status:</strong> <span class="status-indicator -muted">No git config or home path configured</span>
+  </p>
+<% end %>
+<p>
+  <%= link_to 'Configure Git', user_settings_path, class: 'button' %>
+</p>
+
 <div class="agent-actions">
   <%= link_to 'Edit', edit_agent_path(@agent) %> |
   <%= link_to 'Archive', agent_path(@agent), 

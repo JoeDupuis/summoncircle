@@ -19,6 +19,10 @@ class UserSettingsController < ApplicationController
       user_update_params.delete(:ssh_key)
     end
 
+    if user_update_params[:git_config].blank?
+      user_update_params.delete(:git_config)
+    end
+
     if @user.update(user_update_params)
       redirect_to user_settings_path, notice: "Settings updated successfully."
     else
@@ -29,6 +33,6 @@ class UserSettingsController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:github_token, :ssh_key, :instructions)
+    params.require(:user).permit(:github_token, :ssh_key, :instructions, :git_config)
   end
 end

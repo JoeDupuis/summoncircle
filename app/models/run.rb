@@ -48,6 +48,7 @@ class Run < ApplicationRecord
       container&.delete(force: true) if defined?(container)
       task.user.cleanup_instructions_file
       task.user.cleanup_ssh_key_file
+      task.user.cleanup_git_config_file
     end
   end
 
@@ -55,6 +56,22 @@ class Run < ApplicationRecord
 
   def broadcast_update
     broadcast_replace_later_to(task, target: self, partial: "tasks/run", locals: { run: self })
+  end
+
+  def build_git_binds(base_binds)
+    binds = base_binds.dup
+    
+    ssh_key_bind = task.user.ssh_key_bind_string(task.agent.ssh_mount_path)
+    if ssh_key_bind
+      binds << ssh_key_bind
+    end
+    
+    git_config_bind = task.user.git_config_bind_string(task.agent)
+    if git_config_bind
+      binds << git_config_bind
+    end
+    
+    binds
   end
 
   def configure_docker_host
@@ -81,10 +98,17 @@ class Run < ApplicationRecord
       binds << ssh_key_bind
     end
 
+    git_config_bind = task.user.git_config_bind_string(agent)
+    if git_config_bind
+      binds << git_config_bind
+    end
+
+    env_vars = agent.env_strings + project_env_strings
+
     Docker::Container.create(
       "Image" => agent.docker_image,
       "Cmd" => command,
-      "Env" => agent.env_strings,
+      "Env" => env_vars,
       "WorkingDir" => task.agent.workplace_path,
       "HostConfig" => {
         "Binds" => binds
@@ -108,12 +132,6 @@ class Run < ApplicationRecord
     clone_target = repo_path.presence&.sub(/^\//, "") || "."
     repository_url = project.repository_url_with_token(task.user)
 
-    clone_binds = [ task.workplace_mount.bind_string ]
-    ssh_key_bind = task.user.ssh_key_bind_string(task.agent.ssh_mount_path)
-    if ssh_key_bind
-      clone_binds << ssh_key_bind
-    end
-
     git_container = Docker::Container.create(
       "Image" => task.agent.docker_image,
       "Entrypoint" => [ "sh" ],
@@ -121,7 +139,7 @@ class Run < ApplicationRecord
       "WorkingDir" => working_dir,
       "User" => task.agent.user_id.to_s,
       "HostConfig" => {
-        "Binds" => clone_binds
+        "Binds" => build_git_binds([ task.workplace_mount.bind_string ])
       }
     )
     git_container.start
@@ -152,12 +170,6 @@ class Run < ApplicationRecord
 
     git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
 
-    capture_binds = [ task.workplace_mount.bind_string ]
-    ssh_key_bind = task.user.ssh_key_bind_string(task.agent.ssh_mount_path)
-    if ssh_key_bind
-      capture_binds << ssh_key_bind
-    end
-
     git_container = Docker::Container.create(
       "Image" => task.agent.docker_image,
       "Entrypoint" => [ "sh" ],
@@ -165,7 +177,7 @@ class Run < ApplicationRecord
       "WorkingDir" => git_working_dir,
       "User" => task.agent.user_id.to_s,
       "HostConfig" => {
-        "Binds" => capture_binds
+        "Binds" => build_git_binds([ task.workplace_mount.bind_string ])
       }
     )
 
@@ -187,5 +199,9 @@ class Run < ApplicationRecord
     Rails.logger.error "Failed to capture repository state: #{e.message}"
   ensure
     git_container&.delete(force: true) if defined?(git_container)
+  end
+
+  def project_env_strings
+    task.project.secrets.map { |secret| "#{secret.key}=#{secret.value}" }
   end
 end

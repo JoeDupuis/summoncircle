@@ -58,4 +58,28 @@ class User < ApplicationRecord
 
     "#{ssh_key_file_path}:#{mount_path}:ro"
   end
+
+  def git_config_file_path
+    return nil unless git_config.present?
+
+    @git_config_file ||= begin
+      file = Tempfile.new([ "git_config_#{id}", ".gitconfig" ])
+      file.write(git_config)
+      file.close
+      file.path
+    end
+  end
+
+  def cleanup_git_config_file
+    return unless @git_config_file
+
+    File.unlink(@git_config_file) if File.exist?(@git_config_file)
+    @git_config_file = nil
+  end
+
+  def git_config_bind_string(agent)
+    return nil unless git_config_file_path && agent&.home_path.present?
+
+    "#{git_config_file_path}:#{agent.home_path}/.gitconfig:ro"
+  end
 end
