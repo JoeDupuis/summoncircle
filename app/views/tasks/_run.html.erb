@@ -10,7 +10,7 @@
   </p>
   <p class="prompt"><strong>Prompt:</strong> <%= run.prompt %></p>
   <% if run.steps.any? %>
-    <% repo_state = run.steps.includes(:repo_states).find { |s| s.repo_states.any? }&.repo_states&.last %>
+    <% repo_state = run.latest_repo_state %>
     <div data-controller="tabs" class="tabs-container">
       <div class="nav">
         <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="steps" class="tab -active">Steps</button>
@@ -27,14 +27,7 @@
         <% if repo_state.present? %>
           <div data-tabs-target="panel" data-panel-id="diff" class="panel">
             <div class="output">
-              <div data-controller="diff" data-diff-diff-text-value="<%= repo_state.uncommitted_diff.gsub('"', '&quot;') %>">
-                <div data-diff-target="output">
-                  <template shadowrootmode="open">
-                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/diff2html/bundles/css/diff2html.min.css">
-                    <div data-diff-target="shadowContent"></div>
-                  </template>
-                </div>
-              </div>
+              <%= render "runs/diff_panel", repo_state: repo_state %>
             </div>
           </div>
         <% end %>

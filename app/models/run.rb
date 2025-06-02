@@ -11,6 +11,10 @@ class Run < ApplicationRecord
     siblings.where.not(id: id).none?
   end
 
+  def latest_repo_state
+    steps.joins(:repo_states).last&.repo_states&.last
+  end
+
   def execute!
     running!
     update!(started_at: Time.current)

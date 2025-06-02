@@ -1,0 +1,8 @@
+<div data-controller="diff" data-diff-diff-text-value="<%= repo_state.uncommitted_diff.gsub('"', '&quot;') %>">
+  <div data-diff-target="output">
+    <template shadowrootmode="open">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/diff2html/bundles/css/diff2html.min.css">
+      <div data-diff-target="shadowContent"></div>
+    </template>
+  </div>
+</div>
