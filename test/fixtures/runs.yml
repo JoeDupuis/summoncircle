@@ -13,3 +13,32 @@ two:
   status: 2 # completed
   started_at: 2025-05-24 19:13:03
   completed_at: 2025-05-24 19:13:03
+
+pending:
+  task: one
+  prompt: echo pending
+  status: 0 # pending
+  started_at: null
+  completed_at: null
+
+# Runs for task_with_runs fixture
+existing_run:
+  task: task_with_runs
+  prompt: echo hello
+  status: 2 # completed
+  started_at: 2025-05-24 19:13:02
+  completed_at: 2025-05-24 19:13:02
+
+another_run:
+  task: task_with_runs
+  prompt: echo world
+  status: 2 # completed
+  started_at: 2025-05-24 19:13:03
+  completed_at: 2025-05-24 19:13:03
+
+pending_run:
+  task: task_with_runs
+  prompt: echo pending
+  status: 0 # pending
+  started_at: null
+  completed_at: null
