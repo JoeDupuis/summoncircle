@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Diff2HTML</title>
+  <link rel="stylesheet" href="/assets/diff2html.min.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "@hotwired/stimulus": "/assets/stimulus.min.js",
+        "diff2html": "/assets/diff2html.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <h1>Test Diff Display</h1>
+  
+  <div data-controller="diff" data-diff-diff-text-value="diff --git a/test.txt b/test.txt
+new file mode 100644
+index 0000000..ce01362
+--- /dev/null
++++ b/test.txt
+@@ -0,0 +1 @@
++hello world">
+    <div data-diff-target="output"></div>
+  </div>
+
+  <script type="module">
+    import { Application } from "@hotwired/stimulus"
+    import { html } from "diff2html"
+    
+    class DiffController extends EventTarget {
+      static targets = ["output"]
+      static values = {
+        diffText: String
+      }
+      
+      constructor(element) {
+        super()
+        this.element = element
+        this.outputTarget = element.querySelector('[data-diff-target="output"]')
+        this.diffTextValue = element.getAttribute('data-diff-diff-text-value')
+        this.render()
+      }
+      
+      render() {
+        console.log("Rendering diff:", this.diffTextValue?.substring(0, 100))
+        try {
+          const diffHtml = html(this.diffTextValue, {
+            drawFileList: false,
+            fileListToggle: false,
+            fileListStartVisible: false,
+            fileContentToggle: false,
+            matching: 'lines',
+            outputFormat: 'line-by-line',
+            synchronisedScroll: true,
+            renderNothingWhenEmpty: false
+          })
+          
+          console.log("Generated HTML:", diffHtml?.substring(0, 100))
+          this.outputTarget.innerHTML = diffHtml
+        } catch (error) {
+          console.error("Diff rendering error:", error)
+          this.outputTarget.innerHTML = `<pre style="color: red;">Error rendering diff: ${error.message}</pre>`
+        }
+      }
+    }
+    
+    // Initialize diff controller manually
+    document.addEventListener('DOMContentLoaded', () => {
+      const diffElements = document.querySelectorAll('[data-controller="diff"]')
+      diffElements.forEach(element => new DiffController(element))
+    })
+  </script>
+</body>
+</html>

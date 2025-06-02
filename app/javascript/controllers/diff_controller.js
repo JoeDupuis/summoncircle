@@ -1,5 +1,4 @@
 import { Controller } from "@hotwired/stimulus"
-import { html } from "diff2html"
 
 export default class extends Controller {
   static targets = ["output"]
@@ -20,7 +19,27 @@ export default class extends Controller {
   }
 
   render() {
-    const diffHtml = html(this.diffTextValue, {
+    if (typeof Diff2HtmlUI === 'undefined') {
+      console.error('Diff2HtmlUI is not available')
+      return
+    }
+
+    // Get the shadow root from the output target
+    const shadowRoot = this.outputTarget.shadowRoot
+    if (!shadowRoot) {
+      console.error('Shadow root not found')
+      return
+    }
+
+    // Find the content container in the shadow DOM
+    const contentContainer = shadowRoot.querySelector('[data-diff-target="shadowContent"]')
+    if (!contentContainer) {
+      console.error('Shadow content container not found')
+      return
+    }
+
+    // Create Diff2HtmlUI instance targeting the shadow DOM container
+    const diff2htmlUi = new Diff2HtmlUI(contentContainer, this.diffTextValue, {
       drawFileList: false,
       fileListToggle: false,
       fileListStartVisible: false,
@@ -31,6 +50,6 @@ export default class extends Controller {
       renderNothingWhenEmpty: false
     })
     
-    this.outputTarget.innerHTML = diffHtml
+    diff2htmlUi.draw()
   }
 }

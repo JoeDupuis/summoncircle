@@ -4,8 +4,13 @@
     <% parts = system.content.split("\n\nUncommitted diff:\n", 2) %>
     <p style="margin: 5px 0;"><%= parts[0] %></p>
     <% if parts[1].present? %>
-      <div data-controller="diff" data-diff-diff-text-value="<%= html_escape(parts[1]) %>">
-        <div data-diff-target="output"></div>
+      <div data-controller="diff" data-diff-diff-text-value="<%= parts[1].gsub('"', '&quot;') %>">
+        <div data-diff-target="output">
+          <template shadowrootmode="open">
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/diff2html/bundles/css/diff2html.min.css">
+            <div data-diff-target="shadowContent"></div>
+          </template>
+        </div>
       </div>
     <% end %>
   <% else %>
