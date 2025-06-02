@@ -69,6 +69,12 @@
   </div>
 
   <div>
+    <%= form.label :home_path, "Home Directory Path" %><br>
+    <%= form.text_field :home_path, placeholder: "/home" %>
+    <small class="form-help">Path to user's home directory inside the container where .gitconfig will be mounted. Common values: /home, /root</small>
+  </div>
+
+  <div>
     <%= form.submit %>
   </div>
 <% end %>
