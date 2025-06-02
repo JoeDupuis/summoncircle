@@ -1,0 +1,11 @@
+.step-init {
+  margin: 5px 0;
+  padding: 5px;
+  background: #e8f4fd;
+  border-left: 3px solid #007acc;
+  font-size: 0.9em;
+}
+
+.step-init > .label {
+  display: block;
+}

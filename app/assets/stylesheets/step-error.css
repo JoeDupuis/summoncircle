@@ -1,0 +1,7 @@
+.step-error {
+  margin: 5px 0;
+  color: #d73a49;
+  background-color: #ffeef0;
+  border-left: 4px solid #d73a49;
+  padding-left: 10px;
+}

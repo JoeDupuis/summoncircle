@@ -8,18 +8,18 @@ export default class extends Controller {
     const targetPanel = clickedTab.dataset.tabPanel
 
     this.tabTargets.forEach(tab => {
-      tab.classList.remove("active")
+      tab.classList.remove("-active")
     })
 
     this.panelTargets.forEach(panel => {
-      panel.classList.remove("active")
+      panel.classList.remove("-active")
     })
 
-    clickedTab.classList.add("active")
+    clickedTab.classList.add("-active")
 
     const activePanel = this.panelTargets.find(panel => panel.dataset.panelId === targetPanel)
     if (activePanel) {
-      activePanel.classList.add("active")
+      activePanel.classList.add("-active")
     }
   }
 }

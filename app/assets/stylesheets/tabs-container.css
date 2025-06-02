@@ -2,7 +2,7 @@
   margin-top: 15px;
 }
 
-.tabs-container > .tabs-nav {
+.tabs-container > .nav {
   display: flex;
   gap: 0;
   margin-bottom: 0;
@@ -10,7 +10,7 @@
   border-bottom: 1px solid #ccc;
 }
 
-.tabs-container > .tabs-nav > .tab {
+.tabs-container > .nav > .tab {
   padding: 10px 20px;
   background: #d8d8d8;
   border: 1px solid #ccc;
@@ -25,12 +25,12 @@
   margin-bottom: -1px;
 }
 
-.tabs-container > .tabs-nav > .tab:hover {
+.tabs-container > .nav > .tab:hover {
   background: #e0e0e0;
   color: #333;
 }
 
-.tabs-container > .tabs-nav > .tab.active {
+.tabs-container > .nav > .tab.-active {
   background: #f0f0f0;
   color: #000;
   font-weight: 600;
@@ -39,7 +39,7 @@
   padding-bottom: 11px;
 }
 
-.tabs-container > .tabs-content {
+.tabs-container > .content {
   border: 1px solid #ccc;
   background: #f0f0f0;
   padding: 0;
@@ -47,15 +47,15 @@
   border-top: none;
 }
 
-.tabs-container > .tabs-content > .tab-panel {
+.tabs-container > .content > .panel {
   display: none;
 }
 
-.tabs-container > .tabs-content > .tab-panel.active {
+.tabs-container > .content > .panel.-active {
   display: block;
 }
 
-.tabs-container > .tabs-content > .tab-panel > .output-content {
+.tabs-container > .content > .panel > .output {
   background: #f0f0f0;
   padding: 15px;
   overflow: auto;
