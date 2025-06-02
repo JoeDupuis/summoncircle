@@ -1,0 +1,29 @@
+.action-button {
+  padding: 8px 16px;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  display: inline-block;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.action-button:link,
+.action-button:visited {
+  color: white;
+  text-decoration: none;
+}
+
+.action-button:hover {
+  opacity: 0.9;
+  color: white;
+}
+
+.action-button.-primary {
+  background: #007bff;
+}
+
+.action-button.-success {
+  background: #28a745;
+}

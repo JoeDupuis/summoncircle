@@ -1,0 +1,15 @@
+.tool-result {
+  margin: 5px 0;
+  padding: 5px;
+  background: #f8f9fa;
+  border-left: 3px solid #6c757d;
+}
+
+.tool-result > .label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.tool-result > .content {
+  margin: 5px 0 0 0;
+}

@@ -1,0 +1,21 @@
+.run-form > .field {
+  margin-bottom: 10px;
+}
+
+.run-form > .field > .textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.run-form > .field > .errors {
+  color: red;
+  margin-top: 5px;
+}
+
+.run-form > .field > .errors > .error {
+  margin: 2px 0;
+}
+
+.run-form > .actions {
+  margin-top: 10px;
+}

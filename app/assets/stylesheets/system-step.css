@@ -1,0 +1,21 @@
+.system-step {
+  margin: 5px 0;
+  padding: 5px;
+  background: #f0f0f0;
+  border-left: 3px solid #999;
+  font-size: 0.9em;
+}
+
+.system-step > .label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.system-step > .message {
+  margin: 5px 0;
+}
+
+.system-step > .content {
+  margin: 5px 0 0 0;
+  white-space: pre-wrap;
+}

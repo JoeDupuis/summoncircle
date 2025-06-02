@@ -1,0 +1,24 @@
+.run-item {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+.run-item > .status {
+  margin-bottom: 5px;
+}
+
+.run-item > .prompt {
+  margin-bottom: 10px;
+}
+
+.run-item > .title {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.run-item > .output {
+  background: #f0f0f0;
+  padding: 10px;
+  overflow: auto;
+}

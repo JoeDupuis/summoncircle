@@ -1,19 +1,8 @@
-<div style="margin: 5px 0; padding: 5px; background: #f0f0f0; border-left: 3px solid #999; font-size: 0.9em;">
-  <strong>🔧 System</strong>
-  <% if system.content&.include?("Uncommitted diff:") %>
-    <% parts = system.content.split("\n\nUncommitted diff:\n", 2) %>
-    <p style="margin: 5px 0;"><%= parts[0] %></p>
-    <% if parts[1].present? %>
-      <div data-controller="diff" data-diff-diff-text-value="<%= parts[1].gsub('"', '&quot;') %>">
-        <div data-diff-target="output">
-          <template shadowrootmode="open">
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/diff2html/bundles/css/diff2html.min.css">
-            <div data-diff-target="shadowContent"></div>
-          </template>
-        </div>
-      </div>
-    <% end %>
+<div class="system-step">
+  <strong class="label">🔧 System</strong>
+  <% if system.content&.include?("Repository state captured") && system.content&.include?("Uncommitted diff:") %>
+    <p class="message">Repository state captured</p>
   <% else %>
-    <pre style="margin: 5px 0 0 0;"><%= system.content %></pre>
+    <pre class="content"><%= system.content %></pre>
   <% end %>
 </div>
