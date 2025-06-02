@@ -10,29 +10,7 @@
   </p>
   <p class="prompt"><strong>Prompt:</strong> <%= run.prompt %></p>
   <% if run.steps.any? %>
-    <% repo_state = run.latest_repo_state %>
-    <div data-controller="tabs" class="tabs-container">
-      <div class="nav">
-        <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="steps" class="tab -active">Steps</button>
-        <% if repo_state.present? %>
-          <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="diff" class="tab">Diff</button>
-        <% end %>
-      </div>
-      <div class="content">
-        <div data-tabs-target="panel" data-panel-id="steps" class="panel -active">
-          <div class="output">
-            <%= render run.steps %>
-          </div>
-        </div>
-        <% if repo_state.present? %>
-          <div data-tabs-target="panel" data-panel-id="diff" class="panel">
-            <div class="output">
-              <%= render "runs/diff_panel", repo_state: repo_state %>
-            </div>
-          </div>
-        <% end %>
-      </div>
-    </div>
+    <%= render "runs/tabs", run: run %>
   <% elsif run.status == 'running' %>
     <p class="title">Output:</p>
     <div class="run-spinner">
