@@ -75,7 +75,7 @@ class RunTest < ActiveSupport::TestCase
     Docker.expects(:url=).with("tcp://192.168.1.100:2375").once
     Docker.expects(:url=).with(original_url).once
 
-    expect_main_container(cmd: ["echo", "test"], output: "\x04test")
+    expect_main_container(cmd: [ "echo", "test" ], output: "\x04test")
 
     run.execute!
 
@@ -148,21 +148,14 @@ class RunTest < ActiveSupport::TestCase
     run = task.runs.create!(prompt: "test", status: :pending)
 
     # Mock git container creation and execution
-    git_container = mock_git_container(log_output: "Cloning into '.'...")
-    Docker::Container.expects(:create).with(
-      has_entries(
-        "Image" => "example/image:latest",
-        "Entrypoint" => [ "sh" ],
-        "User" => "1000",
-        "Cmd" => [ "-c", "git clone https://github.com/test/repo.git ." ],
-        "WorkingDir" => "/workspace",
-        "HostConfig" => has_entries(
-          "Binds" => instance_of(Array)
-        )
-      )
-    ).returns(git_container)
+    expect_git_clone_container(
+      log_output: "Cloning into '.'...",
+      cmd: [ "-c", "git clone https://github.com/test/repo.git ." ],
+      working_dir: "/workspace",
+      binds: instance_of(Array)
+    )
 
-    expect_main_container(cmd: ["echo", "STARTING: test"], output: "\x04test")
+    expect_main_container(cmd: [ "echo", "STARTING: test" ], output: "\x04test")
     expect_git_diff_container
 
     run.execute!
@@ -176,21 +169,14 @@ class RunTest < ActiveSupport::TestCase
     run = task.runs.create!(prompt: "test", status: :pending)
 
     # Mock git container creation and execution
-    git_container = mock_git_container(log_output: "Cloning into '/workspace/myapp'...")
-    Docker::Container.expects(:create).with(
-      has_entries(
-        "Image" => "example/image:latest",
-        "Entrypoint" => [ "sh" ],
-        "User" => "1000",
-        "Cmd" => [ "-c", "git clone https://github.com/test/repo.git myapp" ],
-        "WorkingDir" => "/workspace",
-        "HostConfig" => has_entries(
-          "Binds" => instance_of(Array)
-        )
-      )
-    ).returns(git_container)
+    expect_git_clone_container(
+      log_output: "Cloning into '/workspace/myapp'...",
+      cmd: [ "-c", "git clone https://github.com/test/repo.git myapp" ],
+      working_dir: "/workspace",
+      binds: instance_of(Array)
+    )
 
-    expect_main_container(cmd: ["echo", "STARTING: test"], output: "\x04test")
+    expect_main_container(cmd: [ "echo", "STARTING: test" ], output: "\x04test")
     expect_git_diff_container
 
     run.execute!
@@ -204,12 +190,10 @@ class RunTest < ActiveSupport::TestCase
     run = task.runs.create!(prompt: "test", status: :pending)
 
     # Mock git container creation and execution with failure
-    git_container = mock_git_container(log_output: "fatal: repository not found", status_code: 1)
-    Docker::Container.expects(:create).with(has_entries(
-      "Image" => "example/image:latest",
-      "Entrypoint" => [ "sh" ],
-      "User" => "1000"
-    )).returns(git_container)
+    expect_git_clone_container(
+      log_output: "fatal: repository not found",
+      status_code: 1
+    )
 
     # No chmod container expected since git clone fails
 
@@ -227,9 +211,7 @@ class RunTest < ActiveSupport::TestCase
     run.steps.destroy_all
 
     # Mock main container
-    Docker::Container.expects(:create).with(
-      has_entries("Image" => "example/image:latest") # Only the main container
-    ).returns(mock_container_with_output("\x04test"))
+    expect_main_container(cmd: [ "echo hello" ], output: "\x04test")
 
     # Expect git diff container to be created after run completes
     expect_git_diff_container
@@ -259,9 +241,7 @@ class RunTest < ActiveSupport::TestCase
     run = task.runs.create!(prompt: "test", status: :pending)
 
     # Ensure Docker::Container.create is only called once (for main container, not git)
-    Docker::Container.expects(:create).once.with(
-      has_entries("Image" => "example/image:latest") # Only the main container
-    ).returns(mock_container_with_output("\x04test"))
+    expect_main_container(cmd: [ "echo", "STARTING: test" ], output: "\x04test")
 
     run.execute!
 
@@ -289,15 +269,21 @@ class RunTest < ActiveSupport::TestCase
     git_container
   end
 
-  def expect_git_clone_container(image: "example/image:latest", user: "1000", log_output: "Cloning...", status_code: 0)
+  def expect_git_clone_container(image: "example/image:latest", user: "1000", log_output: "Cloning...", status_code: 0, cmd: nil, working_dir: nil, binds: nil)
     git_container = mock_git_container(log_output: log_output, status_code: status_code)
 
+    expectations = {
+      "Image" => image,
+      "Entrypoint" => [ "sh" ],
+      "User" => user
+    }
+
+    expectations["Cmd"] = cmd if cmd
+    expectations["WorkingDir"] = working_dir if working_dir
+    expectations["HostConfig"] = has_entries("Binds" => binds) if binds
+
     Docker::Container.expects(:create).with(
-      has_entries(
-        "Image" => image,
-        "Entrypoint" => [ "sh" ],
-        "User" => user
-      )
+      has_entries(expectations)
     ).returns(git_container)
   end
 
