@@ -22,3 +22,17 @@ with_docker_host:
   workplace_path: "/workspace"
   docker_host: "tcp://192.168.1.100:2375"
   start_arguments: [ "echo", "{PROMPT}" ]
+
+with_text_processor:
+  name: Text Agent
+  docker_image: example/image:latest
+  workplace_path: "/workspace"
+  log_processor: "Text"
+  start_arguments: [ "echo", "test" ]
+
+with_claude_json_processor:
+  name: JSON Agent
+  docker_image: example/image:latest
+  workplace_path: "/workspace"
+  log_processor: "ClaudeJson"
+  start_arguments: [ "echo", "test" ]

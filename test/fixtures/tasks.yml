@@ -36,3 +36,17 @@ with_docker_host:
   user: one
   status: active
   started_at: 2025-05-24 19:14:19
+
+with_text_processor:
+  project: one
+  agent: with_text_processor
+  user: one
+  status: active
+  started_at: 2025-05-24 19:14:19
+
+with_claude_json_processor:
+  project: one
+  agent: with_claude_json_processor
+  user: one
+  status: active
+  started_at: 2025-05-24 19:14:19
