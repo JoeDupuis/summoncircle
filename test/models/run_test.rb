@@ -5,14 +5,7 @@ class RunTest < ActiveSupport::TestCase
   DOCKER_LOG_HEADER = "\x01\x00\x00\x00\x00\x00\x00"
 
   test "should identify first run correctly" do
-    # Create a new task with no runs
-    task = Task.create!(
-      project: projects(:one),
-      agent: agents(:one),
-      user: users(:one),
-      status: "active",
-      started_at: Time.current
-    )
+    task = tasks(:without_runs)
 
     first_run = task.runs.create!(prompt: "first")
     assert first_run.first_run?
@@ -22,18 +15,10 @@ class RunTest < ActiveSupport::TestCase
   end
 
   test "execute! handles errors gracefully" do
-    run = runs(:one)
-    run.update!(status: :pending, started_at: nil, completed_at: nil)
-    run.steps.destroy_all
-
-    # Mock Docker::Container to raise an error
+    run = runs(:pending)
     Docker::Container.expects(:create).raises(Docker::Error::NotFoundError, "Image not found")
 
-    # This should not raise an error, but should set status to failed
-    assert_nothing_raised do
-      run.execute!
-    end
-
+    assert_nothing_raised { run.execute! }, "should set status to failed, but raised"
     assert run.failed?
     assert_not_nil run.started_at
     assert_not_nil run.completed_at

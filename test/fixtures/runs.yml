@@ -13,3 +13,10 @@ two:
   status: 2 # completed
   started_at: 2025-05-24 19:13:03
   completed_at: 2025-05-24 19:13:03
+
+pending:
+  task: one
+  prompt: echo pending
+  status: 0 # pending
+  started_at: null
+  completed_at: null
