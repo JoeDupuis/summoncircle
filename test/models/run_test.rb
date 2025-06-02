@@ -236,6 +236,7 @@ class RunTest < ActiveSupport::TestCase
     assert run.send(:should_clone_repository?)
   end
 
+
   test "execute! skips git clone when repository_url is blank" do
     task = tasks(:for_skip_git_clone)
     run = task.runs.create!(prompt: "test", status: :pending)

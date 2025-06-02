@@ -69,6 +69,12 @@
   </div>
 
   <div>
+    <%= form.label :ssh_mount_path, "SSH Key Mount Path" %><br>
+    <%= form.text_field :ssh_mount_path, placeholder: "/home/user/.ssh/id_rsa" %>
+    <small class="form-help">Path where user's SSH private key will be mounted (read-only). Leave blank to disable SSH key mounting.</small>
+  </div>
+
+  <div>
     <%= form.submit %>
   </div>
 <% end %>

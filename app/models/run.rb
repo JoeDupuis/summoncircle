@@ -47,6 +47,7 @@ class Run < ApplicationRecord
       save!
       container&.delete(force: true) if defined?(container)
       task.user.cleanup_instructions_file
+      task.user.cleanup_ssh_key_file
     end
   end
 
@@ -73,6 +74,11 @@ class Run < ApplicationRecord
     instructions_bind = task.user.instructions_bind_string(agent.instructions_mount_path)
     if instructions_bind
       binds << instructions_bind
+    end
+
+    ssh_key_bind = task.user.ssh_key_bind_string(agent.ssh_mount_path)
+    if ssh_key_bind
+      binds << ssh_key_bind
     end
 
     Docker::Container.create(
@@ -102,6 +108,12 @@ class Run < ApplicationRecord
     clone_target = repo_path.presence&.sub(/^\//, "") || "."
     repository_url = project.repository_url_with_token(task.user)
 
+    clone_binds = [ task.workplace_mount.bind_string ]
+    ssh_key_bind = task.user.ssh_key_bind_string(task.agent.ssh_mount_path)
+    if ssh_key_bind
+      clone_binds << ssh_key_bind
+    end
+
     git_container = Docker::Container.create(
       "Image" => task.agent.docker_image,
       "Entrypoint" => [ "sh" ],
@@ -109,7 +121,7 @@ class Run < ApplicationRecord
       "WorkingDir" => working_dir,
       "User" => task.agent.user_id.to_s,
       "HostConfig" => {
-        "Binds" => [ task.workplace_mount.bind_string ]
+        "Binds" => clone_binds
       }
     )
     git_container.start
@@ -140,6 +152,12 @@ class Run < ApplicationRecord
 
     git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
 
+    capture_binds = [ task.workplace_mount.bind_string ]
+    ssh_key_bind = task.user.ssh_key_bind_string(task.agent.ssh_mount_path)
+    if ssh_key_bind
+      capture_binds << ssh_key_bind
+    end
+
     git_container = Docker::Container.create(
       "Image" => task.agent.docker_image,
       "Entrypoint" => [ "sh" ],
@@ -147,7 +165,7 @@ class Run < ApplicationRecord
       "WorkingDir" => git_working_dir,
       "User" => task.agent.user_id.to_s,
       "HostConfig" => {
-        "Binds" => [ task.workplace_mount.bind_string ]
+        "Binds" => capture_binds
       }
     )
 

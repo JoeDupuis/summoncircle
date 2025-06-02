@@ -23,9 +23,21 @@ class Step < ApplicationRecord
   def filter_sensitive_info(message)
     return message unless message.present?
 
-    token = run&.task&.user&.github_token
-    return message unless token.present?
+    filtered_message = message.dup
 
-    message.gsub(token, "[FILTERED]")
+    token = run&.task&.user&.github_token
+    if token.present?
+      filtered_message = filtered_message.gsub(token, "[FILTERED]")
+    end
+
+    ssh_key = run&.task&.user&.ssh_key
+    if ssh_key.present?
+      ssh_key_lines = ssh_key.lines.map(&:strip).reject(&:empty?)
+      ssh_key_lines.each do |line|
+        filtered_message = filtered_message.gsub(line, "[FILTERED]")
+      end
+    end
+
+    filtered_message
   end
 end
