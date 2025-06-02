@@ -618,7 +618,7 @@ class RunTest < ActiveSupport::TestCase
     git_diff_container.expects(:delete).with(force: true)
 
     Docker::Container.expects(:create).with do |params|
-      params["Entrypoint"] == [ "sh" ] && params["Cmd"] == [ "-c", "git add -N . && git diff HEAD" ] && params["User"] == "1000"
+      params["Entrypoint"] == [ "sh" ] && params["Cmd"] == [ "-c", "git add -N . && git diff HEAD --unified=10" ] && params["User"] == "1000"
     end.returns(git_diff_container)
   end
 end

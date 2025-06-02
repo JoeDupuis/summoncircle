@@ -6,6 +6,14 @@
   font-size: 0.9em;
 }
 
+@media (prefers-color-scheme: dark) {
+  .step-init {
+    background: #0f2a3f;
+    border-left: 3px solid #4da6d9;
+    color: #e6e6e6;
+  }
+}
+
 .step-init > .label {
   display: block;
 }

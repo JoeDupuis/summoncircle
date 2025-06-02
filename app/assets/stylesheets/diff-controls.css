@@ -1,0 +1,38 @@
+.diff-controls {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background-color: var(--surface-secondary);
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+@media (prefers-color-scheme: dark) {
+  .diff-controls {
+    background-color: #2d2d2d;
+    border-color: #404040;
+  }
+}
+
+.diff-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: var(--text);
+}
+
+@media (prefers-color-scheme: dark) {
+  .diff-toggle {
+    color: #e6e6e6;
+  }
+}
+
+.diff-toggle input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.diff-toggle-label {
+  cursor: pointer;
+  user-select: none;
+}

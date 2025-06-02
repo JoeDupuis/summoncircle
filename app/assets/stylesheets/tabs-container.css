@@ -10,6 +10,12 @@
   border-bottom: 1px solid #ccc;
 }
 
+@media (prefers-color-scheme: dark) {
+  .tabs-container > .nav {
+    border-bottom: 1px solid #404040;
+  }
+}
+
 .tabs-container > .nav > .tab {
   padding: 10px 20px;
   background: #d8d8d8;
@@ -25,9 +31,24 @@
   margin-bottom: -1px;
 }
 
+@media (prefers-color-scheme: dark) {
+  .tabs-container > .nav > .tab {
+    background: #2d2d2d;
+    border: 1px solid #404040;
+    color: #b3b3b3;
+  }
+}
+
 .tabs-container > .nav > .tab:hover {
   background: #e0e0e0;
   color: #333;
+}
+
+@media (prefers-color-scheme: dark) {
+  .tabs-container > .nav > .tab:hover {
+    background: #404040;
+    color: #e6e6e6;
+  }
 }
 
 .tabs-container > .nav > .tab.-active {
@@ -39,12 +60,26 @@
   padding-bottom: 11px;
 }
 
+@media (prefers-color-scheme: dark) {
+  .tabs-container > .nav > .tab.-active {
+    background: #1a1a1a;
+    color: #e6e6e6;
+  }
+}
+
 .tabs-container > .content {
   border: 1px solid #ccc;
   background: #f0f0f0;
   padding: 0;
   position: relative;
   border-top: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .tabs-container > .content {
+    border: 1px solid #404040;
+    background: #1a1a1a;
+  }
 }
 
 .tabs-container > .content > .panel {
@@ -60,4 +95,10 @@
   padding: 15px;
   overflow: auto;
   min-height: 200px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .tabs-container > .content > .panel > .output {
+    background: #1a1a1a;
+  }
 }

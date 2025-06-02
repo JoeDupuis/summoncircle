@@ -5,6 +5,14 @@
   border-left: 3px solid #ffc107;
 }
 
+@media (prefers-color-scheme: dark) {
+  .tool-call {
+    background: #3d3411;
+    border-left: 3px solid #d4a017;
+    color: #e6e6e6;
+  }
+}
+
 .tool-call > .label {
   display: block;
   margin-bottom: 5px;

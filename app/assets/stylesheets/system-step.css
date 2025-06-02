@@ -6,6 +6,14 @@
   font-size: 0.9em;
 }
 
+@media (prefers-color-scheme: dark) {
+  .system-step {
+    background: #2d2d2d;
+    border-left: 3px solid #bbb;
+    color: #e6e6e6;
+  }
+}
+
 .system-step > .label {
   display: block;
   margin-bottom: 5px;

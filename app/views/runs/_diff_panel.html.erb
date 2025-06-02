@@ -1,4 +1,10 @@
 <div data-controller="diff" data-diff-diff-text-value="<%= repo_state.uncommitted_diff.gsub('"', '&quot;') %>">
+  <div class="diff-controls">
+    <label class="diff-toggle">
+      <input type="checkbox" data-action="change->diff#toggleView" data-diff-target="viewToggle" checked>
+      <span class="diff-toggle-label">Side by Side</span>
+    </label>
+  </div>
   <div data-diff-target="output">
     <template shadowrootmode="open">
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/diff2html/bundles/css/diff2html.min.css">
