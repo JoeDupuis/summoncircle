@@ -17,12 +17,12 @@ class RunTest < ActiveSupport::TestCase
   test "project_env_strings returns project secrets as environment variables" do
     run = runs(:one)
     project = run.task.project
-    
+
     project.secrets.create!(key: "API_KEY", value: "secret_123")
     project.secrets.create!(key: "DB_PASSWORD", value: "db_pass_456")
-    
+
     env_strings = run.send(:project_env_strings)
-    
+
     assert_includes env_strings, "API_KEY=secret_123"
     assert_includes env_strings, "DB_PASSWORD=db_pass_456"
     assert_equal 2, env_strings.length
@@ -30,9 +30,9 @@ class RunTest < ActiveSupport::TestCase
 
   test "project_env_strings returns empty array when no secrets" do
     run = runs(:one)
-    
+
     env_strings = run.send(:project_env_strings)
-    
+
     assert_equal [], env_strings
   end
 
