@@ -315,7 +315,7 @@ class RunTest < ActiveSupport::TestCase
     Docker::Container.expects(:create).with(
       has_entries(
         "Entrypoint" => [ "sh" ],
-        "Cmd" => [ "-c", "git add -N . && git diff HEAD" ],
+        "Cmd" => [ "-c", "git add -N . && git diff HEAD --unified=10" ],
         "User" => "1000"
       )
     ).returns(git_diff_container)

@@ -1,12 +1,13 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["output"]
+  static targets = ["output", "viewToggle"]
   static values = {
     diffText: String
   }
 
   connect() {
+    this.outputFormat = 'side-by-side'
     if (this.hasDiffTextValue && this.diffTextValue.trim()) {
       this.render()
     }
@@ -16,6 +17,11 @@ export default class extends Controller {
     if (this.diffTextValue.trim()) {
       this.render()
     }
+  }
+
+  toggleView() {
+    this.outputFormat = this.viewToggleTarget.checked ? 'side-by-side' : 'line-by-line'
+    this.render()
   }
 
   render() {
@@ -40,14 +46,17 @@ export default class extends Controller {
 
     // Create Diff2HtmlUI instance targeting the shadow DOM container
     const diff2htmlUi = new Diff2HtmlUI(contentContainer, this.diffTextValue, {
-      drawFileList: false,
-      fileListToggle: false,
+      drawFileList: true,
+      fileListToggle: true,
       fileListStartVisible: false,
-      fileContentToggle: false,
+      fileContentToggle: true,
       matching: 'lines',
-      outputFormat: 'line-by-line',
+      outputFormat: this.outputFormat,
       synchronisedScroll: true,
-      renderNothingWhenEmpty: false
+      renderNothingWhenEmpty: false,
+      highlight: true,
+      fileListCloseable: false,
+      colorScheme: 'auto'
     })
     
     diff2htmlUi.draw()

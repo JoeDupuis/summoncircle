@@ -143,7 +143,7 @@ class Run < ApplicationRecord
     git_container = Docker::Container.create(
       "Image" => task.agent.docker_image,
       "Entrypoint" => [ "sh" ],
-      "Cmd" => [ "-c", "git add -N . && git diff HEAD" ],
+      "Cmd" => [ "-c", "git add -N . && git diff HEAD --unified=10" ],
       "WorkingDir" => git_working_dir,
       "User" => task.agent.user_id.to_s,
       "HostConfig" => {

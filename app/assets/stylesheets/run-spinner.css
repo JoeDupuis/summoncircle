@@ -10,6 +10,13 @@
   color: #666;
 }
 
+@media (prefers-color-scheme: dark) {
+  .run-spinner {
+    background: #2d2d2d;
+    color: #e6e6e6;
+  }
+}
+
 .run-spinner > .spinner {
   width: 20px;
   height: 20px;
@@ -17,6 +24,13 @@
   border-top: 2px solid #3498db;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+
+@media (prefers-color-scheme: dark) {
+  .run-spinner > .spinner {
+    border: 2px solid #404040;
+    border-top: 2px solid #64b5f6;
+  }
 }
 
 @keyframes spin {

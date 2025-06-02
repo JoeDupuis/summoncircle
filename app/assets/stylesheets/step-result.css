@@ -5,9 +5,24 @@
   border-left: 3px solid #28a745;
 }
 
+@media (prefers-color-scheme: dark) {
+  .step-result {
+    background: #1e4d1e;
+    border-left: 3px solid #4caf50;
+    color: #e6e6e6;
+  }
+}
+
 .step-result.-error {
   background: #f8d7da;
   border-left-color: #dc3545;
+}
+
+@media (prefers-color-scheme: dark) {
+  .step-result.-error {
+    background: #4d1e1e;
+    border-left-color: #f44336;
+  }
 }
 
 .step-result > .label {
