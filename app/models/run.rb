@@ -47,6 +47,7 @@ class Run < ApplicationRecord
       save!
       container&.delete(force: true) if defined?(container)
       task.user.cleanup_instructions_file
+      task.user.cleanup_git_config_file
     end
   end
 
@@ -54,6 +55,15 @@ class Run < ApplicationRecord
 
   def broadcast_update
     broadcast_replace_later_to(task, target: self, partial: "tasks/run", locals: { run: self })
+  end
+
+  def build_git_binds(base_binds)
+    binds = base_binds.dup
+    git_config_bind = task.user.git_config_bind_string(task.agent)
+    if git_config_bind
+      binds << git_config_bind
+    end
+    binds
   end
 
   def configure_docker_host
@@ -73,6 +83,11 @@ class Run < ApplicationRecord
     instructions_bind = task.user.instructions_bind_string(agent.instructions_mount_path)
     if instructions_bind
       binds << instructions_bind
+    end
+
+    git_config_bind = task.user.git_config_bind_string(agent)
+    if git_config_bind
+      binds << git_config_bind
     end
 
     Docker::Container.create(
@@ -109,7 +124,7 @@ class Run < ApplicationRecord
       "WorkingDir" => working_dir,
       "User" => task.agent.user_id.to_s,
       "HostConfig" => {
-        "Binds" => [ task.workplace_mount.bind_string ]
+        "Binds" => build_git_binds([ task.workplace_mount.bind_string ])
       }
     )
     git_container.start
@@ -147,7 +162,7 @@ class Run < ApplicationRecord
       "WorkingDir" => git_working_dir,
       "User" => task.agent.user_id.to_s,
       "HostConfig" => {
-        "Binds" => [ task.workplace_mount.bind_string ]
+        "Binds" => build_git_binds([ task.workplace_mount.bind_string ])
       }
     )
 

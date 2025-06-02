@@ -25,6 +25,6 @@ class UserSettingsController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:github_token, :instructions)
+    params.require(:user).permit(:github_token, :instructions, :git_config)
   end
 end
