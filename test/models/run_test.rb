@@ -18,7 +18,7 @@ class RunTest < ActiveSupport::TestCase
     run = runs(:pending)
     Docker::Container.expects(:create).raises(Docker::Error::NotFoundError, "Image not found")
 
-    assert_nothing_raised { run.execute! }, "should set status to failed, but raised"
+    assert_nothing_raised { run.execute! }
     assert run.failed?
     assert_not_nil run.started_at
     assert_not_nil run.completed_at
@@ -28,37 +28,11 @@ class RunTest < ActiveSupport::TestCase
   end
 
   test "execute! calls Docker container methods correctly for first run" do
-    # Create a fresh agent with no volumes
-    agent = Agent.create!(
-      name: "Test Agent",
-      docker_image: "example/image:latest",
-      workplace_path: "/workspace",
-      start_arguments: [ "echo", "STARTING: {PROMPT}" ],
-      continue_arguments: [ "{PROMPT}" ],
-      user_id: 1000
-    )
-    # Create a fresh task with no runs
-    task = Task.create!(
-      project: projects(:one),
-      agent: agent,
-      user: users(:one),
-      status: "active",
-      started_at: Time.current
-    )
+    task = tasks(:without_runs)
     run = task.runs.create!(prompt: "test command", status: :pending)
 
     # Mock git container creation (first run clones the repo)
-    git_container = mock("git_container")
-    git_container.expects(:start)
-    git_container.expects(:wait).returns({ "StatusCode" => 0 })
-    git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning...")
-    git_container.expects(:delete).with(force: true)
-
-    Docker::Container.expects(:create).with(has_entries(
-      "Image" => "example/image:latest",
-      "Entrypoint" => [ "sh" ],
-      "User" => "1000"
-    )).returns(git_container)
+    expect_git_clone_container
 
 
     # For first run, it uses start_arguments
@@ -325,17 +299,7 @@ class RunTest < ActiveSupport::TestCase
     run = task.runs.create!(prompt: "test", status: :pending)
 
     # Mock git container creation
-    git_container = mock("git_container")
-    git_container.expects(:start)
-    git_container.expects(:wait).returns({ "StatusCode" => 0 })
-    git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning...")
-    git_container.expects(:delete).with(force: true)
-
-    Docker::Container.expects(:create).with(has_entries(
-      "Image" => "example/image:latest",
-      "Entrypoint" => [ "sh" ],
-      "User" => "1000"
-    )).returns(git_container)
+    expect_git_clone_container
 
 
     # Verify that environment variables are passed to Docker container
@@ -362,12 +326,7 @@ class RunTest < ActiveSupport::TestCase
 
   test "execute! clones repository on first run with default repo_path" do
     # Mock git container creation and execution
-    git_container = mock("git_container")
-    git_container.expects(:start)
-    git_container.expects(:wait).returns({ "StatusCode" => 0 })
-    git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning into '.'...")
-    git_container.expects(:delete).with(force: true)
-
+    git_container = mock_git_container(log_output: "Cloning into '.'...")
     Docker::Container.expects(:create).with(
       has_entries(
         "Image" => "example/image:latest",
@@ -450,12 +409,7 @@ class RunTest < ActiveSupport::TestCase
     run = task.runs.create!(prompt: "test", status: :pending)
 
     # Mock git container creation and execution
-    git_container = mock("git_container")
-    git_container.expects(:start)
-    git_container.expects(:wait).returns({ "StatusCode" => 0 })
-    git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning into '/workspace/myapp'...")
-    git_container.expects(:delete).with(force: true)
-
+    git_container = mock_git_container(log_output: "Cloning into '/workspace/myapp'...")
     Docker::Container.expects(:create).with(
       has_entries(
         "Image" => "example/image:latest",
@@ -510,12 +464,7 @@ class RunTest < ActiveSupport::TestCase
     run = task.runs.create!(prompt: "test", status: :pending)
 
     # Mock git container creation and execution with failure
-    git_container = mock("git_container")
-    git_container.expects(:start)
-    git_container.expects(:wait).returns({ "StatusCode" => 1 })
-    git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "fatal: repository not found")
-    git_container.expects(:delete).with(force: true)
-
+    git_container = mock_git_container(log_output: "fatal: repository not found", status_code: 1)
     Docker::Container.expects(:create).with(has_entries(
       "Image" => "example/image:latest",
       "Entrypoint" => [ "sh" ],
@@ -624,6 +573,27 @@ class RunTest < ActiveSupport::TestCase
     mock_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + output)
     mock_container.expects(:delete).with(force: true)
     mock_container
+  end
+
+  def mock_git_container(log_output: "Cloning...", status_code: 0)
+    git_container = mock("git_container")
+    git_container.expects(:start)
+    git_container.expects(:wait).returns({ "StatusCode" => status_code })
+    git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + log_output)
+    git_container.expects(:delete).with(force: true)
+    git_container
+  end
+
+  def expect_git_clone_container(image: "example/image:latest", user: "1000", log_output: "Cloning...", status_code: 0)
+    git_container = mock_git_container(log_output: log_output, status_code: status_code)
+    
+    Docker::Container.expects(:create).with(
+      has_entries(
+        "Image" => image,
+        "Entrypoint" => [ "sh" ],
+        "User" => user
+      )
+    ).returns(git_container)
   end
 
   def expect_git_diff_container
