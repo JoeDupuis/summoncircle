@@ -73,4 +73,69 @@ class StepTest < ActiveSupport::TestCase
       step.destroy
     end
   end
+
+  test "filters github token from content" do
+    user = users(:one)
+    user.update!(github_token: "github_token_123")
+
+    step = Step.new(
+      run: runs(:one),
+      raw_response: "Error: github_token_123 is invalid"
+    )
+    step.write_attribute(:content, "Error: github_token_123 is invalid")
+
+    assert_equal "Error: [FILTERED] is invalid", step.content
+  end
+
+  test "filters github token from raw_response" do
+    user = users(:one)
+    user.update!(github_token: "github_token_123")
+
+    step = Step.create!(
+      run: runs(:one),
+      raw_response: "Error: github_token_123 is invalid"
+    )
+
+    assert_equal "Error: [FILTERED] is invalid", step.raw_response
+  end
+
+  test "filters project secrets from content" do
+    project = projects(:one)
+    project.secrets.create!(key: "API_KEY", value: "secret_api_key_123")
+    project.secrets.create!(key: "DB_PASSWORD", value: "db_pass_456")
+
+    step = Step.new(
+      run: runs(:one),
+      raw_response: "Connecting with secret_api_key_123 and db_pass_456"
+    )
+    step.write_attribute(:content, "Connecting with secret_api_key_123 and db_pass_456")
+
+    assert_equal "Connecting with [FILTERED] and [FILTERED]", step.content
+  end
+
+  test "filters both github token and project secrets" do
+    user = users(:one)
+    user.update!(github_token: "github_token_123")
+
+    project = projects(:one)
+    project.secrets.create!(key: "API_KEY", value: "secret_api_key_123")
+
+    step = Step.new(
+      run: runs(:one),
+      raw_response: "Using github_token_123 and secret_api_key_123"
+    )
+    step.write_attribute(:content, "Using github_token_123 and secret_api_key_123")
+
+    assert_equal "Using [FILTERED] and [FILTERED]", step.content
+  end
+
+  test "does not filter when no secrets present" do
+    step = Step.new(
+      run: runs(:one),
+      raw_response: "No secrets here"
+    )
+    step.write_attribute(:content, "No secrets here")
+
+    assert_equal "No secrets here", step.content
+  end
 end

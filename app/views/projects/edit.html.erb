@@ -29,6 +29,12 @@
   </div>
 
   <div>
+    <%= form.label :secrets, "Secrets (JSON)" %><br>
+    <%= text_area_tag "project[secrets]", "", placeholder: '{"ENV_VAR": "value", "API_KEY": "secret"}', rows: 3 %>
+    <small class="form-help">JSON format. Leave empty to keep existing secrets. Values are encrypted and hidden after saving.</small>
+  </div>
+
+  <div>
     <%= form.submit %>
   </div>
 <% end %>

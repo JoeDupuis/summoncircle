@@ -90,10 +90,12 @@ class Run < ApplicationRecord
       binds << git_config_bind
     end
 
+    env_vars = agent.env_strings + project_env_strings
+
     Docker::Container.create(
       "Image" => agent.docker_image,
       "Cmd" => command,
-      "Env" => agent.env_strings,
+      "Env" => env_vars,
       "WorkingDir" => task.agent.workplace_path,
       "HostConfig" => {
         "Binds" => binds
@@ -184,5 +186,9 @@ class Run < ApplicationRecord
     Rails.logger.error "Failed to capture repository state: #{e.message}"
   ensure
     git_container&.delete(force: true) if defined?(git_container)
+  end
+
+  def project_env_strings
+    task.project.secrets.map { |secret| "#{secret.key}=#{secret.value}" }
   end
 end

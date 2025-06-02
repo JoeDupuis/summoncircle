@@ -14,6 +14,47 @@ class RunTest < ActiveSupport::TestCase
     assert_not second_run.first_run?
   end
 
+  test "execute! includes project secrets in container environment variables" do
+    task = tasks(:without_runs)
+    project = task.project
+    project.secrets.create!(key: "API_KEY", value: "secret_123")
+    project.secrets.create!(key: "DB_PASSWORD", value: "db_pass_456")
+
+    run = task.runs.create!(prompt: "test command", status: :pending)
+
+    expect_git_clone_container
+    expect_main_container(
+      cmd: [ "echo", "STARTING: test command" ],
+      output: "\x0bhello world",
+      env: [ "API_KEY=secret_123", "DB_PASSWORD=db_pass_456" ]
+    )
+    expect_git_diff_container
+
+    run.execute!
+
+    assert run.completed?
+  end
+
+  test "execute! combines project secrets with agent environment variables" do
+    task = tasks(:with_env_vars)
+    project = task.project
+    project.secrets.create!(key: "API_KEY", value: "secret_123")
+
+    run = task.runs.create!(prompt: "test command", status: :pending)
+
+    expect_git_clone_container
+    expect_main_container(
+      cmd: [ "echo", "test command" ],
+      output: "\x0bhello world",
+      env: [ "NODE_ENV=development", "DEBUG=true", "API_KEY=secret_123" ]
+    )
+    expect_git_diff_container
+
+    run.execute!
+
+    assert run.completed?
+  end
+
   test "execute! handles errors gracefully" do
     run = runs(:pending)
     Docker::Container.expects(:create).raises(Docker::Error::NotFoundError, "Image not found")

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_02_030052) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_02_034140) do
   create_table "agents", force: :cascade do |t|
     t.string "name"
     t.string "docker_image"
@@ -60,6 +60,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_02_030052) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["task_id"], name: "index_runs_on_task_id"
+  end
+
+  create_table "secrets", force: :cascade do |t|
+    t.integer "project_id", null: false
+    t.string "key", null: false
+    t.text "value"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id", "key"], name: "index_secrets_on_project_id_and_key", unique: true
+    t.index ["project_id"], name: "index_secrets_on_project_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -131,6 +141,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_02_030052) do
 
   add_foreign_key "repo_states", "steps"
   add_foreign_key "runs", "tasks"
+  add_foreign_key "secrets", "projects"
   add_foreign_key "sessions", "users"
   add_foreign_key "steps", "runs"
   add_foreign_key "tasks", "agents"
