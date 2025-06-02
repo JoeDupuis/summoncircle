@@ -14,6 +14,7 @@ class ProjectsController < ApplicationController
   def update
     @project = Project.find(params[:id])
     if @project.update(project_params)
+      update_project_secrets if params[:project][:secrets].present?
       redirect_to @project, notice: "Project was successfully updated."
     else
       render :edit, status: :unprocessable_entity
@@ -43,5 +44,17 @@ class ProjectsController < ApplicationController
 
   def project_params
     params.require(:project).permit(:name, :description, :repository_url, :setup_script, :repo_path)
+  end
+
+  def update_project_secrets
+    secrets_json = params[:project][:secrets]
+    return if secrets_json.blank?
+
+    begin
+      secrets_hash = JSON.parse(secrets_json)
+      @project.update_secrets(secrets_hash)
+    rescue JSON::ParserError
+      flash[:alert] = "Invalid JSON format for secrets"
+    end
   end
 end

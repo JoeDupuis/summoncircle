@@ -23,9 +23,20 @@ class Step < ApplicationRecord
   def filter_sensitive_info(message)
     return message unless message.present?
 
-    token = run&.task&.user&.github_token
-    return message unless token.present?
+    filtered_message = message
 
-    message.gsub(token, "[FILTERED]")
+    github_token = run&.task&.user&.github_token
+    if github_token.present?
+      filtered_message = filtered_message.gsub(github_token, "[FILTERED]")
+    end
+
+    project_secret_values = run&.task&.project&.secret_values || []
+    project_secret_values.each do |secret_value|
+      next unless secret_value.present?
+
+      filtered_message = filtered_message.gsub(secret_value, "[FILTERED]")
+    end
+
+    filtered_message
   end
 end
