@@ -1,6 +1,6 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
+one: # Has existing runs (see runs.yml)
   project: one
   agent: one
   user: one
@@ -15,3 +15,66 @@ two:
   status: MyString
   started_at: 2025-05-24 19:14:19
   archived_at: 2025-05-24 19:14:19
+
+task_with_runs: # Has existing runs - see runs.yml for run fixtures (existing_run, another_run, pending_run)
+  project: one
+  agent: one
+  user: one
+  status: active
+  started_at: 2025-05-24 19:14:19
+
+without_runs: # No runs - used for testing first run behavior
+  project: one
+  agent: one
+  user: one
+  status: active
+  started_at: 2025-05-24 19:14:19
+
+with_docker_host:
+  project: without_repo
+  agent: with_docker_host
+  user: one
+  status: active
+  started_at: 2025-05-24 19:14:19
+
+with_text_processor:
+  project: one
+  agent: with_text_processor
+  user: one
+  status: active
+  started_at: 2025-05-24 19:14:19
+
+with_claude_json_processor:
+  project: one
+  agent: with_claude_json_processor
+  user: one
+  status: active
+  started_at: 2025-05-24 19:14:19
+
+with_env_vars:
+  project: one
+  agent: with_env_vars
+  user: one
+  status: active
+  started_at: 2025-05-24 19:14:19
+
+for_repo_clone:
+  project: with_repo
+  agent: one
+  user: one
+  status: active
+  started_at: 2025-05-24 19:14:19
+
+for_repo_clone_with_path:
+  project: with_repo_and_path
+  agent: one
+  user: one
+  status: active
+  started_at: 2025-05-24 19:14:19
+
+for_skip_git_clone:
+  project: without_repo
+  agent: one
+  user: one
+  status: active
+  started_at: 2025-05-24 19:14:19
