@@ -1,9 +1,11 @@
-<% repo_state = run.latest_repo_state %>
+<% repo_states = run.repo_states %>
 <div data-controller="tabs" class="tabs-container">
   <div class="nav">
     <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="steps" class="tab -active">Steps</button>
-    <% if repo_state.present? %>
-      <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="diff" class="tab">Diff</button>
+    <% repo_states.each_with_index do |repo_state, index| %>
+      <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="diff-<%= index %>" class="tab">
+        Diff <%= repo_states.count > 1 ? "##{index + 1}" : "" %>
+      </button>
     <% end %>
   </div>
   <div class="content">
@@ -12,8 +14,8 @@
         <%= render run.steps %>
       </div>
     </div>
-    <% if repo_state.present? %>
-      <div data-tabs-target="panel" data-panel-id="diff" class="panel">
+    <% repo_states.each_with_index do |repo_state, index| %>
+      <div data-tabs-target="panel" data-panel-id="diff-<%= index %>" class="panel">
         <div class="output">
           <%= render "runs/diff_panel", repo_state: repo_state %>
         </div>
