@@ -125,41 +125,16 @@ class RunTest < ActiveSupport::TestCase
   end
 
   test "execute! passes environment variables to Docker container" do
-    # Create agent with environment variables
-    agent = Agent.create!(
-      name: "Test Agent with Env Vars",
-      docker_image: "example/image:latest",
-      workplace_path: "/workspace",
-      start_arguments: [ "echo", "{PROMPT}" ],
-      env_variables: { "NODE_ENV" => "development", "DEBUG" => "true" }
-    )
-    task = Task.create!(
-      project: projects(:one),
-      agent: agent,
-      user: users(:one),
-      status: "active",
-      started_at: Time.current
-    )
+    task = tasks(:with_env_vars)
     run = task.runs.create!(prompt: "test", status: :pending)
 
-    # Mock git container creation
     expect_git_clone_container
-
-
-    # Verify that environment variables are passed to Docker container
-    Docker::Container.expects(:create).with(
-      has_entries(
-        "Image" => "example/image:latest",
-        "Cmd" => [ "echo", "test" ],
-        "Env" => [ "NODE_ENV=development", "DEBUG=true" ],
-        "WorkingDir" => "/workspace",
-        "HostConfig" => has_entries(
-          "Binds" => includes(regexp_matches(/summoncircle_workplace_volume_.*:\/workspace/))
-        )
-      )
-    ).returns(mock_container_with_output("\x04test"))
-
-    # Expect git diff container to be created after run completes
+    expect_main_container(
+      cmd: [ "echo", "test" ],
+      output: "\x04test",
+      env: [ "NODE_ENV=development", "DEBUG=true" ],
+      binds: includes(regexp_matches(/summoncircle_workplace_volume_.*:\/workspace/))
+    )
     expect_git_diff_container
 
     run.execute!

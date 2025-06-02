@@ -36,3 +36,11 @@ with_claude_json_processor:
   workplace_path: "/workspace"
   log_processor: "ClaudeJson"
   start_arguments: [ "echo", "test" ]
+
+with_env_vars:
+  name: Test Agent with Env Vars
+  docker_image: example/image:latest
+  workplace_path: "/workspace"
+  start_arguments: [ "echo", "{PROMPT}" ]
+  env_variables: { "NODE_ENV": "development", "DEBUG": "true" }
+  user_id: 1000
