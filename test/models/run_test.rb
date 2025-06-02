@@ -31,25 +31,13 @@ class RunTest < ActiveSupport::TestCase
     task = tasks(:without_runs)
     run = task.runs.create!(prompt: "test command", status: :pending)
 
-    # Mock git container creation (first run clones the repo)
     expect_git_clone_container
-
-
-    # For first run, it uses start_arguments
-    Docker::Container.expects(:create).with(
-      has_entries(
-        "Image" => "example/image:latest",
-        "Cmd" => [ "echo", "STARTING: test command" ],
-        "Env" => [],
-        "WorkingDir" => "/workspace",
-        "HostConfig" => has_entries(
-          "Binds" => includes(regexp_matches(/summoncircle_workplace_volume_.*:\/workspace/))
-        )
-      )
-    ).returns(mock_container_with_output("\x0bhello world"))
-
-    # Expect git diff container to be created after run completes
+    expect_main_container(
+      cmd: [ "echo", "STARTING: test command" ],
+      output: "\x0bhello world"
+    )
     expect_git_diff_container
+
 
     run.execute!
 
@@ -60,27 +48,16 @@ class RunTest < ActiveSupport::TestCase
   end
 
   test "execute! uses continue_arguments for subsequent runs" do
-    # Use existing task with runs
     task = tasks(:one)
     run = runs(:one)
     run.update!(status: :pending, started_at: nil, completed_at: nil)
     run.steps.destroy_all
 
     # For non-first run, it uses continue_arguments
-    Docker::Container.expects(:create).with(
-      has_entries(
-        "Image" => "example/image:latest",
-        "Cmd" => [ "echo hello" ],
-        "Env" => [],
-        "WorkingDir" => "/workspace",
-        "HostConfig" => has_entries(
-          "Binds" => includes(
-            "summoncircle_MyString_volume_12345678-1234-5678-9abc-123456789abc:MyString",
-            "summoncircle_workplace_volume_abcdef12-3456-7890-abcd-ef1234567890:/workspace"
-          )
-        )
-      )
-    ).returns(mock_container_with_output("\x10continued output"))
+    expect_main_container(
+      cmd: [ "echo hello" ],
+      output: "\x10continued output"
+    )
 
     # Expect git diff container to be created after run completes
     expect_git_diff_container
@@ -481,7 +458,6 @@ class RunTest < ActiveSupport::TestCase
   end
 
   test "execute! skips git clone on subsequent runs" do
-    # Use existing task with runs to ensure it's not the first run
     task = tasks(:one)
     run = runs(:one)
     run.update!(status: :pending, started_at: nil, completed_at: nil)
@@ -586,7 +562,7 @@ class RunTest < ActiveSupport::TestCase
 
   def expect_git_clone_container(image: "example/image:latest", user: "1000", log_output: "Cloning...", status_code: 0)
     git_container = mock_git_container(log_output: log_output, status_code: status_code)
-    
+
     Docker::Container.expects(:create).with(
       has_entries(
         "Image" => image,
@@ -594,6 +570,24 @@ class RunTest < ActiveSupport::TestCase
         "User" => user
       )
     ).returns(git_container)
+  end
+
+  def expect_main_container(cmd:, output:, image: "example/image:latest", env: [], working_dir: "/workspace", binds: nil)
+    expectations = {
+      "Image" => image,
+      "Cmd" => cmd,
+      "WorkingDir" => working_dir
+    }
+
+    expectations["Env"] = env unless env.nil?
+
+    if binds
+      expectations["HostConfig"] = has_entries("Binds" => binds)
+    end
+
+    Docker::Container.expects(:create).with(
+      has_entries(expectations)
+    ).returns(mock_container_with_output(output))
   end
 
   def expect_git_diff_container

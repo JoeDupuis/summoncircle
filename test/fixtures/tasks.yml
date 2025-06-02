@@ -1,6 +1,6 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
+one: # Has existing runs (see runs.yml)
   project: one
   agent: one
   user: one
@@ -16,7 +16,7 @@ two:
   started_at: 2025-05-24 19:14:19
   archived_at: 2025-05-24 19:14:19
 
-without_runs:
+without_runs: # No runs - used for testing first run behavior
   project: one
   agent: one
   user: one
