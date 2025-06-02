@@ -1,0 +1,45 @@
+.run-item {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+.run-item > .status-line {
+  margin-bottom: 5px;
+}
+
+.run-item > .prompt-line {
+  margin-bottom: 10px;
+}
+
+.run-item > .output-title {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.run-item > .output-content {
+  background: #f0f0f0;
+  padding: 10px;
+  overflow: auto;
+}
+
+.run-item > .spinner-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+}
+
+.run-item > .spinner-container > .spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

@@ -1,5 +1,5 @@
-<div id="<%= dom_id(run) %>" style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
-  <p>
+<div id="<%= dom_id(run) %>" class="run-item">
+  <p class="status-line">
     <strong>Status:</strong> <%= run.status %>
     <% if run.started_at %>
       | <strong>Started:</strong> <%= run.started_at.strftime("%Y-%m-%d %H:%M:%S") %>
@@ -8,15 +8,41 @@
       | <strong>Completed:</strong> <%= run.completed_at.strftime("%Y-%m-%d %H:%M:%S") %>
     <% end %>
   </p>
-  <p><strong>Prompt:</strong> <%= run.prompt %></p>
+  <p class="prompt-line"><strong>Prompt:</strong> <%= run.prompt %></p>
   <% if run.steps.any? %>
-    <p><strong>Output:</strong></p>
-    <div style="background: #f0f0f0; padding: 10px; overflow: auto;">
-      <%= render run.steps %>
+    <% repo_state = run.steps.includes(:repo_states).find { |s| s.repo_states.any? }&.repo_states&.last %>
+    <div data-controller="tabs" class="tabs-container">
+      <div class="tabs-nav">
+        <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="steps" class="tab active">Steps</button>
+        <% if repo_state.present? %>
+          <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="diff" class="tab">Diff</button>
+        <% end %>
+      </div>
+      <div class="tabs-content">
+        <div data-tabs-target="panel" data-panel-id="steps" class="tab-panel active">
+          <div class="output-content">
+            <%= render run.steps %>
+          </div>
+        </div>
+        <% if repo_state.present? %>
+          <div data-tabs-target="panel" data-panel-id="diff" class="tab-panel">
+            <div class="output-content">
+              <div data-controller="diff" data-diff-diff-text-value="<%= repo_state.uncommitted_diff.gsub('"', '&quot;') %>">
+                <div data-diff-target="output">
+                  <template shadowrootmode="open">
+                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/diff2html/bundles/css/diff2html.min.css">
+                    <div data-diff-target="shadowContent"></div>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
     </div>
   <% elsif run.status == 'running' %>
-    <p><strong>Output:</strong></p>
-    <div class="run-spinner-container">
+    <p class="output-title">Output:</p>
+    <div class="spinner-container">
       <div class="spinner"></div>
       Processing...
     </div>

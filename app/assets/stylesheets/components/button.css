@@ -1,0 +1,22 @@
+.button {
+  padding: 8px 16px;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  display: inline-block;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.button:hover {
+  opacity: 0.9;
+}
+
+.button.-primary {
+  background: #007bff;
+}
+
+.button.-success {
+  background: #28a745;
+}
