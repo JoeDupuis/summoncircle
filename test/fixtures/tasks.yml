@@ -57,3 +57,24 @@ with_env_vars:
   user: one
   status: active
   started_at: 2025-05-24 19:14:19
+
+for_repo_clone:
+  project: with_repo
+  agent: one
+  user: one
+  status: active
+  started_at: 2025-05-24 19:14:19
+
+for_repo_clone_with_path:
+  project: with_repo_and_path
+  agent: one
+  user: one
+  status: active
+  started_at: 2025-05-24 19:14:19
+
+for_skip_git_clone:
+  project: without_repo
+  agent: one
+  user: one
+  status: active
+  started_at: 2025-05-24 19:14:19

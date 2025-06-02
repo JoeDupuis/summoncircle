@@ -15,3 +15,12 @@ two:
 without_repo:
   name: Test Project
   # No repository_url - should skip git clone
+
+with_repo:
+  name: Test Project
+  repository_url: https://github.com/test/repo.git
+
+with_repo_and_path:
+  name: Test Project
+  repository_url: https://github.com/test/repo.git
+  repo_path: myapp

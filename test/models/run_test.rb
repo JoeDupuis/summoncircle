@@ -144,6 +144,9 @@ class RunTest < ActiveSupport::TestCase
   end
 
   test "execute! clones repository on first run with default repo_path" do
+    task = tasks(:for_repo_clone)
+    run = task.runs.create!(prompt: "test", status: :pending)
+
     # Mock git container creation and execution
     git_container = mock_git_container(log_output: "Cloning into '.'...")
     Docker::Container.expects(:create).with(
@@ -159,40 +162,7 @@ class RunTest < ActiveSupport::TestCase
       )
     ).returns(git_container)
 
-    # Create a fresh project with repository URL
-    project = Project.create!(
-      name: "Test Project",
-      repository_url: "https://github.com/test/repo.git"
-    )
-    # Create a fresh agent with required user_id for git operations
-    agent = Agent.create!(
-      name: "Test Agent",
-      docker_image: "example/image:latest",
-      workplace_path: "/workspace",
-      start_arguments: [ "echo", "{PROMPT}" ],
-      continue_arguments: [ "{PROMPT}" ],
-      user_id: 1000
-    )
-    # Create a fresh task with no runs (this ensures first_run? returns true)
-    task = Task.create!(
-      project: project,
-      agent: agent,
-      user: users(:one),
-      status: "active",
-      started_at: Time.current
-    )
-    run = task.runs.create!(prompt: "test", status: :pending)
-
-
-    # Mock main container
-    Docker::Container.expects(:create).with(
-      has_entries(
-        "Image" => "example/image:latest",
-        "Cmd" => [ "echo", "test" ]
-      )
-    ).returns(mock_container_with_output("\x04test"))
-
-    # Expect git diff container to be created after run completes
+    expect_main_container(cmd: ["echo", "STARTING: test"], output: "\x04test")
     expect_git_diff_container
 
     run.execute!
@@ -202,29 +172,7 @@ class RunTest < ActiveSupport::TestCase
   end
 
   test "execute! clones repository on first run with custom repo_path" do
-    # Create a fresh project with repository URL and custom repo path
-    project = Project.create!(
-      name: "Test Project",
-      repository_url: "https://github.com/test/repo.git",
-      repo_path: "myapp"
-    )
-    # Create a fresh agent with required user_id for git operations
-    agent = Agent.create!(
-      name: "Test Agent",
-      docker_image: "example/image:latest",
-      workplace_path: "/workspace",
-      start_arguments: [ "echo", "{PROMPT}" ],
-      continue_arguments: [ "{PROMPT}" ],
-      user_id: 1000
-    )
-    # Create a fresh task with no runs (this ensures first_run? returns true)
-    task = Task.create!(
-      project: project,
-      agent: agent,
-      user: users(:one),
-      status: "active",
-      started_at: Time.current
-    )
+    task = tasks(:for_repo_clone_with_path)
     run = task.runs.create!(prompt: "test", status: :pending)
 
     # Mock git container creation and execution
@@ -242,15 +190,7 @@ class RunTest < ActiveSupport::TestCase
       )
     ).returns(git_container)
 
-    # Mock main container
-    Docker::Container.expects(:create).with(
-      has_entries(
-        "Image" => "example/image:latest",
-        "Cmd" => [ "echo", "test" ]
-      )
-    ).returns(mock_container_with_output("\x04test"))
-
-    # Expect git diff container to be created after run completes
+    expect_main_container(cmd: ["echo", "STARTING: test"], output: "\x04test")
     expect_git_diff_container
 
     run.execute!
@@ -260,26 +200,7 @@ class RunTest < ActiveSupport::TestCase
   end
 
   test "execute! handles git clone failure" do
-    project = Project.create!(
-      name: "Test Project",
-      repository_url: "https://github.com/test/repo.git"
-    )
-    agent = Agent.create!(
-      name: "Test Agent",
-      docker_image: "example/image:latest",
-      workplace_path: "/workspace",
-      start_arguments: [ "echo", "{PROMPT}" ],
-      continue_arguments: [ "{PROMPT}" ],
-      user_id: 1000,
-      log_processor: "Text"
-    )
-    task = Task.create!(
-      project: project,
-      agent: agent,
-      user: users(:one),
-      status: "active",
-      started_at: Time.current
-    )
+    task = tasks(:for_repo_clone)
     run = task.runs.create!(prompt: "test", status: :pending)
 
     # Mock git container creation and execution with failure
@@ -320,55 +241,21 @@ class RunTest < ActiveSupport::TestCase
   end
 
   test "should_clone_repository? returns false when repository_url is blank" do
-    project = Project.create!(name: "Test Project")
-    agent = Agent.create!(
-      name: "Test Agent",
-      docker_image: "example/image:latest",
-      workplace_path: "/workspace",
-      start_arguments: [ "echo", "test" ]
-    )
-    task = Task.create!(project: project, agent: agent, user: users(:one), status: "active")
+    task = tasks(:for_skip_git_clone)
     run = task.runs.create!(prompt: "test")
 
     assert_not run.send(:should_clone_repository?)
   end
 
   test "should_clone_repository? returns true when repository_url is present" do
-    project = Project.create!(name: "Test Project", repository_url: "https://github.com/test/repo.git")
-    agent = Agent.create!(
-      name: "Test Agent",
-      docker_image: "example/image:latest",
-      workplace_path: "/workspace",
-      start_arguments: [ "echo", "test" ]
-    )
-    task = Task.create!(project: project, agent: agent, user: users(:one), status: "active")
+    task = tasks(:for_repo_clone)
     run = task.runs.create!(prompt: "test")
 
     assert run.send(:should_clone_repository?)
   end
 
   test "execute! skips git clone when repository_url is blank" do
-    project = Project.create!(
-      name: "Test Project"
-      # No repository_url - should skip git clone
-    )
-
-    agent = Agent.create!(
-      name: "Test Agent",
-      docker_image: "example/image:latest",
-      workplace_path: "/workspace",
-      start_arguments: [ "echo", "{PROMPT}" ],
-      continue_arguments: [ "{PROMPT}" ],
-      user_id: 1000,
-      log_processor: "Text"
-    )
-    task = Task.create!(
-      project: project,
-      agent: agent,
-      user: users(:one),
-      status: "active",
-      started_at: Time.current
-    )
+    task = tasks(:for_skip_git_clone)
     run = task.runs.create!(prompt: "test", status: :pending)
 
     # Ensure Docker::Container.create is only called once (for main container, not git)
