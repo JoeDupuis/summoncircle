@@ -19,7 +19,7 @@ class RunTest < ActiveSupport::TestCase
     project = task.project
     project.secrets.create!(key: "API_KEY", value: "secret_123")
     project.secrets.create!(key: "DB_PASSWORD", value: "db_pass_456")
-    
+
     run = task.runs.create!(prompt: "test command", status: :pending)
 
     expect_git_clone_container
@@ -39,7 +39,7 @@ class RunTest < ActiveSupport::TestCase
     task = tasks(:with_env_vars)
     project = task.project
     project.secrets.create!(key: "API_KEY", value: "secret_123")
-    
+
     run = task.runs.create!(prompt: "test command", status: :pending)
 
     expect_git_clone_container
