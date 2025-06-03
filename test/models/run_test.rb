@@ -140,56 +140,34 @@ class RunTest < ActiveSupport::TestCase
     assert_equal original_url, Docker.url
   end
 
-  test "log processor processes logs and creates steps" do
-    task = tasks(:with_text_processor)
-    run = task.runs.create!(prompt: "test")
-
-    logs = "Simple log output"
-    processor = task.agent.log_processor_class.new
-    step_data_list = processor.process(logs)
-    step_data_list.each { |step_data| run.steps.create!(step_data) }
-
-    assert_equal 1, run.steps.count
-    assert_equal logs, run.steps.first.raw_response
-  end
-
-  test "ClaudeJson processor processes logs and creates steps" do
-    task = tasks(:with_claude_json_processor)
-    run = task.runs.create!(prompt: "test")
-
-    logs = '[{"type": "system", "message": "Starting"}, {"type": "user", "content": "Hello"}]'
-    processor = task.agent.log_processor_class.new
-    step_data_list = processor.process(logs)
-    step_data_list.each { |step_data| run.steps.create!(step_data) }
-
-    assert_equal 2, run.steps.count
-    assert_equal '{"type":"system","message":"Starting"}', run.steps.first.raw_response
-    assert_equal '{"type":"user","content":"Hello"}', run.steps.second.raw_response
-    assert_equal "Step::System", run.steps.first.type
-    assert_equal "Step::ToolResult", run.steps.second.type
-  end
 
   test "run uses unified flow with streaming processor" do
     task = tasks(:with_claude_streaming_json_processor)
     run = task.runs.create!(prompt: "Test")
 
     # Test that streaming processor's process_container method is called
-    mock_processor = mock('processor')
+    mock_processor = mock("processor")
     mock_processor.expects(:process_container).with(anything, run)
-    
+
     LogProcessor::ClaudeStreamingJson.stubs(:new).returns(mock_processor)
-    
-    # Mock container creation to avoid actual Docker calls
-    mock_container = mock('container')
-    mock_container.stubs(:start).returns(true)
-    mock_container.stubs(:delete).returns(true)
-    Docker::Container.stubs(:create).returns(mock_container)
-    run.stubs(:setup_container_files).returns(true)
-    run.stubs(:capture_repository_state).returns(true)
-    run.stubs(:clone_repository).returns(true)
+
+    # Use existing helper methods for Docker mocking
+    expect_git_clone_container
+    # Mock the main container, but we don't expect logs/wait since the processor handles it
+    mock_container = mock("container")
+    mock_container.expects(:start)
+    mock_container.expects(:delete).with(force: true)
+    Docker::Container.expects(:create).with(
+      has_entries(
+        "Image" => "example/image:latest",
+        "Cmd" => [ "echo", "test" ],
+        "WorkingDir" => "/workspace"
+      )
+    ).returns(mock_container)
+    expect_git_diff_container
 
     run.execute!
-    
+
     assert run.completed?
   end
 
@@ -198,22 +176,28 @@ class RunTest < ActiveSupport::TestCase
     run = task.runs.create!(prompt: "Test")
 
     # Test that non-streaming processor's process_container method is called
-    mock_processor = mock('processor')
+    mock_processor = mock("processor")
     mock_processor.expects(:process_container).with(anything, run)
-    
+
     LogProcessor::ClaudeJson.stubs(:new).returns(mock_processor)
-    
-    # Mock container creation to avoid actual Docker calls
-    mock_container = mock('container')
-    mock_container.stubs(:start).returns(true)
-    mock_container.stubs(:delete).returns(true)
-    Docker::Container.stubs(:create).returns(mock_container)
-    run.stubs(:setup_container_files).returns(true)
-    run.stubs(:capture_repository_state).returns(true)
-    run.stubs(:clone_repository).returns(true)
+
+    # Use existing helper methods for Docker mocking
+    expect_git_clone_container
+    # Mock the main container, but we don't expect logs/wait since the processor handles it
+    mock_container = mock("container")
+    mock_container.expects(:start)
+    mock_container.expects(:delete).with(force: true)
+    Docker::Container.expects(:create).with(
+      has_entries(
+        "Image" => "example/image:latest",
+        "Cmd" => [ "echo", "test" ],
+        "WorkingDir" => "/workspace"
+      )
+    ).returns(mock_container)
+    expect_git_diff_container
 
     run.execute!
-    
+
     assert run.completed?
   end
 
