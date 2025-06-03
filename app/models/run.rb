@@ -25,6 +25,7 @@ class Run < ApplicationRecord
       clone_repository if first_run? && should_clone_repository?
 
       container = create_container
+      setup_container_files(container)
       container.start
       container.wait
 
@@ -46,8 +47,6 @@ class Run < ApplicationRecord
       update!(completed_at: Time.current)
       save!
       container&.delete(force: true) if defined?(container)
-      task.user.cleanup_instructions_file
-      task.user.cleanup_git_config_file
     end
   end
 
@@ -57,14 +56,6 @@ class Run < ApplicationRecord
     broadcast_replace_later_to(task, target: self, partial: "tasks/run", locals: { run: self })
   end
 
-  def build_git_binds(base_binds)
-    binds = base_binds.dup
-    git_config_bind = task.user.git_config_bind_string(task.agent)
-    if git_config_bind
-      binds << git_config_bind
-    end
-    binds
-  end
 
   def configure_docker_host
     agent = task.agent
@@ -79,16 +70,6 @@ class Run < ApplicationRecord
     command = command_template.map { |arg| arg.gsub("{PROMPT}", prompt) }
 
     binds = task.volume_mounts.includes(:volume).map(&:bind_string)
-
-    instructions_bind = task.user.instructions_bind_string(agent.instructions_mount_path)
-    if instructions_bind
-      binds << instructions_bind
-    end
-
-    git_config_bind = task.user.git_config_bind_string(agent)
-    if git_config_bind
-      binds << git_config_bind
-    end
 
     env_vars = agent.env_strings + project_env_strings
 
@@ -126,7 +107,7 @@ class Run < ApplicationRecord
       "WorkingDir" => working_dir,
       "User" => task.agent.user_id.to_s,
       "HostConfig" => {
-        "Binds" => build_git_binds([ task.workplace_mount.bind_string ])
+        "Binds" => [ task.workplace_mount.bind_string ]
       }
     )
     git_container.start
@@ -164,7 +145,7 @@ class Run < ApplicationRecord
       "WorkingDir" => git_working_dir,
       "User" => task.agent.user_id.to_s,
       "HostConfig" => {
-        "Binds" => build_git_binds([ task.workplace_mount.bind_string ])
+        "Binds" => [ task.workplace_mount.bind_string ]
       }
     )
 
@@ -190,5 +171,29 @@ class Run < ApplicationRecord
 
   def project_env_strings
     task.project.secrets.map { |secret| "#{secret.key}=#{secret.value}" }
+  end
+
+  def setup_container_files(container)
+    agent = task.agent
+    user = task.user
+
+    if user.git_config.present? && agent.home_path.present?
+      archive_file_to_container(container, user.git_config, File.join(agent.home_path, ".gitconfig"))
+    end
+
+    if user.instructions.present? && agent.instructions_mount_path.present?
+      archive_file_to_container(container, user.instructions, agent.instructions_mount_path)
+    end
+  end
+
+  def archive_file_to_container(container, content, destination_path)
+    filename = File.basename(destination_path)
+    temp_dir = Dir.mktmpdir
+    temp_file_path = File.join(temp_dir, filename)
+    File.write(temp_file_path, content)
+
+    container.archive_in(temp_file_path, File.dirname(destination_path))
+  ensure
+    FileUtils.rm_rf(temp_dir) if temp_dir
   end
 end
