@@ -8,7 +8,9 @@ class RunLogProcessingTest < ActiveSupport::TestCase
 
     json_logs = '[{"type":"system","subtype":"init","session_id":"test"},{"type":"assistant","message":{"content":[{"type":"text","text":"Hello"}]}}]'
 
-    run.send(:create_steps_from_logs, json_logs)
+    processor = task.agent.log_processor_class.new
+    step_data_list = processor.process(json_logs)
+    step_data_list.each { |step_data| run.steps.create!(step_data) }
 
     assert_equal 2, run.steps.count
     assert_equal "Step::Init", run.steps.first.type
@@ -23,7 +25,9 @@ class RunLogProcessingTest < ActiveSupport::TestCase
 
     invalid_json = "Not valid JSON"
 
-    run.send(:create_steps_from_logs, invalid_json)
+    processor = task.agent.log_processor_class.new
+    step_data_list = processor.process(invalid_json)
+    step_data_list.each { |step_data| run.steps.create!(step_data) }
 
     assert_equal 1, run.steps.count
     assert_equal "Step::Error", run.steps.first.type
@@ -37,7 +41,9 @@ class RunLogProcessingTest < ActiveSupport::TestCase
 
     text_logs = "Simple text output\nLine 2"
 
-    run.send(:create_steps_from_logs, text_logs)
+    processor = task.agent.log_processor_class.new
+    step_data_list = processor.process(text_logs)
+    step_data_list.each { |step_data| run.steps.create!(step_data) }
 
     assert_equal 1, run.steps.count
     assert_equal "Step::Text", run.steps.first.type

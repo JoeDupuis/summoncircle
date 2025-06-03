@@ -37,6 +37,13 @@ with_claude_json_processor:
   log_processor: "ClaudeJson"
   start_arguments: [ "echo", "test" ]
 
+with_claude_streaming_json_processor:
+  name: Streaming JSON Agent
+  docker_image: example/image:latest
+  workplace_path: "/workspace"
+  log_processor: "ClaudeStreamingJson"
+  start_arguments: [ "echo", "test" ]
+
 with_env_vars:
   name: Test Agent with Env Vars
   docker_image: example/image:latest

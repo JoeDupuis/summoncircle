@@ -140,30 +140,7 @@ class RunTest < ActiveSupport::TestCase
     assert_equal original_url, Docker.url
   end
 
-  test "create_steps_from_logs uses agent's log processor" do
-    task = tasks(:with_text_processor)
-    run = task.runs.create!(prompt: "test")
 
-    logs = "Simple log output"
-    run.send(:create_steps_from_logs, logs)
-
-    assert_equal 1, run.steps.count
-    assert_equal logs, run.steps.first.raw_response
-  end
-
-  test "create_steps_from_logs with ClaudeJson processor" do
-    task = tasks(:with_claude_json_processor)
-    run = task.runs.create!(prompt: "test")
-
-    logs = '[{"type": "system", "message": "Starting"}, {"type": "user", "content": "Hello"}]'
-    run.send(:create_steps_from_logs, logs)
-
-    assert_equal 2, run.steps.count
-    assert_equal '{"type":"system","message":"Starting"}', run.steps.first.raw_response
-    assert_equal '{"type":"user","content":"Hello"}', run.steps.second.raw_response
-    assert_equal "Step::System", run.steps.first.type
-    assert_equal "Step::ToolResult", run.steps.second.type
-  end
 
   test "execute! passes environment variables to Docker container" do
     task = tasks(:with_env_vars)

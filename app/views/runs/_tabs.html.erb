@@ -12,6 +12,12 @@
     <div data-tabs-target="panel" data-panel-id="steps" class="panel -active">
       <div class="output">
         <%= render run.steps %>
+        <% if run.status == 'running' %>
+          <div class="run-spinner">
+            <div class="spinner"></div>
+            Processing...
+          </div>
+        <% end %>
       </div>
     </div>
     <% repo_states.each_with_index do |repo_state, index| %>
