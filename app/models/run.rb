@@ -39,8 +39,20 @@ class Run < ApplicationRecord
       capture_repository_state
       completed!
     rescue => e
-      error_message = "Error: #{e.message}"
-      steps.create!(raw_response: error_message, type: "Step::Text", content: error_message)
+      error_message = "Error: #{e.message}\nBacktrace: #{e.backtrace.first(5).join("\n")}"
+      Rails.logger.error "Run execution failed: #{e.class} - #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+
+      # If we have logs, try to save them as an error step with the original content
+      if clean_logs.present?
+        steps.create!(
+          raw_response: clean_logs,
+          type: "Step::Error",
+          content: "#{error_message}\n\nOriginal logs:\n#{clean_logs.truncate(1000)}"
+        )
+      else
+        steps.create!(raw_response: error_message, type: "Step::Error", content: error_message)
+      end
       failed!
     ensure
       Docker.url = original_docker_url
@@ -86,11 +98,22 @@ class Run < ApplicationRecord
 
   def create_steps_from_logs(logs)
     processor_class = task.agent.log_processor_class
-    step_data_list = processor_class.process(logs)
+    Rails.logger.info "Processing logs with #{processor_class.name}"
+    Rails.logger.debug "Log content (first 500 chars): #{logs.truncate(500)}"
 
-    step_data_list.each do |step_data|
-      steps.create!(step_data)
+    step_data_list = processor_class.process(logs)
+    Rails.logger.info "Parsed #{step_data_list.size} steps"
+
+    step_data_list.each_with_index do |step_data, index|
+      Rails.logger.debug "Creating step #{index + 1}: #{step_data[:type]}"
+      step = steps.create!(step_data)
+      Rails.logger.debug "Created step #{step.id} successfully"
     end
+  rescue => e
+    Rails.logger.error "Failed to create steps from logs: #{e.message}"
+    Rails.logger.error "Processor class: #{processor_class.name}"
+    Rails.logger.error "Log excerpt: #{logs.truncate(200)}"
+    raise
   end
 
   def clone_repository
