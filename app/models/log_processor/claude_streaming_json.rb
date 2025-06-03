@@ -30,22 +30,7 @@ class LogProcessor::ClaudeStreamingJson < LogProcessor
         # Process complete lines
         while buffer.include?("\n")
           line, buffer = buffer.split("\n", 2)
-          next if line.strip.empty?
-
-          Rails.logger.info "Processing line: #{line.inspect}"
-          begin
-            parsed_item = JSON.parse(line.strip)
-            step_data = process_item(parsed_item)
-            step = run.steps.create!(step_data)
-            Rails.logger.info "Created step: #{step.type}"
-            run.broadcast_update
-          rescue JSON::ParserError => e
-            Rails.logger.error "JSON parse error for line: #{line.inspect} - #{e.message}"
-            run.steps.create!(raw_response: line, type: "Step::Error", content: line)
-            run.broadcast_update
-          rescue => e
-            Rails.logger.error "Failed to process streaming step: #{e.message}"
-          end
+          process_line(line, run)
         end
       end
     rescue => e
@@ -57,21 +42,7 @@ class LogProcessor::ClaudeStreamingJson < LogProcessor
     if buffer.strip.present?
       Rails.logger.info "Processing remaining buffer: #{buffer.inspect}"
       buffer.split("\n").each do |line|
-        next if line.strip.empty?
-
-        begin
-          parsed_item = JSON.parse(line.strip)
-          step_data = process_item(parsed_item)
-          step = run.steps.create!(step_data)
-          Rails.logger.info "Created step: #{step.type}"
-          run.broadcast_update
-        rescue JSON::ParserError => e
-          Rails.logger.error "JSON parse error for remaining line: #{line.inspect} - #{e.message}"
-          run.steps.create!(raw_response: line, type: "Step::Error", content: line)
-          run.broadcast_update
-        rescue => e
-          Rails.logger.error "Failed to process remaining step: #{e.message}"
-        end
+        process_line(line, run)
       end
     end
 
@@ -82,5 +53,26 @@ class LogProcessor::ClaudeStreamingJson < LogProcessor
     Rails.logger.error e.backtrace.join("\n")
     # Fallback to default behavior
     super
+  end
+
+  private
+
+  def process_line(line, run)
+    return if line.strip.empty?
+
+    Rails.logger.info "Processing line: #{line.inspect}"
+    begin
+      parsed_item = JSON.parse(line.strip)
+      step_data = process_item(parsed_item)
+      step = run.steps.create!(step_data)
+      Rails.logger.info "Created step: #{step.type}"
+      run.broadcast_update
+    rescue JSON::ParserError => e
+      Rails.logger.error "JSON parse error for line: #{line.inspect} - #{e.message}"
+      run.steps.create!(raw_response: line, type: "Step::Error", content: line)
+      run.broadcast_update
+    rescue => e
+      Rails.logger.error "Failed to process streaming step: #{e.message}"
+    end
   end
 end
