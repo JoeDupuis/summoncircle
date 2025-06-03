@@ -39,8 +39,20 @@ class Run < ApplicationRecord
       capture_repository_state
       completed!
     rescue => e
-      error_message = "Error: #{e.message}"
-      steps.create!(raw_response: error_message, type: "Step::Text", content: error_message)
+      error_message = "Error: #{e.message}\nBacktrace: #{e.backtrace.first(5).join("\n")}"
+      Rails.logger.error "Run execution failed: #{e.class} - #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+
+      # If we have logs, try to save them as an error step with the original content
+      if clean_logs.present?
+        steps.create!(
+          raw_response: clean_logs,
+          type: "Step::Error",
+          content: "#{error_message}\n\nOriginal logs:\n#{clean_logs.truncate(1000)}"
+        )
+      else
+        steps.create!(raw_response: error_message, type: "Step::Error", content: error_message)
+      end
       failed!
     ensure
       Docker.url = original_docker_url
@@ -91,6 +103,11 @@ class Run < ApplicationRecord
     step_data_list.each do |step_data|
       steps.create!(step_data)
     end
+  rescue => e
+    Rails.logger.error "Failed to create steps from logs: #{e.message}"
+    Rails.logger.error "Processor class: #{processor_class.name}"
+    Rails.logger.error "Log excerpt: #{logs.truncate(200)}"
+    raise
   end
 
   def clone_repository
