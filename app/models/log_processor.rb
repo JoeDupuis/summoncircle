@@ -1,8 +1,7 @@
 class LogProcessor
   ALL = [
     LogProcessor::Text,
-    LogProcessor::ClaudeJson,
-    LogProcessor::Auto
+    LogProcessor::ClaudeJson
   ].freeze
 
   def self.process(logs)
