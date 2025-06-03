@@ -22,5 +22,4 @@ class UserTest < ActiveSupport::TestCase
     assert_equal ssh_key_content, user.ssh_key
     assert_not_equal ssh_key_content, user.read_attribute_before_type_cast(:ssh_key)
   end
-
 end

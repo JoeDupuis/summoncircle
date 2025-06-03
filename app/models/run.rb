@@ -76,6 +76,7 @@ class Run < ApplicationRecord
       "Image" => agent.docker_image,
       "Cmd" => command,
       "Env" => env_vars,
+      "User" => agent.user_id.to_s,
       "WorkingDir" => task.agent.workplace_path,
       "HostConfig" => {
         "Binds" => binds
@@ -194,26 +195,12 @@ class Run < ApplicationRecord
   end
 
   def archive_file_to_container(container, content, destination_path, permissions = 0o644)
-    filename = File.basename(destination_path)
     target_dir = File.dirname(destination_path)
-    agent = task.agent
-    user_id = agent.user_id.to_s
 
-    # Create target directory with correct ownership
     container.exec([ "mkdir", "-p", target_dir ])
-    container.exec([ "chown", user_id, target_dir ])
 
-    temp_dir = Dir.mktmpdir
-    temp_file_path = File.join(temp_dir, filename)
-    File.write(temp_file_path, content)
-    File.chmod(permissions, temp_file_path)
-
-    container.archive_in(temp_file_path, target_dir)
-    
-    # Set correct ownership and permissions on the archived file
-    container.exec([ "chown", user_id, destination_path ])
+    encoded_content = Base64.strict_encode64(content)
+    container.exec([ "sh", "-c", "echo '#{encoded_content}' | base64 -d > #{destination_path}" ])
     container.exec([ "chmod", permissions.to_s(8), destination_path ])
-  ensure
-    FileUtils.rm_rf(temp_dir) if temp_dir
   end
 end

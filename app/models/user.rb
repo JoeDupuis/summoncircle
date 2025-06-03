@@ -8,5 +8,4 @@ class User < ApplicationRecord
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
   enum :role, { standard: 0, admin: 1 }, allow_nil: true
-
 end
