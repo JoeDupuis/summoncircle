@@ -9,30 +9,6 @@ class User < ApplicationRecord
 
   enum :role, { standard: 0, admin: 1 }, allow_nil: true
 
-  def instructions_file_path
-    return nil unless instructions.present?
-
-    @instructions_file ||= begin
-      file = Tempfile.new([ "user_instructions_#{id}", ".txt" ])
-      file.write(instructions)
-      file.close
-      file.path
-    end
-  end
-
-  def cleanup_instructions_file
-    return unless @instructions_file
-
-    File.unlink(@instructions_file) if File.exist?(@instructions_file)
-    @instructions_file = nil
-  end
-
-  def instructions_bind_string(mount_path)
-    return nil unless instructions_file_path && mount_path.present?
-
-    "#{instructions_file_path}:#{mount_path}:ro"
-  end
-
   def ssh_key_file_path
     return nil unless ssh_key.present?
 
@@ -57,29 +33,5 @@ class User < ApplicationRecord
     return nil unless mount_path.present?
 
     "#{ssh_key_file_path}:#{mount_path}:ro"
-  end
-
-  def git_config_file_path
-    return nil unless git_config.present?
-
-    @git_config_file ||= begin
-      file = Tempfile.new([ "git_config_#{id}", ".gitconfig" ])
-      file.write(git_config)
-      file.close
-      file.path
-    end
-  end
-
-  def cleanup_git_config_file
-    return unless @git_config_file
-
-    File.unlink(@git_config_file) if File.exist?(@git_config_file)
-    @git_config_file = nil
-  end
-
-  def git_config_bind_string(agent)
-    return nil unless git_config_file_path && agent&.home_path.present?
-
-    "#{git_config_file_path}:#{agent.home_path}/.gitconfig:ro"
   end
 end

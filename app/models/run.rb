@@ -25,6 +25,7 @@ class Run < ApplicationRecord
       clone_repository if first_run? && should_clone_repository?
 
       container = create_container
+      setup_container_files(container)
       container.start
       container.wait
 
@@ -46,9 +47,7 @@ class Run < ApplicationRecord
       update!(completed_at: Time.current)
       save!
       container&.delete(force: true) if defined?(container)
-      task.user.cleanup_instructions_file
       task.user.cleanup_ssh_key_file
-      task.user.cleanup_git_config_file
     end
   end
 
@@ -58,21 +57,6 @@ class Run < ApplicationRecord
     broadcast_replace_later_to(task, target: self, partial: "tasks/run", locals: { run: self })
   end
 
-  def build_git_binds(base_binds)
-    binds = base_binds.dup
-    
-    ssh_key_bind = task.user.ssh_key_bind_string(task.agent.ssh_mount_path)
-    if ssh_key_bind
-      binds << ssh_key_bind
-    end
-    
-    git_config_bind = task.user.git_config_bind_string(task.agent)
-    if git_config_bind
-      binds << git_config_bind
-    end
-    
-    binds
-  end
 
   def configure_docker_host
     agent = task.agent
@@ -87,22 +71,6 @@ class Run < ApplicationRecord
     command = command_template.map { |arg| arg.gsub("{PROMPT}", prompt) }
 
     binds = task.volume_mounts.includes(:volume).map(&:bind_string)
-
-    instructions_bind = task.user.instructions_bind_string(agent.instructions_mount_path)
-    if instructions_bind
-      binds << instructions_bind
-    end
-
-    ssh_key_bind = task.user.ssh_key_bind_string(agent.ssh_mount_path)
-    if ssh_key_bind
-      binds << ssh_key_bind
-    end
-
-    git_config_bind = task.user.git_config_bind_string(agent)
-    if git_config_bind
-      binds << git_config_bind
-    end
-
     env_vars = agent.env_strings + project_env_strings
 
     Docker::Container.create(
@@ -132,6 +100,12 @@ class Run < ApplicationRecord
     clone_target = repo_path.presence&.sub(/^\//, "") || "."
     repository_url = project.repository_url_with_token(task.user)
 
+    clone_binds = [ task.workplace_mount.bind_string ]
+    ssh_key_bind = task.user.ssh_key_bind_string(task.agent.ssh_mount_path)
+    if ssh_key_bind
+      clone_binds << ssh_key_bind
+    end
+
     git_container = Docker::Container.create(
       "Image" => task.agent.docker_image,
       "Entrypoint" => [ "sh" ],
@@ -139,7 +113,7 @@ class Run < ApplicationRecord
       "WorkingDir" => working_dir,
       "User" => task.agent.user_id.to_s,
       "HostConfig" => {
-        "Binds" => build_git_binds([ task.workplace_mount.bind_string ])
+        "Binds" => clone_binds
       }
     )
     git_container.start
@@ -170,6 +144,12 @@ class Run < ApplicationRecord
 
     git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
 
+    capture_binds = [ task.workplace_mount.bind_string ]
+    ssh_key_bind = task.user.ssh_key_bind_string(task.agent.ssh_mount_path)
+    if ssh_key_bind
+      capture_binds << ssh_key_bind
+    end
+
     git_container = Docker::Container.create(
       "Image" => task.agent.docker_image,
       "Entrypoint" => [ "sh" ],
@@ -177,7 +157,7 @@ class Run < ApplicationRecord
       "WorkingDir" => git_working_dir,
       "User" => task.agent.user_id.to_s,
       "HostConfig" => {
-        "Binds" => build_git_binds([ task.workplace_mount.bind_string ])
+        "Binds" => capture_binds
       }
     )
 
@@ -203,5 +183,34 @@ class Run < ApplicationRecord
 
   def project_env_strings
     task.project.secrets.map { |secret| "#{secret.key}=#{secret.value}" }
+  end
+
+  def setup_container_files(container)
+    agent = task.agent
+    user = task.user
+
+    if user.git_config.present? && agent.home_path.present?
+      archive_file_to_container(container, user.git_config, File.join(agent.home_path, ".gitconfig"))
+    end
+
+    if user.instructions.present? && agent.instructions_mount_path.present?
+      archive_file_to_container(container, user.instructions, agent.instructions_mount_path)
+    end
+
+    if user.ssh_key.present? && agent.ssh_mount_path.present?
+      archive_file_to_container(container, user.ssh_key, agent.ssh_mount_path, 0o600)
+    end
+  end
+
+  def archive_file_to_container(container, content, destination_path, permissions = 0o644)
+    filename = File.basename(destination_path)
+    temp_dir = Dir.mktmpdir
+    temp_file_path = File.join(temp_dir, filename)
+    File.write(temp_file_path, content)
+    File.chmod(permissions, temp_file_path)
+
+    container.archive_in(temp_file_path, File.dirname(destination_path))
+  ensure
+    FileUtils.rm_rf(temp_dir) if temp_dir
   end
 end
