@@ -74,6 +74,50 @@ class StepTest < ActiveSupport::TestCase
     end
   end
 
+  test "content filters SSH key content" do
+    user = users(:one)
+    ssh_key_content = "-----BEGIN OPENSSH PRIVATE KEY-----\ntest_key_content\n-----END OPENSSH PRIVATE KEY-----"
+    user.update!(ssh_key: ssh_key_content)
+
+    task = tasks(:without_runs)
+    task.update!(user: user)
+    run = task.runs.create!(prompt: "test")
+
+    content_with_key = "Some output\n-----BEGIN OPENSSH PRIVATE KEY-----\ntest_key_content\n-----END OPENSSH PRIVATE KEY-----\nMore output"
+    step = Step.new(run: run, raw_response: "response", content: content_with_key)
+
+    filtered_content = step.content
+
+    assert_not_includes filtered_content, "-----BEGIN OPENSSH PRIVATE KEY-----"
+    assert_not_includes filtered_content, "test_key_content"
+    assert_not_includes filtered_content, "-----END OPENSSH PRIVATE KEY-----"
+    assert_includes filtered_content, "[FILTERED]"
+    assert_includes filtered_content, "Some output"
+    assert_includes filtered_content, "More output"
+  end
+
+  test "raw_response filters SSH key content" do
+    user = users(:one)
+    ssh_key_content = "-----BEGIN OPENSSH PRIVATE KEY-----\ntest_key_content\n-----END OPENSSH PRIVATE KEY-----"
+    user.update!(ssh_key: ssh_key_content)
+
+    task = tasks(:without_runs)
+    task.update!(user: user)
+    run = task.runs.create!(prompt: "test")
+
+    response_with_key = "Response with\n-----BEGIN OPENSSH PRIVATE KEY-----\ntest_key_content\n-----END OPENSSH PRIVATE KEY-----\nkey content"
+    step = Step.new(run: run, raw_response: response_with_key)
+
+    filtered_response = step.raw_response
+
+    assert_not_includes filtered_response, "-----BEGIN OPENSSH PRIVATE KEY-----"
+    assert_not_includes filtered_response, "test_key_content"
+    assert_not_includes filtered_response, "-----END OPENSSH PRIVATE KEY-----"
+    assert_includes filtered_response, "[FILTERED]"
+    assert_includes filtered_response, "Response with"
+    assert_includes filtered_response, "key content"
+  end
+
   test "filters github token from content" do
     user = users(:one)
     user.update!(github_token: "github_token_123")

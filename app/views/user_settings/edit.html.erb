@@ -10,6 +10,12 @@
   </div>
 
   <div>
+    <%= form.label :ssh_key, "SSH Private Key" %><br>
+    <%= form.text_area :ssh_key, rows: 10, placeholder: "Paste your SSH private key here (leave blank to keep current key)", value: "" %>
+    <small>Used for Git authentication. Key is encrypted and automatically mounted in containers. Never displayed or logged.</small>
+  </div>
+
+  <div>
     <%= form.label :instructions, "Global Agent Instructions" %><br>
     <%= form.text_area :instructions, rows: 10, placeholder: "Enter instructions that will be available to all agents..." %>
     <small class="form-help">These instructions will be mounted as a file in agent containers. Configure mount path in each agent's settings.</small>

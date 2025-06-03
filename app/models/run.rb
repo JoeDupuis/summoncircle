@@ -25,8 +25,8 @@ class Run < ApplicationRecord
       clone_repository if first_run? && should_clone_repository?
 
       container = create_container
-      setup_container_files(container)
       container.start
+      setup_container_files(container)
       container.wait
 
 
@@ -70,13 +70,13 @@ class Run < ApplicationRecord
     command = command_template.map { |arg| arg.gsub("{PROMPT}", prompt) }
 
     binds = task.volume_mounts.includes(:volume).map(&:bind_string)
-
     env_vars = agent.env_strings + project_env_strings
 
     Docker::Container.create(
       "Image" => agent.docker_image,
       "Cmd" => command,
       "Env" => env_vars,
+      "User" => agent.user_id.to_s,
       "WorkingDir" => task.agent.workplace_path,
       "HostConfig" => {
         "Binds" => binds
@@ -184,16 +184,19 @@ class Run < ApplicationRecord
     if user.instructions.present? && agent.instructions_mount_path.present?
       archive_file_to_container(container, user.instructions, agent.instructions_mount_path)
     end
+
+    if user.ssh_key.present? && agent.ssh_mount_path.present?
+      archive_file_to_container(container, user.ssh_key, agent.ssh_mount_path, 0o600)
+    end
   end
 
-  def archive_file_to_container(container, content, destination_path)
-    filename = File.basename(destination_path)
-    temp_dir = Dir.mktmpdir
-    temp_file_path = File.join(temp_dir, filename)
-    File.write(temp_file_path, content)
+  def archive_file_to_container(container, content, destination_path, permissions = 0o644)
+    target_dir = File.dirname(destination_path)
 
-    container.archive_in(temp_file_path, File.dirname(destination_path))
-  ensure
-    FileUtils.rm_rf(temp_dir) if temp_dir
+    container.exec([ "mkdir", "-p", target_dir ])
+
+    encoded_content = Base64.strict_encode64(content)
+    container.exec([ "sh", "-c", "echo '#{encoded_content}' | base64 -d > #{destination_path}" ])
+    container.exec([ "chmod", permissions.to_s(8), destination_path ])
   end
 end

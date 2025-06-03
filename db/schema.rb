@@ -25,6 +25,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_02_034140) do
     t.datetime "discarded_at"
     t.integer "user_id", default: 1000, null: false
     t.string "instructions_mount_path"
+    t.string "ssh_mount_path"
     t.string "home_path"
     t.index ["discarded_at"], name: "index_agents_on_discarded_at"
   end
@@ -116,6 +117,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_02_034140) do
     t.integer "role"
     t.text "github_token"
     t.text "instructions"
+    t.text "ssh_key"
     t.text "git_config"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end

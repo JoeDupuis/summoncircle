@@ -3,6 +3,7 @@ class User < ApplicationRecord
   has_many :sessions, dependent: :destroy
 
   encrypts :github_token, deterministic: false
+  encrypts :ssh_key, deterministic: false
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
