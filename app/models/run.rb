@@ -19,9 +19,9 @@ class Run < ApplicationRecord
     running!
     update!(started_at: Time.current)
 
-    original_docker_config = save_docker_config
+    save_docker_config
     begin
-      set_docker_host(task.agent.docker_host) if task.agent.docker_host.present?
+      set_docker_host(task.agent.docker_host)
       clone_repository if first_run? && should_clone_repository?
 
       container = create_container
@@ -55,7 +55,7 @@ class Run < ApplicationRecord
       end
       failed!
     ensure
-      restore_docker_config(original_docker_config)
+      restore_docker_config
       update!(completed_at: Time.current)
       save!
       container&.delete(force: true) if defined?(container)
@@ -70,13 +70,13 @@ class Run < ApplicationRecord
 
 
   def save_docker_config
-    {
-      url: Docker.url,
-      options: Docker.options
-    }
+    @original_docker_url = Docker.url
+    @original_docker_options = Docker.options
   end
 
   def set_docker_host(docker_host)
+    return unless docker_host.present?
+
     Docker.url = docker_host
     Docker.options = {
       read_timeout: 600,
@@ -85,9 +85,9 @@ class Run < ApplicationRecord
     }
   end
 
-  def restore_docker_config(config)
-    Docker.url = config[:url]
-    Docker.options = config[:options]
+  def restore_docker_config
+    Docker.url = @original_docker_url
+    Docker.options = @original_docker_options
   end
 
   def create_container
