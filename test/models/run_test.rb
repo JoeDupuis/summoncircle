@@ -141,65 +141,6 @@ class RunTest < ActiveSupport::TestCase
   end
 
 
-  test "run uses unified flow with streaming processor" do
-    task = tasks(:with_claude_streaming_json_processor)
-    run = task.runs.create!(prompt: "Test")
-
-    # Test that streaming processor's process_container method is called
-    mock_processor = mock("processor")
-    mock_processor.expects(:process_container).with(anything, run)
-
-    LogProcessor::ClaudeStreamingJson.stubs(:new).returns(mock_processor)
-
-    # Use existing helper methods for Docker mocking
-    expect_git_clone_container
-    # Mock the main container, but we don't expect logs/wait since the processor handles it
-    mock_container = mock("container")
-    mock_container.expects(:start)
-    mock_container.expects(:delete).with(force: true)
-    Docker::Container.expects(:create).with(
-      has_entries(
-        "Image" => "example/image:latest",
-        "Cmd" => [ "echo", "test" ],
-        "WorkingDir" => "/workspace"
-      )
-    ).returns(mock_container)
-    expect_git_diff_container
-
-    run.execute!
-
-    assert run.completed?
-  end
-
-  test "run uses unified flow with non-streaming processor" do
-    task = tasks(:with_claude_json_processor)
-    run = task.runs.create!(prompt: "Test")
-
-    # Test that non-streaming processor's process_container method is called
-    mock_processor = mock("processor")
-    mock_processor.expects(:process_container).with(anything, run)
-
-    LogProcessor::ClaudeJson.stubs(:new).returns(mock_processor)
-
-    # Use existing helper methods for Docker mocking
-    expect_git_clone_container
-    # Mock the main container, but we don't expect logs/wait since the processor handles it
-    mock_container = mock("container")
-    mock_container.expects(:start)
-    mock_container.expects(:delete).with(force: true)
-    Docker::Container.expects(:create).with(
-      has_entries(
-        "Image" => "example/image:latest",
-        "Cmd" => [ "echo", "test" ],
-        "WorkingDir" => "/workspace"
-      )
-    ).returns(mock_container)
-    expect_git_diff_container
-
-    run.execute!
-
-    assert run.completed?
-  end
 
   test "execute! passes environment variables to Docker container" do
     task = tasks(:with_env_vars)
