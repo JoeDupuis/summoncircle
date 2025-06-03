@@ -27,15 +27,18 @@ class Run < ApplicationRecord
       container = create_container
       container.start
       setup_container_files(container)
-      container.wait
 
+      if task.agent.log_processor == "ClaudeStreamingJson"
+        stream_logs_and_create_steps(container)
+      else
+        container.wait
+        logs = container.logs(stdout: true, stderr: true)
+        # Docker logs prefix each line with 8 bytes of metadata that we need to strip
+        clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
 
-      logs = container.logs(stdout: true, stderr: true)
-      # Docker logs prefix each line with 8 bytes of metadata that we need to strip
-      clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
-
-      # Process logs and create steps
-      create_steps_from_logs(clean_logs)
+        # Process logs and create steps
+        create_steps_from_logs(clean_logs)
+      end
       capture_repository_state
       completed!
     rescue => e
@@ -108,6 +111,48 @@ class Run < ApplicationRecord
     Rails.logger.error "Processor class: #{processor_class.name}"
     Rails.logger.error "Log excerpt: #{logs.truncate(200)}"
     raise
+  end
+
+  def stream_logs_and_create_steps(container)
+    processor = task.agent.log_processor_class.new
+    buffer = ""
+
+    container.logs(stdout: true, stderr: true, follow: true) do |stream, chunk|
+      # Docker logs prefix each line with 8 bytes of metadata that we need to strip
+      clean_chunk = chunk.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub
+
+      buffer += clean_chunk
+
+      # Process complete lines (ending with newline)
+      while buffer.include?("\n")
+        line, buffer = buffer.split("\n", 2)
+        next if line.strip.empty?
+
+        begin
+          # Parse and process individual JSON line
+          parsed_item = JSON.parse(line.strip)
+          step_data = processor.send(:process_item, parsed_item)
+          steps.create!(step_data)
+          broadcast_update
+        rescue JSON::ParserError
+          # Skip malformed JSON lines or store as error
+          steps.create!(raw_response: line, type: "Step::Error", content: line)
+          broadcast_update
+        rescue => e
+          Rails.logger.error "Failed to process streaming step: #{e.message}"
+        end
+      end
+    end
+
+    # Wait for container to finish
+    container.wait
+  rescue => e
+    Rails.logger.error "Streaming failed: #{e.message}"
+    # Fallback to regular log processing
+    container.wait
+    logs = container.logs(stdout: true, stderr: true)
+    clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
+    create_steps_from_logs(clean_logs)
   end
 
   def clone_repository

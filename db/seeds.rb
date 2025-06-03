@@ -36,9 +36,9 @@ if Rails.env.development?
   claude_stream_agent = Agent.find_or_create_by!(name: "Claude Json") do |agent|
     agent.docker_image = "claude_max:latest"
     agent.workplace_path = "/workspace"
-    agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "json", "--verbose", "-p", "{PROMPT}" ]
-    agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "json", "--verbose", "-p", "{PROMPT}" ]
-    agent.log_processor = "ClaudeJson"
+    agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "streaming-json", "--verbose", "-p", "{PROMPT}" ]
+    agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "streaming-json", "--verbose", "-p", "{PROMPT}" ]
+    agent.log_processor = "ClaudeStreamingJson"
   end
 
   Volume.find_or_create_by!(agent: claude_stream_agent, name: "home") do |volume|
