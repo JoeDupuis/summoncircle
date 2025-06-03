@@ -8,6 +8,8 @@ export default class extends Controller {
 
   connect() {
     this.outputFormat = 'side-by-side'
+    // Ensure the shadow root is available
+    this.ensureShadowRoot()
     if (this.hasDiffTextValue && this.diffTextValue.trim()) {
       this.render()
     }
@@ -24,16 +26,34 @@ export default class extends Controller {
     this.render()
   }
 
+  ensureShadowRoot() {
+    // Check if shadow root already exists
+    if (this.outputTarget.shadowRoot) {
+      return this.outputTarget.shadowRoot
+    }
+
+    // If there's a template with shadowrootmode, the browser should have already created the shadow root
+    // But in case it hasn't (e.g., due to timing issues with Turbo), we'll create it manually
+    const template = this.outputTarget.querySelector('template[shadowrootmode]')
+    if (template && !this.outputTarget.shadowRoot) {
+      const shadowRoot = this.outputTarget.attachShadow({ mode: 'open' })
+      shadowRoot.appendChild(template.content.cloneNode(true))
+      return shadowRoot
+    }
+
+    return this.outputTarget.shadowRoot
+  }
+
   render() {
     if (typeof Diff2HtmlUI === 'undefined') {
       console.error('Diff2HtmlUI is not available')
       return
     }
 
-    // Get the shadow root from the output target
-    const shadowRoot = this.outputTarget.shadowRoot
+    // Ensure shadow root exists
+    const shadowRoot = this.ensureShadowRoot()
     if (!shadowRoot) {
-      console.error('Shadow root not found')
+      console.error('Shadow root not found and could not be created')
       return
     }
 

@@ -191,4 +191,26 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to project_tasks_path(@project)
     assert @task.reload.discarded?
   end
+
+  test "show task with run containing diff" do
+    login @user
+    # Create a run with a diff
+    run = @task.runs.create!(prompt: "Test prompt", status: :completed)
+    step = run.steps.create!(
+      raw_response: "Repository state captured",
+      type: "Step::System",
+      content: "Repository state captured"
+    )
+    repo_state = step.repo_states.create!(
+      uncommitted_diff: "diff --git a/test.rb b/test.rb\nindex 0000000..1234567 100644\n--- /dev/null\n+++ b/test.rb\n@@ -0,0 +1,3 @@\n+def hello\n+  puts 'Hello, World!'\n+end",
+      repository_path: "/test/path"
+    )
+
+    get task_url(@task)
+    assert_response :success
+    assert_select "##{dom_id(run)}"
+    assert_select "[data-controller='diff']"
+    # Check that the diff text is properly escaped
+    assert_match(/data-diff-diff-text-value/, response.body)
+  end
 end
