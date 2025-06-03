@@ -100,8 +100,6 @@ class Run < ApplicationRecord
     clone_target = repo_path.presence&.sub(/^\//, "") || "."
     repository_url = project.repository_url_with_token(task.user)
 
-    clone_binds = [ task.workplace_mount.bind_string ]
-
     git_container = Docker::Container.create(
       "Image" => task.agent.docker_image,
       "Entrypoint" => [ "sh" ],
@@ -109,7 +107,7 @@ class Run < ApplicationRecord
       "WorkingDir" => working_dir,
       "User" => task.agent.user_id.to_s,
       "HostConfig" => {
-        "Binds" => clone_binds
+        "Binds" => [ task.workplace_mount.bind_string ]
       }
     )
     git_container.start
