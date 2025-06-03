@@ -28,17 +28,9 @@ class Run < ApplicationRecord
       container.start
       setup_container_files(container)
 
-      if task.agent.log_processor == "ClaudeStreamingJson"
-        stream_logs_and_create_steps(container)
-      else
-        container.wait
-        logs = container.logs(stdout: true, stderr: true)
-        # Docker logs prefix each line with 8 bytes of metadata that we need to strip
-        clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
-
-        # Process logs and create steps
-        create_steps_from_logs(clean_logs)
-      end
+      # Delegate to log processor for container processing and step creation
+      processor = task.agent.log_processor_class.new
+      processor.process_container(container, self)
       capture_repository_state
       completed!
     rescue => e
@@ -46,16 +38,8 @@ class Run < ApplicationRecord
       Rails.logger.error "Run execution failed: #{e.class} - #{e.message}"
       Rails.logger.error e.backtrace.join("\n")
 
-      # If we have logs, try to save them as an error step with the original content
-      if clean_logs.present?
-        steps.create!(
-          raw_response: clean_logs,
-          type: "Step::Error",
-          content: "#{error_message}\n\nOriginal logs:\n#{clean_logs.truncate(1000)}"
-        )
-      else
-        steps.create!(raw_response: error_message, type: "Step::Error", content: error_message)
-      end
+      # Create an error step with the error message
+      steps.create!(raw_response: error_message, type: "Step::Error", content: error_message)
       failed!
     ensure
       Docker.url = original_docker_url
@@ -65,11 +49,11 @@ class Run < ApplicationRecord
     end
   end
 
-  private
-
   def broadcast_update
     broadcast_replace_later_to(task, target: self, partial: "tasks/run", locals: { run: self })
   end
+
+  private
 
 
   def configure_docker_host
@@ -99,93 +83,6 @@ class Run < ApplicationRecord
     )
   end
 
-  def create_steps_from_logs(logs)
-    processor_class = task.agent.log_processor_class
-    step_data_list = processor_class.process(logs)
-
-    step_data_list.each do |step_data|
-      steps.create!(step_data)
-    end
-  rescue => e
-    Rails.logger.error "Failed to create steps from logs: #{e.message}"
-    Rails.logger.error "Processor class: #{processor_class.name}"
-    Rails.logger.error "Log excerpt: #{logs.truncate(200)}"
-    raise
-  end
-
-  def stream_logs_and_create_steps(container)
-    Rails.logger.info "Starting attach-based log streaming for run #{id}"
-    processor = task.agent.log_processor_class.new
-    buffer = ""
-
-    # Use attach to get real-time streaming output
-    begin
-      container.attach(stdout: true, stderr: true, stream: true) do |stream, chunk|
-        # Docker attach doesn't add the 8-byte prefix like logs do
-        clean_chunk = chunk.force_encoding("UTF-8").scrub
-        Rails.logger.info "Received chunk: #{clean_chunk.inspect}"
-
-        buffer += clean_chunk
-
-        # Process complete lines
-        while buffer.include?("\n")
-          line, buffer = buffer.split("\n", 2)
-          next if line.strip.empty?
-
-          Rails.logger.info "Processing line: #{line.inspect}"
-          begin
-            parsed_item = JSON.parse(line.strip)
-            step_data = processor.send(:process_item, parsed_item)
-            step = steps.create!(step_data)
-            Rails.logger.info "Created step: #{step.type}"
-            broadcast_update
-          rescue JSON::ParserError => e
-            Rails.logger.error "JSON parse error for line: #{line.inspect} - #{e.message}"
-            steps.create!(raw_response: line, type: "Step::Error", content: line)
-            broadcast_update
-          rescue => e
-            Rails.logger.error "Failed to process streaming step: #{e.message}"
-          end
-        end
-      end
-    rescue => e
-      Rails.logger.error "Attach failed: #{e.message}"
-      Rails.logger.error e.backtrace.join("\n")
-    end
-
-    # Process any remaining content in buffer
-    if buffer.strip.present?
-      Rails.logger.info "Processing remaining buffer: #{buffer.inspect}"
-      buffer.split("\n").each do |line|
-        next if line.strip.empty?
-
-        begin
-          parsed_item = JSON.parse(line.strip)
-          step_data = processor.send(:process_item, parsed_item)
-          step = steps.create!(step_data)
-          Rails.logger.info "Created step: #{step.type}"
-          broadcast_update
-        rescue JSON::ParserError => e
-          Rails.logger.error "JSON parse error for remaining line: #{line.inspect} - #{e.message}"
-          steps.create!(raw_response: line, type: "Step::Error", content: line)
-          broadcast_update
-        rescue => e
-          Rails.logger.error "Failed to process remaining step: #{e.message}"
-        end
-      end
-    end
-
-    container.wait
-    Rails.logger.info "Container finished, streaming complete"
-  rescue => e
-    Rails.logger.error "Streaming failed: #{e.message}"
-    Rails.logger.error e.backtrace.join("\n")
-    container.wait
-    logs = container.logs(stdout: true, stderr: true)
-    clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
-    Rails.logger.info "Fallback logs: #{clean_logs.inspect}"
-    create_steps_from_logs(clean_logs)
-  end
 
   def clone_repository
     project = task.project
