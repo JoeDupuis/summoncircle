@@ -98,16 +98,10 @@ class Run < ApplicationRecord
 
   def create_steps_from_logs(logs)
     processor_class = task.agent.log_processor_class
-    Rails.logger.info "Processing logs with #{processor_class.name}"
-    Rails.logger.debug "Log content (first 500 chars): #{logs.truncate(500)}"
-
     step_data_list = processor_class.process(logs)
-    Rails.logger.info "Parsed #{step_data_list.size} steps"
 
-    step_data_list.each_with_index do |step_data, index|
-      Rails.logger.debug "Creating step #{index + 1}: #{step_data[:type]}"
-      step = steps.create!(step_data)
-      Rails.logger.debug "Created step #{step.id} successfully"
+    step_data_list.each do |step_data|
+      steps.create!(step_data)
     end
   rescue => e
     Rails.logger.error "Failed to create steps from logs: #{e.message}"
