@@ -19,7 +19,6 @@ class Run < ApplicationRecord
     running!
     update!(started_at: Time.current)
 
-    save_docker_config
     begin
       set_docker_host(task.agent.docker_host)
       clone_repository if first_run? && should_clone_repository?
@@ -69,12 +68,10 @@ class Run < ApplicationRecord
   end
 
 
-  def save_docker_config
-    @original_docker_url = Docker.url
-    @original_docker_options = Docker.options
-  end
-
   def set_docker_host(docker_host)
+    @original_docker_url ||= Docker.url
+    @original_docker_options ||= Docker.options
+
     return unless docker_host.present?
 
     Docker.url = docker_host
