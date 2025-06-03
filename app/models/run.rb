@@ -195,12 +195,17 @@ class Run < ApplicationRecord
 
   def archive_file_to_container(container, content, destination_path, permissions = 0o644)
     filename = File.basename(destination_path)
+    target_dir = File.dirname(destination_path)
+    
+    # Create target directory if it doesn't exist (needed for .ssh directories)
+    container.exec([ "mkdir", "-p", target_dir ])
+    
     temp_dir = Dir.mktmpdir
     temp_file_path = File.join(temp_dir, filename)
     File.write(temp_file_path, content)
     File.chmod(permissions, temp_file_path)
 
-    container.archive_in(temp_file_path, File.dirname(destination_path))
+    container.archive_in(temp_file_path, target_dir)
   ensure
     FileUtils.rm_rf(temp_dir) if temp_dir
   end
