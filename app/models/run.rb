@@ -188,12 +188,12 @@ class Run < ApplicationRecord
 
   def archive_file_to_container(container, content, destination_path)
     filename = File.basename(destination_path)
-    temp_file = Tempfile.new([filename, ""])
-    temp_file.write(content)
-    temp_file.close
+    temp_dir = Dir.mktmpdir
+    temp_file_path = File.join(temp_dir, filename)
+    File.write(temp_file_path, content)
 
-    container.archive_in(temp_file.path, File.dirname(destination_path))
+    container.archive_in(temp_file_path, File.dirname(destination_path))
   ensure
-    temp_file&.unlink
+    FileUtils.rm_rf(temp_dir) if temp_dir
   end
 end
