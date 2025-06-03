@@ -19,15 +19,14 @@ class Run < ApplicationRecord
     running!
     update!(started_at: Time.current)
 
-    original_docker_url = Docker.url
     begin
-      configure_docker_host
+      set_docker_host(task.agent.docker_host)
       clone_repository if first_run? && should_clone_repository?
 
       container = create_container
       container.start
       setup_container_files(container)
-      container.wait
+      container.wait(3600)
 
 
       logs = container.logs(stdout: true, stderr: true)
@@ -55,7 +54,7 @@ class Run < ApplicationRecord
       end
       failed!
     ensure
-      Docker.url = original_docker_url
+      restore_docker_config
       update!(completed_at: Time.current)
       save!
       container&.delete(force: true) if defined?(container)
@@ -69,11 +68,23 @@ class Run < ApplicationRecord
   end
 
 
-  def configure_docker_host
-    agent = task.agent
-    return unless agent.docker_host.present?
+  def set_docker_host(docker_host)
+    @original_docker_url ||= Docker.url
+    @original_docker_options ||= Docker.options
 
-    Docker.url = agent.docker_host
+    return unless docker_host.present?
+
+    Docker.url = docker_host
+    Docker.options = {
+      read_timeout: 600,
+      write_timeout: 600,
+      connect_timeout: 60
+    }
+  end
+
+  def restore_docker_config
+    Docker.url = @original_docker_url
+    Docker.options = @original_docker_options
   end
 
   def create_container
@@ -128,7 +139,7 @@ class Run < ApplicationRecord
       }
     )
     git_container.start
-    wait_result = git_container.wait
+    wait_result = git_container.wait(300)
     logs = git_container.logs(stdout: true, stderr: true)
     clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
     exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
@@ -167,7 +178,7 @@ class Run < ApplicationRecord
     )
 
     git_container.start
-    wait_result = git_container.wait
+    wait_result = git_container.wait(300)
     logs = git_container.logs(stdout: true, stderr: true)
     uncommitted_diff = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
 
