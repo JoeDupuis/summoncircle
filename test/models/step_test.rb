@@ -94,8 +94,6 @@ class StepTest < ActiveSupport::TestCase
     assert_includes filtered_content, "[FILTERED]"
     assert_includes filtered_content, "Some output"
     assert_includes filtered_content, "More output"
-
-    user.cleanup_ssh_key_file
   end
 
   test "raw_response filters SSH key content" do
@@ -118,8 +116,6 @@ class StepTest < ActiveSupport::TestCase
     assert_includes filtered_response, "[FILTERED]"
     assert_includes filtered_response, "Response with"
     assert_includes filtered_response, "key content"
-
-    user.cleanup_ssh_key_file
   end
 
   test "filters github token from content" do
