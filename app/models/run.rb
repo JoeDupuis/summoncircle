@@ -196,9 +196,12 @@ class Run < ApplicationRecord
   def archive_file_to_container(container, content, destination_path, permissions = 0o644)
     filename = File.basename(destination_path)
     target_dir = File.dirname(destination_path)
+    agent = task.agent
+    user_id = agent.user_id.to_s
 
-    # Create target directory if it doesn't exist (needed for .ssh directories)
+    # Create target directory with correct ownership
     container.exec([ "mkdir", "-p", target_dir ])
+    container.exec([ "chown", user_id, target_dir ])
 
     temp_dir = Dir.mktmpdir
     temp_file_path = File.join(temp_dir, filename)
@@ -206,6 +209,10 @@ class Run < ApplicationRecord
     File.chmod(permissions, temp_file_path)
 
     container.archive_in(temp_file_path, target_dir)
+    
+    # Set correct ownership and permissions on the archived file
+    container.exec([ "chown", user_id, destination_path ])
+    container.exec([ "chmod", permissions.to_s(8), destination_path ])
   ensure
     FileUtils.rm_rf(temp_dir) if temp_dir
   end
