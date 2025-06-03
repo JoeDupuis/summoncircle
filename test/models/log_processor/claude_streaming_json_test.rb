@@ -15,7 +15,9 @@ class LogProcessor::ClaudeStreamingJsonTest < ActiveSupport::TestCase
     assert_equal 3, steps.length
     assert_equal "Step::Init", steps[0][:type]
     assert_equal "Step::Text", steps[1][:type]
+    assert_equal "Hello", steps[1][:content]
     assert_equal "Step::Result", steps[2][:type]
+    assert_equal "Done", steps[2][:content]
   end
 
   test "handles empty lines gracefully" do

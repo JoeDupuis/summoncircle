@@ -169,6 +169,54 @@ class RunTest < ActiveSupport::TestCase
     assert_equal "Step::ToolResult", run.steps.second.type
   end
 
+  test "run uses unified flow with streaming processor" do
+    task = tasks(:with_claude_streaming_json_processor)
+    run = task.runs.create!(prompt: "Test")
+
+    # Test that streaming processor's process_container method is called
+    mock_processor = mock('processor')
+    mock_processor.expects(:process_container).with(anything, run)
+    
+    LogProcessor::ClaudeStreamingJson.stubs(:new).returns(mock_processor)
+    
+    # Mock container creation to avoid actual Docker calls
+    mock_container = mock('container')
+    mock_container.stubs(:start).returns(true)
+    mock_container.stubs(:delete).returns(true)
+    Docker::Container.stubs(:create).returns(mock_container)
+    run.stubs(:setup_container_files).returns(true)
+    run.stubs(:capture_repository_state).returns(true)
+    run.stubs(:clone_repository).returns(true)
+
+    run.execute!
+    
+    assert run.completed?
+  end
+
+  test "run uses unified flow with non-streaming processor" do
+    task = tasks(:with_claude_json_processor)
+    run = task.runs.create!(prompt: "Test")
+
+    # Test that non-streaming processor's process_container method is called
+    mock_processor = mock('processor')
+    mock_processor.expects(:process_container).with(anything, run)
+    
+    LogProcessor::ClaudeJson.stubs(:new).returns(mock_processor)
+    
+    # Mock container creation to avoid actual Docker calls
+    mock_container = mock('container')
+    mock_container.stubs(:start).returns(true)
+    mock_container.stubs(:delete).returns(true)
+    Docker::Container.stubs(:create).returns(mock_container)
+    run.stubs(:setup_container_files).returns(true)
+    run.stubs(:capture_repository_state).returns(true)
+    run.stubs(:clone_repository).returns(true)
+
+    run.execute!
+    
+    assert run.completed?
+  end
+
   test "execute! passes environment variables to Docker container" do
     task = tasks(:with_env_vars)
     run = task.runs.create!(prompt: "test", status: :pending)
