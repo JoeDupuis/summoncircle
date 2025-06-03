@@ -25,8 +25,8 @@ class Run < ApplicationRecord
       clone_repository if first_run? && should_clone_repository?
 
       container = create_container
-      setup_container_files(container)
       container.start
+      setup_container_files(container)
       container.wait
 
 
@@ -196,10 +196,10 @@ class Run < ApplicationRecord
   def archive_file_to_container(container, content, destination_path, permissions = 0o644)
     filename = File.basename(destination_path)
     target_dir = File.dirname(destination_path)
-    
+
     # Create target directory if it doesn't exist (needed for .ssh directories)
     container.exec([ "mkdir", "-p", target_dir ])
-    
+
     temp_dir = Dir.mktmpdir
     temp_file_path = File.join(temp_dir, filename)
     File.write(temp_file_path, content)
