@@ -2,21 +2,19 @@ require "test_helper"
 
 class RunStreamingTest < ActiveSupport::TestCase
   def setup
-    @agent = agents(:with_claude_json_processor)
-    @agent.update!(log_processor: "ClaudeStreamingJson")
-
-    @task = tasks(:with_claude_json_processor)
-    @run = @task.runs.create!(prompt: "Test streaming")
+    @streaming_task = tasks(:with_claude_streaming_json_processor)
+    @streaming_run = @streaming_task.runs.create!(prompt: "Test streaming")
+    
+    @json_task = tasks(:with_claude_json_processor)
+    @json_run = @json_task.runs.create!(prompt: "Test json")
   end
 
   test "identifies streaming agent correctly" do
     # Test streaming agent
-    assert_equal "ClaudeStreamingJson", @task.agent.log_processor
+    assert_equal "ClaudeStreamingJson", @streaming_task.agent.log_processor
 
     # Test non-streaming agent
-    @task.agent.update!(log_processor: "ClaudeJson")
-    @task.agent.reload
-    assert_equal "ClaudeJson", @task.agent.log_processor
+    assert_equal "ClaudeJson", @json_task.agent.log_processor
   end
 
   test "streaming processor handles line-by-line JSON" do
