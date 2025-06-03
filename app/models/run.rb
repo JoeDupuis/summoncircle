@@ -27,7 +27,7 @@ class Run < ApplicationRecord
       container = create_container
       container.start
       setup_container_files(container)
-      container.wait
+      container.wait(3600)
 
 
       logs = container.logs(stdout: true, stderr: true)
@@ -74,6 +74,11 @@ class Run < ApplicationRecord
     return unless agent.docker_host.present?
 
     Docker.url = agent.docker_host
+    Docker.options = {
+      read_timeout: 600,
+      write_timeout: 600,
+      connect_timeout: 60
+    }
   end
 
   def create_container
@@ -128,7 +133,7 @@ class Run < ApplicationRecord
       }
     )
     git_container.start
-    wait_result = git_container.wait
+    wait_result = git_container.wait(300)
     logs = git_container.logs(stdout: true, stderr: true)
     clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
     exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
@@ -167,7 +172,7 @@ class Run < ApplicationRecord
     )
 
     git_container.start
-    wait_result = git_container.wait
+    wait_result = git_container.wait(300)
     logs = git_container.logs(stdout: true, stderr: true)
     uncommitted_diff = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
 
