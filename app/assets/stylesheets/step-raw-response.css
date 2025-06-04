@@ -4,7 +4,7 @@
   border-radius: 4px;
 }
 
-.step-raw-container h4 {
+.step-raw-container > .header {
   margin: 0;
   padding: 0.5rem 1rem;
   background-color: var(--bg-secondary);
@@ -14,7 +14,7 @@
   color: var(--text-secondary);
 }
 
-.step-raw-response {
+.step-raw-container > .response {
   margin: 0;
   padding: 1rem;
   background-color: var(--bg-code);

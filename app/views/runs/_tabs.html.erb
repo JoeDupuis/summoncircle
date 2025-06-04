@@ -25,8 +25,8 @@
       <div class="output">
         <% run.steps.each do |step| %>
           <div class="step-raw-container">
-            <h4><%= step.class.name.demodulize %></h4>
-            <pre class="step-raw-response"><%= step.pretty_raw_response %></pre>
+            <h4 class="header"><%= step.class.name.demodulize %></h4>
+            <pre class="response"><%= step.pretty_raw_response %></pre>
           </div>
         <% end %>
       </div>
