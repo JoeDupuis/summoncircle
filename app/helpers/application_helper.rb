@@ -40,4 +40,31 @@ module ApplicationHelper
       nil
     end
   end
+
+  def markdown(text)
+    return "" if text.blank?
+
+    options = {
+      filter_html: true,
+      hard_wrap: true,
+      link_attributes: { rel: "nofollow", target: "_blank" },
+      space_after_headers: true
+    }
+
+    extensions = {
+      autolink: true,
+      superscript: true,
+      disable_indented_code_blocks: true,
+      fenced_code_blocks: true,
+      strikethrough: true,
+      tables: true,
+      underline: true,
+      highlight: true
+    }
+
+    renderer = Redcarpet::Render::HTML.new(options)
+    markdown_processor = Redcarpet::Markdown.new(renderer, extensions)
+
+    markdown_processor.render(text).html_safe
+  end
 end

@@ -53,7 +53,21 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
 
     get task_url(@task)
     assert_response :success
-    assert_select "pre", text: "Hello world"
+    assert_select "div.step-text.markdown p", text: "Hello world"
+  end
+
+  test "show renders Step::Text with markdown formatting" do
+    login @user
+    run = @task.runs.create!(prompt: "test")
+    markdown_content = "# Header\n\nSome **bold** text and `code`"
+    run.steps.create!(type: "Step::Text", content: markdown_content, raw_response: "raw data")
+
+    get task_url(@task)
+    assert_response :success
+    assert_select "div.step-text.markdown"
+    assert_select "div.step-text.markdown h1", text: "Header"
+    assert_select "div.step-text.markdown strong", text: "bold"
+    assert_select "div.step-text.markdown code", text: "code"
   end
 
   test "show renders Step::Init with session initialized message" do
