@@ -5,7 +5,6 @@ export default class extends Controller {
 
   connect() {
     this.updateTextareaAttributes()
-    this.adjustHeight()
   }
 
   keydown(event) {
@@ -32,13 +31,6 @@ export default class extends Controller {
 
   clearForm() {
     this.textareaTarget.value = ""
-    this.adjustHeight()
-  }
-
-  adjustHeight() {
-    const textarea = this.textareaTarget
-    textarea.style.height = 'auto'
-    textarea.style.height = textarea.scrollHeight + 'px'
   }
 
   isMobile() {
