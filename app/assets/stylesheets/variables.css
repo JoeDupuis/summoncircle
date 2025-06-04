@@ -3,4 +3,9 @@
   --color-danger-hover: #c82333;
   --color-white: white;
   --spacing-sm: 10px;
+  --color-text: #333;
+  --color-text-muted: #666;
+  --color-primary: #007bff;
+  --color-border: #e1e4e8;
+  --color-background-subtle: #f6f8fa;
 }

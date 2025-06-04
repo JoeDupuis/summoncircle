@@ -53,7 +53,7 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
 
     get task_url(@task)
     assert_response :success
-    assert_select "pre", text: "Hello world"
+    assert_select "div.step-text.markdown-content p", text: "Hello world"
   end
 
   test "show renders Step::Init with session initialized message" do
