@@ -5,6 +5,10 @@
 .run-form > .field > .textarea {
   width: 100%;
   box-sizing: border-box;
+  min-height: 100px;
+  resize: none;
+  overflow: hidden;
+  transition: height 0.2s ease;
 }
 
 .run-form > .field > .errors {
