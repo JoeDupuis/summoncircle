@@ -1,4 +1,33 @@
-<div class="tool-call">
-  <strong class="label">🔧 Tool Call</strong>
-  <pre class="content"><%= tool_call.content %></pre>
-</div>
+<%
+  is_bash_tool = tool_call.content.start_with?("name: Bash\n")
+  if is_bash_tool
+    # Parse bash tool call content to extract command and description
+    lines = tool_call.content.split("\n")
+    inputs_json = lines[1].gsub(/^inputs: /, '')
+    begin
+      inputs = JSON.parse(inputs_json)
+      command = inputs['command']
+      description = inputs['description']
+    rescue JSON::ParserError
+      command = inputs_json
+      description = nil
+    end
+  end
+%>
+
+<% if is_bash_tool %>
+  <div class="tool-call bash-tool-call">
+    <div class="bash-prompt">
+      <span class="prompt-symbol">$</span>
+      <span class="command"><%= command %></span>
+    </div>
+    <% if description %>
+      <div class="bash-description"><%= description %></div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="tool-call">
+    <strong class="label">🔧 Tool Call</strong>
+    <pre class="content"><%= tool_call.content %></pre>
+  </div>
+<% end %>
