@@ -1,0 +1,20 @@
+.prompt-toggle {
+  background: none;
+  border: none;
+  color: var(--link-color, #0066cc);
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: inherit;
+  font-family: inherit;
+  padding: 0;
+  margin-left: 0.5rem;
+}
+
+.prompt-toggle:hover {
+  color: var(--link-hover-color, #004499);
+}
+
+.prompt-toggle:focus {
+  outline: 2px solid var(--focus-color, #0066cc);
+  outline-offset: 2px;
+}
