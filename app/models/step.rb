@@ -10,6 +10,12 @@ class Step < ApplicationRecord
     raw_response
   end
 
+  def pretty_raw_response
+    JSON.pretty_generate(JSON.parse(raw_response))
+  rescue JSON::ParserError
+    raw_response
+  end
+
   def content
     filter_sensitive_info(super)
   end

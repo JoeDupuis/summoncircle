@@ -2,6 +2,7 @@
 <div data-controller="tabs" class="tabs-container">
   <div class="nav">
     <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="steps" class="tab -active">Steps</button>
+    <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="raw" class="tab">Raw</button>
     <% repo_states.each_with_index do |repo_state, index| %>
       <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="diff-<%= index %>" class="tab">
         Diff <%= repo_states.count > 1 ? "##{index + 1}" : "" %>
@@ -16,6 +17,16 @@
           <div class="run-spinner">
             <div class="spinner"></div>
             Processing...
+          </div>
+        <% end %>
+      </div>
+    </div>
+    <div data-tabs-target="panel" data-panel-id="raw" class="panel">
+      <div class="output">
+        <% run.steps.each do |step| %>
+          <div class="step-raw-container">
+            <h4><%= step.class.name.demodulize %></h4>
+            <pre class="step-raw-response"><%= step.pretty_raw_response %></pre>
           </div>
         <% end %>
       </div>

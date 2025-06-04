@@ -182,4 +182,24 @@ class StepTest < ActiveSupport::TestCase
 
     assert_equal "No secrets here", step.content
   end
+
+  test "pretty_raw_response should return pretty-printed JSON" do
+    json_data = { "message" => "hello", "status" => "success", "data" => { "count" => 5 } }
+    step = Step.new(
+      run: runs(:one),
+      raw_response: json_data.to_json
+    )
+
+    expected = JSON.pretty_generate(json_data)
+    assert_equal expected, step.pretty_raw_response
+  end
+
+  test "pretty_raw_response should return raw_response for invalid JSON" do
+    step = Step.new(
+      run: runs(:one),
+      raw_response: "invalid json"
+    )
+
+    assert_equal "invalid json", step.pretty_raw_response
+  end
 end
