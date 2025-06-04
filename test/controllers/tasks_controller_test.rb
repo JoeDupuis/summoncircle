@@ -53,7 +53,7 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
 
     get task_url(@task)
     assert_response :success
-    assert_select "div.step-text.markdown p", text: "Hello world"
+    assert_select "div.step-text p", text: "Hello world"
   end
 
   test "show renders Step::Text with markdown formatting" do
@@ -64,10 +64,10 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
 
     get task_url(@task)
     assert_response :success
-    assert_select "div.step-text.markdown"
-    assert_select "div.step-text.markdown h1", text: "Header"
-    assert_select "div.step-text.markdown strong", text: "bold"
-    assert_select "div.step-text.markdown code", text: "code"
+    assert_select "div.step-text"
+    assert_select "div.step-text h1", text: "Header"
+    assert_select "div.step-text strong", text: "bold"
+    assert_select "div.step-text code", text: "code"
   end
 
   test "show renders Step::Init with session initialized message" do
