@@ -57,7 +57,7 @@ class TasksController < ApplicationController
     if @project.present?
       @task = @project.tasks.find(params[:id])
     else
-      @task = Current.user.tasks.find(params[:id])
+      @task = Task.find(params[:id])
     end
   end
 
