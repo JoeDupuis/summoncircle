@@ -90,4 +90,30 @@ class LogProcessor::ClaudeJsonTest < ActiveSupport::TestCase
     expected_content = "name: WebFetch\ninputs: {\"url\":\"https://example.com\",\"prompt\":\"What is the title?\"}"
     assert_equal expected_content, result[0][:content]
   end
+
+  test "process creates BashCommand steps for Bash tool calls" do
+    processor = LogProcessor::ClaudeJson.new
+    logs = '{
+      "type": "assistant",
+      "message": {
+        "content": [
+          {
+            "type": "tool_use",
+            "name": "Bash",
+            "input": {
+              "command": "ls -la",
+              "description": "List files with details"
+            }
+          }
+        ]
+      }
+    }'
+
+    result = processor.process(logs)
+
+    assert_equal 1, result.size
+    assert_equal "Step::BashCommand", result[0][:type]
+    expected_content = "name: Bash\ninputs: {\"command\":\"ls -la\",\"description\":\"List files with details\"}"
+    assert_equal expected_content, result[0][:content]
+  end
 end

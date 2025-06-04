@@ -1,0 +1,59 @@
+.bash-command {
+  margin: 5px 0;
+  padding: 8px 12px;
+  background: #1e1e1e;
+  border-radius: 4px;
+  border-left: 3px solid #00d084;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.bash-command > .prompt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bash-command > .prompt > .symbol {
+  color: #00d084;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.bash-command > .prompt > .command {
+  color: #ffffff;
+  font-size: 14px;
+  flex: 1;
+}
+
+.bash-command > .description {
+  color: #888888;
+  font-size: 12px;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+@media (prefers-color-scheme: dark) {
+  .bash-command {
+    background: #0d1117;
+    border-left: 3px solid #00d084;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .bash-command {
+    background: #f6f8fa;
+    border-left: 3px solid #28a745;
+  }
+  
+  .bash-command > .prompt > .symbol {
+    color: #28a745;
+  }
+  
+  .bash-command > .prompt > .command {
+    color: #24292e;
+  }
+  
+  .bash-command > .description {
+    color: #586069;
+  }
+}

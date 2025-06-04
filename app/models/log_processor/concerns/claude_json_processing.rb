@@ -15,7 +15,8 @@ module LogProcessor::Concerns::ClaudeJsonProcessing
       end
     when "assistant"
       if has_tool_use?(item)
-        { raw_response: item_json, type: "Step::ToolCall", content: extract_content(item) }
+        step_type = bash_tool_use?(item) ? "Step::BashCommand" : "Step::ToolCall"
+        { raw_response: item_json, type: step_type, content: extract_content(item) }
       else
         { raw_response: item_json, type: "Step::Text", content: extract_content(item) }
       end
@@ -32,6 +33,13 @@ module LogProcessor::Concerns::ClaudeJsonProcessing
     return false unless item.dig("message", "content").is_a?(Array)
 
     item["message"]["content"].any? { |content_item| content_item["type"] == "tool_use" }
+  end
+
+  def bash_tool_use?(item)
+    return false unless item.dig("message", "content").is_a?(Array)
+
+    tool_use = item["message"]["content"].find { |c| c["type"] == "tool_use" }
+    tool_use&.dig("name") == "Bash"
   end
 
   def extract_content(item)

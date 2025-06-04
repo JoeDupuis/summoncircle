@@ -1,23 +1,22 @@
 require "test_helper"
 
 class ToolCallViewTest < ActionView::TestCase
-  test "renders bash tool call with terminal styling" do
+  test "renders tool call with standard styling" do
     run = runs(:one)
-    bash_content = "name: Bash\ninputs: {\"command\":\"ls -la\",\"description\":\"List files with details\"}"
+    tool_content = "name: SomeOtherTool\ninputs: {\"param\":\"value\"}"
 
     tool_call = Step::ToolCall.create!(
       run: run,
       raw_response: '{"type":"tool_call"}',
-      content: bash_content
+      content: tool_content
     )
 
     rendered = render(partial: "step/tool_calls/tool_call", locals: { tool_call: tool_call })
 
-    assert_includes rendered, "bash-tool-call"
-    assert_includes rendered, "bash-prompt"
-    assert_includes rendered, "prompt-symbol"
-    assert_includes rendered, "ls -la"
-    assert_includes rendered, "List files with details"
+    assert_includes rendered, "tool-call"
+    assert_includes rendered, "🔧 Tool Call"
+    assert_includes rendered, "content"
+    assert_not_includes rendered, "bash-command"
   end
 
   test "renders non-bash tool call with standard styling" do

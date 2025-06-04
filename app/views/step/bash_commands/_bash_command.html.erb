@@ -1,0 +1,9 @@
+<div class="bash-command">
+  <div class="prompt">
+    <span class="symbol">$</span>
+    <span class="command"><%= bash_command.command %></span>
+  </div>
+  <% if bash_command.description %>
+    <div class="description"><%= bash_command.description %></div>
+  <% end %>
+</div>
