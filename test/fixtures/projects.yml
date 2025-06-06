@@ -4,13 +4,13 @@ one:
   name: MyString
   description: MyText
   repository_url: http://example.com/one.git
-  setup_script: MyText
+  setup_script: ""
 
 two:
   name: MyString
   description: MyText
   repository_url: http://example.com/two.git
-  setup_script: MyText
+  setup_script: ""
 
 without_repo:
   name: Test Project

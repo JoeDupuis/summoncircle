@@ -267,6 +267,89 @@ class RunTest < ActiveSupport::TestCase
     assert_equal 1, run.steps.count # No repo state step since no repository_url
   end
 
+  test "execute! runs setup script on first run when present" do
+    task = tasks(:for_repo_clone)
+    project = task.project
+    project.update!(setup_script: "npm install && npm run build")
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    expect_git_clone_container
+    expect_setup_script_container(
+      cmd: [ "-c", "npm install && npm run build" ],
+      output: "\x00Setup complete!"
+    )
+    expect_main_container(cmd: [ "echo", "STARTING: test" ], output: "\x04test")
+    expect_git_diff_container
+
+    run.execute!
+
+    assert run.completed?
+    assert_equal 3, run.steps.count
+    setup_step = run.steps.find { |s| s.content&.start_with?("Setup script executed") }
+    assert_not_nil setup_step
+    assert_includes setup_step.content, "Setup complete!"
+  end
+
+  test "execute! skips setup script on subsequent runs" do
+    task = tasks(:task_with_runs)
+    project = task.project
+    project.update!(setup_script: "npm install")
+    run = task.runs.last
+    run.update!(status: :pending, started_at: nil, completed_at: nil)
+    run.steps.destroy_all
+
+    expect_main_container(cmd: [ "echo hello" ], output: "\x04test")
+    expect_git_diff_container
+
+    run.execute!
+
+    assert run.completed?
+    assert_equal 2, run.steps.count
+    assert_nil run.steps.find { |s| s.content&.start_with?("Setup script executed") }
+  end
+
+  test "execute! handles setup script failure" do
+    task = tasks(:for_repo_clone)
+    project = task.project
+    project.update!(setup_script: "exit 1")
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    expect_git_clone_container
+    expect_setup_script_container(
+      cmd: [ "-c", "exit 1" ],
+      output: "Setup failed!",
+      status_code: 1
+    )
+
+    run.execute!
+
+    assert run.failed?
+    assert_equal 1, run.steps.count
+    assert_includes run.steps.first.raw_response, "Setup script failed"
+  end
+
+  test "execute! runs setup script with project environment variables" do
+    task = tasks(:for_repo_clone)
+    project = task.project
+    project.update!(setup_script: "echo $API_KEY")
+    project.secrets.create!(key: "API_KEY", value: "secret_123")
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    expect_git_clone_container
+    expect_setup_script_container(
+      cmd: [ "-c", "echo $API_KEY" ],
+      output: "secret_123",
+      env: [ "API_KEY=secret_123" ]
+    )
+    expect_main_container(cmd: [ "echo", "STARTING: test" ], output: "\x04test", env: [ "API_KEY=secret_123" ])
+    expect_git_diff_container
+
+    run.execute!
+
+    assert run.completed?
+    assert_equal 3, run.steps.count
+  end
+
   private
 
   def mock_container_with_output(output)
@@ -337,5 +420,28 @@ class RunTest < ActiveSupport::TestCase
         "User" => "1000"
       )
     ).returns(git_diff_container)
+  end
+
+  def expect_setup_script_container(cmd:, output:, status_code: 0, env: nil)
+    setup_container = mock("setup_container")
+    setup_container.expects(:start)
+    setup_container.expects(:wait).returns({ "StatusCode" => status_code })
+    setup_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + output)
+    setup_container.expects(:delete).with(force: true)
+
+    expectations = {
+      "Image" => "example/image:latest",
+      "Entrypoint" => [ "sh" ],
+      "Cmd" => cmd,
+      "WorkingDir" => "/workspace",
+      "User" => "1000"
+    }
+
+    expectations["Env"] = env if env
+    expectations["HostConfig"] = has_entries("Binds" => instance_of(Array))
+
+    Docker::Container.expects(:create).with(
+      has_entries(expectations)
+    ).returns(setup_container)
   end
 end
