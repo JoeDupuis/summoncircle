@@ -29,7 +29,7 @@ class LogProcessor
 
   def create_steps_with_relationships(run, step_data_list)
     tool_call_map = {}
-    
+
     step_data_list.each do |step_data|
       if (step_data[:type] == "Step::ToolCall" || step_data[:type] == "Step::BashTool") && step_data[:tool_use_id]
         # Create tool call/bash tool and store mapping
