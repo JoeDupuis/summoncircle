@@ -1,5 +1,5 @@
 class Step::ToolCall < Step
-  has_one :tool_result, class_name: "Step::ToolResult", foreign_key: :tool_call_id
+  include ToolCallable
 
   def tool_id
     parsed = parsed_response
@@ -32,10 +32,5 @@ class Step::ToolCall < Step
 
     tool_use = content_array.find { |c| c["type"] == "tool_use" }
     tool_use&.dig("input")
-  end
-
-
-  def pending?
-    tool_result.nil?
   end
 end
