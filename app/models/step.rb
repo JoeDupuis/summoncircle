@@ -1,8 +1,6 @@
 class Step < ApplicationRecord
   belongs_to :run
   has_many :repo_states, dependent: :destroy
-  belongs_to :tool_call, class_name: "Step::ToolCall", optional: true
-  has_one :tool_result, class_name: "Step::ToolResult", foreign_key: :tool_call_id
 
   validates :raw_response, presence: true
 

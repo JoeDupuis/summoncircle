@@ -97,7 +97,7 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
         ]
       }
     }.to_json
-    run.steps.create!(type: "Step::ToolCall", content: content, raw_response: raw_response, tool_use_id: "toolu_test123")
+    run.steps.create!(type: "Step::ToolCall", content: content, raw_response: raw_response)
 
     get task_url(@task)
     assert_response :success
@@ -121,7 +121,7 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
         ]
       }
     }.to_json
-    run.steps.create!(type: "Step::ToolResult", content: "total 0", raw_response: raw_response, tool_use_id: "toolu_orphaned")
+    run.steps.create!(type: "Step::ToolResult", content: "total 0", raw_response: raw_response)
 
     get task_url(@task)
     assert_response :success

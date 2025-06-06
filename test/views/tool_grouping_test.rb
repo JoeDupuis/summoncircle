@@ -9,7 +9,6 @@ class ToolGroupingTest < ActionView::TestCase
     # Create a tool call step
     tool_call = run.steps.create!(
       type: "Step::ToolCall",
-      tool_use_id: "toolu_test123",
       raw_response: {
         type: "assistant",
         message: {
@@ -29,7 +28,6 @@ class ToolGroupingTest < ActionView::TestCase
     # Create corresponding tool result
     tool_result = run.steps.create!(
       type: "Step::ToolResult",
-      tool_use_id: "toolu_test123",
       tool_call_id: tool_call.id,
       raw_response: {
         type: "user",
@@ -67,7 +65,6 @@ class ToolGroupingTest < ActionView::TestCase
     # Create a tool call step without result
     tool_call = run.steps.create!(
       type: "Step::ToolCall",
-      tool_use_id: "toolu_test456",
       raw_response: {
         type: "assistant",
         message: {

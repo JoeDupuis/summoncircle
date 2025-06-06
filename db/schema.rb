@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_06_030020) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_06_031041) do
   create_table "agents", force: :cascade do |t|
     t.string "name"
     t.string "docker_image"
@@ -89,7 +89,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_06_030020) do
     t.datetime "updated_at", null: false
     t.string "type"
     t.text "content"
-    t.string "tool_use_id"
     t.integer "tool_call_id"
     t.index ["run_id"], name: "index_steps_on_run_id"
     t.index ["tool_call_id"], name: "index_steps_on_tool_call_id"
