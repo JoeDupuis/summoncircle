@@ -1,4 +1,6 @@
 class Step::ToolCall < Step
+  has_one :tool_result, class_name: "Step::ToolResult", foreign_key: :tool_call_id
+
   def tool_id
     parsed = parsed_response
     return nil unless parsed.is_a?(Hash)
@@ -32,8 +34,6 @@ class Step::ToolCall < Step
     tool_use&.dig("input")
   end
 
-
-  has_one :tool_result, class_name: "Step::ToolResult", foreign_key: :tool_call_id
 
   def pending?
     tool_result.nil?
