@@ -15,14 +15,12 @@ module LogProcessor::Concerns::ClaudeJsonProcessing
       end
     when "assistant"
       if has_tool_use?(item)
-        tool_use_id = extract_tool_use_id(item)
-        { raw_response: item_json, type: "Step::ToolCall", content: extract_content(item), tool_use_id: tool_use_id }
+        { raw_response: item_json, type: "Step::ToolCall", content: extract_content(item) }
       else
         { raw_response: item_json, type: "Step::Text", content: extract_content(item) }
       end
     when "user"
-      tool_use_id = extract_tool_result_id(item)
-      { raw_response: item_json, type: "Step::ToolResult", content: extract_content(item), tool_use_id: tool_use_id }
+      { raw_response: item_json, type: "Step::ToolResult", content: extract_content(item) }
     when "result"
       { raw_response: item_json, type: "Step::Result", content: item["result"] || extract_content(item) }
     else
