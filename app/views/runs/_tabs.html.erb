@@ -12,13 +12,7 @@
   <div class="content">
     <div data-tabs-target="panel" data-panel-id="steps" class="panel -active">
       <div class="output">
-        <% run.steps.each do |step| %>
-          <% if step.is_a?(Step::ToolResult) && step.tool_call.present? %>
-            <%# Skip rendering tool results that have a matching tool call, they'll be rendered inside the tool call %>
-          <% else %>
-            <%= render step %>
-          <% end %>
-        <% end %>
+        <%= render run.steps %>
         <% if run.status == 'running' %>
           <div class="run-spinner">
             <div class="spinner"></div>

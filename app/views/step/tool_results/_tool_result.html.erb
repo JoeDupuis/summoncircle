@@ -1,4 +1,6 @@
-<div class="tool-result">
-  <strong class="label">⚙️ Tool Result</strong>
-  <pre class="content"><%= tool_result.content %></pre>
-</div>
+<% unless tool_result.tool_call.present? %>
+  <div class="tool-result">
+    <strong class="label">⚙️ Tool Result</strong>
+    <pre class="content"><%= tool_result.content %></pre>
+  </div>
+<% end %>
