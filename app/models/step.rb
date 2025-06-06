@@ -2,6 +2,9 @@ class Step < ApplicationRecord
   belongs_to :run
   has_many :repo_states, dependent: :destroy
 
+  has_one :tool_call, -> { where(type: "Step::ToolCall") }, class_name: "Step::ToolCall", foreign_key: :tool_use_id, primary_key: :tool_use_id
+  has_one :tool_result, -> { where(type: "Step::ToolResult") }, class_name: "Step::ToolResult", foreign_key: :tool_use_id, primary_key: :tool_use_id
+
   validates :raw_response, presence: true
 
   def parsed_response

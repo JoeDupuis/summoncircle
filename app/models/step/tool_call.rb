@@ -32,11 +32,6 @@ class Step::ToolCall < Step
     tool_use&.dig("input")
   end
 
-  def tool_result
-    return nil unless tool_use_id.present?
-
-    run.steps.where(type: "Step::ToolResult", tool_use_id: tool_use_id).first
-  end
 
   def pending?
     tool_result.nil?
