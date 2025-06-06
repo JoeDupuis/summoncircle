@@ -22,7 +22,7 @@ class LogProcessor
 
     step_data_list = process(clean_logs)
     step_data_list.each do |step_data|
-      run.steps.create!(step_data.except(:tool_use_id))
+      run.steps.create!(step_data)
     end
   end
 end

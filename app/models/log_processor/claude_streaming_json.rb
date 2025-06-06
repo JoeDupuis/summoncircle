@@ -64,7 +64,7 @@ class LogProcessor::ClaudeStreamingJson < LogProcessor
     begin
       parsed_item = JSON.parse(line.strip)
       step_data = process_item(parsed_item)
-      run.steps.create!(step_data.except(:tool_use_id))
+      run.steps.create!(step_data)
       run.broadcast_update
     rescue JSON::ParserError => e
       Rails.logger.error "JSON parse error for line: #{line.inspect} - #{e.message}"
