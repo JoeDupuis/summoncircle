@@ -91,10 +91,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_06_060235) do
     t.text "content"
     t.integer "tool_call_id"
     t.string "tool_use_id"
-    t.index ["run_id", "type"], name: "index_steps_on_run_id_and_type"
+    t.index ["run_id", "tool_use_id"], name: "index_steps_on_run_id_and_tool_use_id"
     t.index ["run_id"], name: "index_steps_on_run_id"
     t.index ["tool_call_id"], name: "index_steps_on_tool_call_id"
-    t.index ["tool_use_id"], name: "index_steps_on_tool_use_id"
     t.index ["type"], name: "index_steps_on_type"
   end
 
