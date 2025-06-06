@@ -1,7 +1,7 @@
 class Run < ApplicationRecord
   belongs_to :task
   has_many :siblings, through: :task, source: :runs
-  has_many :steps, dependent: :destroy
+  has_many :steps, -> { order(:id) }, dependent: :destroy
 
   enum :status, { pending: 0, running: 1, completed: 2, failed: 3 }, default: :pending
 
