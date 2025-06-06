@@ -64,7 +64,7 @@ class LogProcessor::ClaudeStreamingJson < LogProcessor
     begin
       parsed_item = JSON.parse(line.strip)
       step_data = process_item(parsed_item)
-      create_single_step_with_relationship(run, step_data)
+      run.steps.create!(step_data.except(:tool_use_id))
       run.broadcast_update
     rescue JSON::ParserError => e
       Rails.logger.error "JSON parse error for line: #{line.inspect} - #{e.message}"
@@ -72,27 +72,6 @@ class LogProcessor::ClaudeStreamingJson < LogProcessor
       run.broadcast_update
     rescue => e
       Rails.logger.error "Failed to process streaming step: #{e.message}"
-    end
-  end
-
-  def create_single_step_with_relationship(run, step_data)
-    if (step_data[:type] == "Step::ToolCall" || step_data[:type] == "Step::BashTool") && step_data[:tool_use_id]
-      # Create tool call/bash tool and store mapping in run's context
-      step = run.steps.create!(step_data.except(:tool_use_id))
-      # Store the mapping for later tool results (could use run metadata or cache)
-      Rails.cache.write("tool_call_map_#{run.id}_#{step_data[:tool_use_id]}", step.id, expires_in: 1.hour)
-      Rails.logger.info "Created tool call: #{step.type} with ID #{step.id}"
-    elsif step_data[:type] == "Step::ToolResult" && step_data[:tool_use_id]
-      # Find matching tool call and set foreign key
-      tool_call_id = Rails.cache.read("tool_call_map_#{run.id}_#{step_data[:tool_use_id]}")
-      step_data_clean = step_data.except(:tool_use_id)
-      step_data_clean[:tool_call_id] = tool_call_id if tool_call_id
-      step = run.steps.create!(step_data_clean)
-      Rails.logger.info "Created tool result: #{step.type} linked to tool call #{tool_call_id}"
-    else
-      # Create other step types normally
-      step = run.steps.create!(step_data.except(:tool_use_id))
-      Rails.logger.info "Created step: #{step.type}"
     end
   end
 end
