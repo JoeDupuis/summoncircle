@@ -2,15 +2,5 @@
   <strong class="label">🔧 Tool Call: <%= tool_call.tool_name %></strong>
   <pre class="content"><%= tool_call.content %></pre>
   
-  <% if tool_call.tool_result %>
-    <div class="tool-result">
-      <strong class="label">⚙️ Tool Result</strong>
-      <pre class="content"><%= tool_call.tool_result.content %></pre>
-    </div>
-  <% else %>
-    <div class="tool-result -pending">
-      <div class="spinner"></div>
-      <span>Waiting for result...</span>
-    </div>
-  <% end %>
+  <%= render "step/tool_calls/tool_result_section", tool_call: tool_call %>
 </div>
