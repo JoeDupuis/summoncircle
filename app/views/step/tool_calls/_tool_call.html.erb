@@ -1,4 +1,6 @@
-<div class="tool-call">
-  <strong class="label">🔧 Tool Call</strong>
+<div class="tool-call" data-tool-id="<%= tool_call.tool_id %>">
+  <strong class="label">🔧 Tool Call: <%= tool_call.tool_name %></strong>
   <pre class="content"><%= tool_call.content %></pre>
+  
+  <%= render "step/tool_calls/tool_result_section", tool_call: tool_call %>
 </div>

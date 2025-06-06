@@ -3,4 +3,6 @@
     <span class="prompt-symbol">$</span>
     <span class="command"><%= bash_tool.content %></span>
   </div>
+  
+  <%= render "step/tool_calls/tool_result_section", tool_call: bash_tool %>
 </div>

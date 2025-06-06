@@ -1,2 +1,2 @@
-class Step::BashTool < Step
+class Step::BashTool < Step::ToolCall
 end

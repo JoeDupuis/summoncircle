@@ -84,18 +84,44 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     login @user
     run = @task.runs.create!(prompt: "test")
     content = "name: WebFetch\ninputs: {\"url\":\"https://example.com\",\"prompt\":\"What is the title of this webpage?\"}"
-    run.steps.create!(type: "Step::ToolCall", content: content, raw_response: '{"type":"assistant"}')
+    raw_response = {
+      type: "assistant",
+      message: {
+        content: [
+          {
+            type: "tool_use",
+            id: "toolu_test123",
+            name: "WebFetch",
+            input: { url: "https://example.com", prompt: "What is the title?" }
+          }
+        ]
+      }
+    }.to_json
+    run.steps.create!(type: "Step::ToolCall", content: content, raw_response: raw_response)
 
     get task_url(@task)
     assert_response :success
-    assert_select "div strong", text: "🔧 Tool Call"
+    assert_select "div strong", text: "🔧 Tool Call: WebFetch"
     assert_select "pre", text: content
   end
 
   test "show renders Step::ToolResult with tool result styling" do
     login @user
     run = @task.runs.create!(prompt: "test")
-    run.steps.create!(type: "Step::ToolResult", content: "total 0", raw_response: '{"type":"user"}')
+    # Create a tool result without a matching tool call (orphaned result)
+    raw_response = {
+      type: "user",
+      message: {
+        content: [
+          {
+            tool_use_id: "toolu_orphaned",
+            type: "tool_result",
+            content: "total 0"
+          }
+        ]
+      }
+    }.to_json
+    run.steps.create!(type: "Step::ToolResult", content: "total 0", raw_response: raw_response)
 
     get task_url(@task)
     assert_response :success

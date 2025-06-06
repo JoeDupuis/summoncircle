@@ -1,0 +1,11 @@
+<% if tool_call.tool_result %>
+  <div class="tool-result">
+    <strong class="label">⚙️ Tool Result</strong>
+    <pre class="content"><%= tool_call.tool_result.content %></pre>
+  </div>
+<% else %>
+  <div class="tool-result -pending">
+    <div class="spinner"></div>
+    <span>Waiting for result...</span>
+  </div>
+<% end %>
