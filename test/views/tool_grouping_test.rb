@@ -30,6 +30,7 @@ class ToolGroupingTest < ActionView::TestCase
     tool_result = run.steps.create!(
       type: "Step::ToolResult",
       tool_use_id: "toolu_test123",
+      tool_call_id: tool_call.id,
       raw_response: {
         type: "user",
         message: {
