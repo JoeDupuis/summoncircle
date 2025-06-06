@@ -161,10 +161,13 @@ class Run < ApplicationRecord
       type: "Step::System",
       content: "Repository state captured\n\nUncommitted diff:\n#{uncommitted_diff}"
     )
-    repo_state_step.repo_states.create!(
-      uncommitted_diff: uncommitted_diff,
-      repository_path: git_working_dir
-    )
+
+    if uncommitted_diff.present?
+      repo_state_step.repo_states.create!(
+        uncommitted_diff: uncommitted_diff,
+        repository_path: git_working_dir
+      )
+    end
   rescue => e
     Rails.logger.error "Failed to capture repository state: #{e.message}"
   ensure
