@@ -10,7 +10,7 @@
   overflow-x: auto;
 }
 
-.terminal-prompt {
+.bash-tool > .terminal-prompt {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -22,7 +22,7 @@
   user-select: none;
 }
 
-.bash-tool .command-text {
+.bash-tool .command {
   color: var(--command-text, #d4d4d4);
   flex: 1;
   white-space: pre-wrap;
