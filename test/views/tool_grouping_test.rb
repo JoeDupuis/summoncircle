@@ -89,7 +89,7 @@ class ToolGroupingTest < ActionView::TestCase
 
     # Check that pending spinner is shown
     assert_match /Waiting for result/, html
-    assert_match /tool-result-pending/, html
+    assert_match /tool-result -pending/, html
     assert_match /spinner/, html
   end
 end
