@@ -1,0 +1,28 @@
+.bash-tool {
+  background-color: var(--bg-terminal, #1e1e1e);
+  color: var(--text-terminal, #d4d4d4);
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0.5rem 0;
+  overflow-x: auto;
+}
+
+.terminal-prompt {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.prompt-symbol {
+  color: var(--prompt-symbol, #569cd6);
+  font-weight: bold;
+  user-select: none;
+}
+
+.command {
+  color: var(--command-text, #d4d4d4);
+  flex: 1;
+}
