@@ -4,6 +4,10 @@
   margin: 10px 0;
 }
 
+.run-item.-hidden {
+  display: none;
+}
+
 .run-item > .status {
   margin-bottom: 5px;
 }

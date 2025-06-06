@@ -1,37 +1,38 @@
-<h1>Task <%= @task.id %></h1>
+<div class="task-page">
+  <h1>Task <%= @task.id %></h1>
+  <p>Agent: <%= @task.agent.name %></p>
+  <p>Project: <%= @task.project.name %></p>
 
-<p>Agent: <%= @task.agent.name %></p>
-<p>Project: <%= @task.project.name %></p>
-
-<h2>Runs</h2>
-<% if @task.runs.any? %>
-  <% if @task.runs.count > 1 %>
-    <div class="run-filter">
-      <% if @show_all_runs %>
-        <%= link_to "Show Last Run Only", task_path(@task), class: "action-button -primary" %>
-      <% else %>
-        <%= link_to "Show All Runs", task_path(@task, show_all_runs: true), class: "action-button -success" %>
+  <h2>Runs</h2>
+  <% if @task.runs.any? %>
+    <% if @task.runs.count > 1 %>
+      <div class="run-filter">
+        <% if @show_all_runs %>
+          <%= link_to "Show Last Run Only", task_path(@task), class: "action-button -primary" %>
+        <% else %>
+          <%= link_to "Show All Runs", task_path(@task, show_all_runs: true), class: "action-button -success" %>
+        <% end %>
+      </div>
+    <% end %>
+    <%= turbo_stream_from @task %>
+    <div id="runs-list">
+      <% @runs.each do |run| %>
+        <%= render "tasks/run", run: run %>
       <% end %>
     </div>
+  <% else %>
+    <div id="runs-list">
+      <p>No runs yet.</p>
+    </div>
   <% end %>
-  <%= turbo_stream_from @task %>
-  <div id="runs-list">
-    <% @runs.each do |run| %>
-      <%= render "tasks/run", run: run %>
-    <% end %>
-  </div>
-<% else %>
-  <div id="runs-list">
-    <p>No runs yet.</p>
-  </div>
-<% end %>
 
-<h2>New Run</h2>
-<%= render "run_form", task: @task, run: Run.new %>
+  <h2>New Run</h2>
+  <%= render "run_form", task: @task, run: Run.new %>
 
-<div class="task-actions">
-  <%= link_to 'Archive', task_path(@task), 
-              data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to archive this task?' },
-              class: 'archive' %> |
-  <%= link_to 'Back', project_tasks_path(@task.project) %>
+  <div class="task-actions">
+    <%= link_to 'Archive', task_path(@task), 
+                data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to archive this task?' },
+                class: 'archive' %> |
+    <%= link_to 'Back', project_tasks_path(@task.project) %>
+  </div>
 </div>

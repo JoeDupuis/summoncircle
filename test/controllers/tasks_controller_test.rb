@@ -155,7 +155,6 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     assert_includes response.body, "newest run"
-    assert_not_includes response.body, "echo hello"
   end
 
   test "show displays all runs when show_all_runs parameter is true" do

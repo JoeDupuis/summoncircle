@@ -1,12 +1,15 @@
 .task-actions {
-  .archive {
-    color: var(--color-danger);
-    text-decoration: none;
-  }
+  margin-top: 20px;
+  padding: 0 20px 20px;
+}
 
-  .archive:hover,
-  .archive:focus {
-    color: var(--color-danger-hover);
-    text-decoration: underline;
-  }
+.task-actions > .archive {
+  color: var(--color-danger);
+  text-decoration: none;
+}
+
+.task-actions > .archive:hover,
+.task-actions > .archive:focus {
+  color: var(--color-danger-hover);
+  text-decoration: underline;
 }

@@ -1,0 +1,14 @@
+/* Remove the nav margin globally for consistent layout */
+header nav {
+  margin-block-start: 0 !important;
+  margin-top: 0 !important;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body > header {
+  padding: 2rem .5rem 2rem !important;
+}

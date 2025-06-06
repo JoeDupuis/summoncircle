@@ -1,3 +1,15 @@
 .run-filter {
   margin-bottom: 15px;
 }
+
+.tabs-panel > .run-filter {
+  padding: 10px;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .tabs-panel > .run-filter {
+    border-color: #404040;
+  }
+}

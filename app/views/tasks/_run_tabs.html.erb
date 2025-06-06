@@ -1,0 +1,58 @@
+<% all_repo_states = @task.runs.flat_map(&:repo_states) %>
+<div data-controller="tabs" class="tabs-container">
+  <div class="nav">
+    <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="mobile-chat" class="tab -active chat-mobile">Chat</button>
+    <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="logs" class="tab -active-desktop">Logs</button>
+    <% all_repo_states.each_with_index do |repo_state, index| %>
+      <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="diff-<%= index %>" class="tab">
+        Diff <%= all_repo_states.count > 1 ? "##{index + 1}" : "" %>
+      </button>
+    <% end %>
+  </div>
+  <div class="content">
+    <div data-tabs-target="panel" data-panel-id="mobile-chat" class="panel -active chat-mobile">
+      <div class="output">
+        <% @task.runs.each do |chat_run| %>
+          <div class="chat-message -user">
+            <div class="chat-message-content" data-controller="prompt-truncate" data-prompt-truncate-max-length-value="500">
+              <span data-prompt-truncate-target="content"><%= chat_run.prompt %></span>
+              <button data-prompt-truncate-target="toggle" data-action="click->prompt-truncate#toggle" class="prompt-toggle" style="display: none;">Show more</button>
+            </div>
+          </div>
+          <% chat_run.steps.where(type: 'Step::Text').each do |step| %>
+            <div class="chat-message -assistant">
+              <div class="chat-message-content">
+                <%= render step %>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+        <div class="chat-input-mobile">
+          <%= render "run_form", task: @task, run: Run.new %>
+        </div>
+      </div>
+    </div>
+    <div data-tabs-target="panel" data-panel-id="logs" class="panel -active-desktop">
+      <div class="output">
+        <% @task.runs.each do |log_run| %>
+          <% log_run.steps.reject { |s| s.type == 'Step::Text' }.each do |step| %>
+            <%= render step %>
+          <% end %>
+        <% end %>
+        <% if @task.runs.any? && @task.runs.last.status == 'running' %>
+          <div class="run-spinner">
+            <div class="spinner"></div>
+            Processing...
+          </div>
+        <% end %>
+      </div>
+    </div>
+    <% all_repo_states.each_with_index do |repo_state, index| %>
+      <div data-tabs-target="panel" data-panel-id="diff-<%= index %>" class="panel">
+        <div class="output">
+          <%= render "runs/diff_panel", repo_state: repo_state %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

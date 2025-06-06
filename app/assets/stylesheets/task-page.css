@@ -1,0 +1,30 @@
+/* Override simple.css constraints only for tasks#show */
+body.tasks-show {
+  display: block !important;
+  grid-template-columns: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body.tasks-show > * {
+  grid-column: unset !important;
+}
+
+body.tasks-show header {
+  grid-column: unset !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+body.tasks-show main {
+  max-width: 100% !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  grid-column: unset !important;
+}
+
+.task-page {
+  padding: 20px;
+  max-width: 100%;
+}
