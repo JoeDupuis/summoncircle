@@ -16,13 +16,13 @@
   gap: 0.5rem;
 }
 
-.prompt-symbol {
+.bash-tool .prompt-symbol {
   color: var(--prompt-symbol, #569cd6);
   font-weight: bold;
   user-select: none;
 }
 
-.command {
+.bash-tool .command-text {
   color: var(--command-text, #d4d4d4);
   flex: 1;
   white-space: pre-wrap;
