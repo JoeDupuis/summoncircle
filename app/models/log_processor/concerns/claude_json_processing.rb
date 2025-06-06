@@ -16,7 +16,12 @@ module LogProcessor::Concerns::ClaudeJsonProcessing
     when "assistant"
       if has_tool_use?(item)
         tool_use_id = extract_tool_use_id(item)
-        { raw_response: item_json, type: "Step::ToolCall", content: extract_content(item), tool_use_id: tool_use_id }
+        tool_use = item["message"]["content"].find { |c| c["type"] == "tool_use" }
+        if tool_use && tool_use["name"] == "Bash"
+          { raw_response: item_json, type: "Step::BashTool", content: extract_content(item), tool_use_id: tool_use_id }
+        else
+          { raw_response: item_json, type: "Step::ToolCall", content: extract_content(item), tool_use_id: tool_use_id }
+        end
       else
         { raw_response: item_json, type: "Step::Text", content: extract_content(item) }
       end
@@ -49,7 +54,11 @@ module LogProcessor::Concerns::ClaudeJsonProcessing
         if has_tool_use?(item)
           tool_use = item["message"]["content"].find { |c| c["type"] == "tool_use" }
           if tool_use
-            "name: #{tool_use['name']}\ninputs: #{tool_use['input'].to_json}"
+            if tool_use["name"] == "Bash"
+              tool_use["input"]["command"]
+            else
+              "name: #{tool_use['name']}\ninputs: #{tool_use['input'].to_json}"
+            end
           else
             item.to_json
           end

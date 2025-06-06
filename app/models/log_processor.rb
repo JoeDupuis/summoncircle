@@ -31,8 +31,8 @@ class LogProcessor
     tool_call_map = {}
     
     step_data_list.each do |step_data|
-      if step_data[:type] == "Step::ToolCall" && step_data[:tool_use_id]
-        # Create tool call and store mapping
+      if (step_data[:type] == "Step::ToolCall" || step_data[:type] == "Step::BashTool") && step_data[:tool_use_id]
+        # Create tool call/bash tool and store mapping
         step = run.steps.create!(step_data.except(:tool_use_id))
         tool_call_map[step_data[:tool_use_id]] = step.id
       elsif step_data[:type] == "Step::ToolResult" && step_data[:tool_use_id]

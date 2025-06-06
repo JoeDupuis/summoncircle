@@ -1,0 +1,18 @@
+<div class="bash-tool">
+  <div class="terminal-prompt">
+    <span class="prompt-symbol">$</span>
+    <span class="command"><%= bash_tool.content %></span>
+  </div>
+  
+  <% if bash_tool.tool_result %>
+    <div class="tool-result">
+      <strong class="label">⚙️ Tool Result</strong>
+      <pre class="content"><%= bash_tool.tool_result.content %></pre>
+    </div>
+  <% else %>
+    <div class="tool-result -pending">
+      <div class="spinner"></div>
+      <span>Waiting for result...</span>
+    </div>
+  <% end %>
+</div>

@@ -55,6 +55,16 @@ class LogProcessor::ClaudeStreamingJsonTest < ActiveSupport::TestCase
     assert_includes steps[0][:content], "name: bash"
   end
 
+  test "processes Bash tool calls as Step::BashTool" do
+    logs = '{"type": "assistant", "message": {"content": [{"type": "tool_use", "name": "Bash", "input": {"command": "ls -la", "description": "List files"}}]}}'
+
+    steps = @processor.process(logs)
+
+    assert_equal 1, steps.length
+    assert_equal "Step::BashTool", steps[0][:type]
+    assert_equal "ls -la", steps[0][:content]
+  end
+
   test "processes tool results correctly" do
     logs = '{"type": "user", "message": {"content": [{"content": "file1.txt\nfile2.txt"}]}}'
 
