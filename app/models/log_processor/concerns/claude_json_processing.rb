@@ -15,12 +15,14 @@ module LogProcessor::Concerns::ClaudeJsonProcessing
       end
     when "assistant"
       if has_tool_use?(item)
-        { raw_response: item_json, type: "Step::ToolCall", content: extract_content(item) }
+        tool_use_id = extract_tool_use_id(item)
+        { raw_response: item_json, type: "Step::ToolCall", content: extract_content(item), tool_use_id: tool_use_id }
       else
         { raw_response: item_json, type: "Step::Text", content: extract_content(item) }
       end
     when "user"
-      { raw_response: item_json, type: "Step::ToolResult", content: extract_content(item) }
+      tool_use_id = extract_tool_result_id(item)
+      { raw_response: item_json, type: "Step::ToolResult", content: extract_content(item), tool_use_id: tool_use_id }
     when "result"
       { raw_response: item_json, type: "Step::Result", content: item["result"] || extract_content(item) }
     else
@@ -69,5 +71,19 @@ module LogProcessor::Concerns::ClaudeJsonProcessing
     else
       item.to_json
     end
+  end
+
+  def extract_tool_use_id(item)
+    return nil unless item.dig("message", "content").is_a?(Array)
+
+    tool_use = item["message"]["content"].find { |c| c["type"] == "tool_use" }
+    tool_use&.dig("id")
+  end
+
+  def extract_tool_result_id(item)
+    return nil unless item.dig("message", "content").is_a?(Array)
+
+    tool_result = item["message"]["content"].find { |c| c["tool_use_id"] }
+    tool_result&.dig("tool_use_id")
   end
 end

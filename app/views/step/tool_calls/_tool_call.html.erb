@@ -1,4 +1,13 @@
-<div class="tool-call">
-  <strong class="label">🔧 Tool Call</strong>
+<div class="tool-call" data-tool-use-id="<%= tool_call.tool_use_id %>">
+  <strong class="label">🔧 Tool Call: <%= tool_call.tool_name %></strong>
   <pre class="content"><%= tool_call.content %></pre>
+  
+  <% if tool_call.tool_result %>
+    <%= render tool_call.tool_result %>
+  <% else %>
+    <div class="tool-result-pending">
+      <div class="spinner"></div>
+      <span>Waiting for result...</span>
+    </div>
+  <% end %>
 </div>
