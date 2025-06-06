@@ -20,7 +20,6 @@ class LogProcessor
     # Docker logs prefix each line with 8 bytes of metadata that we need to strip
     clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
 
-    # Process logs and create steps (callbacks handle relationships)
     step_data_list = process(clean_logs)
     step_data_list.each do |step_data|
       run.steps.create!(step_data.except(:tool_use_id))
