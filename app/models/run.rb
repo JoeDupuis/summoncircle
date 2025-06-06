@@ -22,6 +22,7 @@ class Run < ApplicationRecord
     begin
       set_docker_host(task.agent.docker_host)
       clone_repository if first_run? && should_clone_repository?
+      run_setup_script
 
       container = create_container
       container.start
@@ -203,5 +204,46 @@ class Run < ApplicationRecord
     encoded_content = Base64.strict_encode64(content)
     container.exec([ "sh", "-c", "echo '#{encoded_content}' | base64 -d > #{destination_path}" ])
     container.exec([ "chmod", permissions.to_s(8), destination_path ])
+  end
+
+  def run_setup_script
+    return unless first_run? && task.project.setup_script.present?
+
+    project = task.project
+    repo_path = project.repo_path.presence || ""
+    working_dir = task.workplace_mount.container_path
+    setup_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
+
+    setup_container = Docker::Container.create(
+      "Image" => task.agent.docker_image,
+      "Entrypoint" => [ "sh" ],
+      "Cmd" => [ "-c", project.setup_script ],
+      "WorkingDir" => setup_working_dir,
+      "User" => task.agent.user_id.to_s,
+      "Env" => task.agent.env_strings + project_env_strings,
+      "HostConfig" => {
+        "Binds" => task.volume_mounts.includes(:volume).map(&:bind_string)
+      }
+    )
+
+    setup_container.start
+    wait_result = setup_container.wait(600)
+    logs = setup_container.logs(stdout: true, stderr: true)
+    clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
+    exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
+
+    if exit_code && exit_code != 0
+      raise "Setup script failed with exit code #{exit_code}: #{clean_logs}"
+    end
+
+    steps.create!(
+      raw_response: "Setup script executed",
+      type: "Step::System",
+      content: "Setup script executed successfully\n\nOutput:\n#{clean_logs}"
+    )
+  rescue => e
+    raise "Setup script error: #{e.message}"
+  ensure
+    setup_container&.delete(force: true) if defined?(setup_container)
   end
 end
