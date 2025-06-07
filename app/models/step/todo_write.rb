@@ -1,6 +1,12 @@
+require "ostruct"
+
 class Step::TodoWrite < Step::ToolCall
+  def to_partial_path
+    "step/todo_writes/todo_write"
+  end
+
   def todos
-    todos_data = tool_input.dig("todos") || []
+    todos_data = tool_inputs&.dig("todos") || []
     todos_data.map do |todo|
       OpenStruct.new(
         id: todo["id"],
