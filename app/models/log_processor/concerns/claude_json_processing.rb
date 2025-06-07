@@ -21,6 +21,8 @@ module LogProcessor::Concerns::ClaudeJsonProcessing
         tool_use = item["message"]["content"].find { |c| c["type"] == "tool_use" }
         if tool_use && tool_use["name"] == "Bash"
           { raw_response: item_json, type: "Step::BashTool", content: extract_content(item), tool_use_id: tool_use_id }
+        elsif tool_use && tool_use["name"] == "TodoWrite"
+          { raw_response: item_json, type: "Step::TodoWrite", content: extract_content(item), tool_use_id: tool_use_id }
         else
           { raw_response: item_json, type: "Step::ToolCall", content: extract_content(item), tool_use_id: tool_use_id }
         end
@@ -67,6 +69,8 @@ module LogProcessor::Concerns::ClaudeJsonProcessing
           if tool_use
             if tool_use["name"] == "Bash"
               tool_use["input"]["command"]
+            elsif tool_use["name"] == "TodoWrite"
+              "Todo list updated"
             else
               "name: #{tool_use['name']}\ninputs: #{tool_use['input'].to_json}"
             end
