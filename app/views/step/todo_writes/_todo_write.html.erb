@@ -1,6 +1,6 @@
 <div class="todo-write-tool">
   <div class="todo-header">
-    <h3 class="todo-title">Todo List</h3>
+    <h3 class="todo-title">📋 Todo List</h3>
     <div class="todo-progress">
       <span class="todo-count"><%= todo_write.completed_count %>/<%= todo_write.total_count %></span>
       <div class="todo-progress-bar">
@@ -11,11 +11,11 @@
 
   <% if todo_write.in_progress_todos.any? %>
     <div class="todo-section">
-      <h4 class="todo-section-title">In Progress</h4>
+      <h4 class="todo-section-title">🔄 In Progress</h4>
       <ul class="todo-list">
         <% todo_write.in_progress_todos.each do |todo| %>
           <li class="todo-item todo-in-progress">
-            <span class="todo-status-icon">🔄</span>
+            <input type="checkbox" class="todo-checkbox" disabled>
             <span class="todo-content"><%= todo.content %></span>
             <span class="todo-priority todo-priority-<%= todo.priority %>"><%= todo.priority %></span>
           </li>
@@ -26,11 +26,11 @@
 
   <% if todo_write.pending_todos.any? %>
     <div class="todo-section">
-      <h4 class="todo-section-title">Pending</h4>
+      <h4 class="todo-section-title">⏳ Pending</h4>
       <ul class="todo-list">
         <% todo_write.pending_todos.each do |todo| %>
           <li class="todo-item todo-pending">
-            <span class="todo-status-icon">⏳</span>
+            <input type="checkbox" class="todo-checkbox" disabled>
             <span class="todo-content"><%= todo.content %></span>
             <span class="todo-priority todo-priority-<%= todo.priority %>"><%= todo.priority %></span>
           </li>
@@ -41,11 +41,11 @@
 
   <% if todo_write.completed_todos.any? %>
     <div class="todo-section">
-      <h4 class="todo-section-title">Completed</h4>
+      <h4 class="todo-section-title">✅ Completed</h4>
       <ul class="todo-list">
         <% todo_write.completed_todos.each do |todo| %>
           <li class="todo-item todo-completed">
-            <span class="todo-status-icon">✅</span>
+            <input type="checkbox" class="todo-checkbox" checked disabled>
             <span class="todo-content"><%= todo.content %></span>
             <span class="todo-priority todo-priority-<%= todo.priority %>"><%= todo.priority %></span>
           </li>
