@@ -1,0 +1,122 @@
+.todo-write-tool {
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  margin: 0.5rem 0;
+}
+
+.todo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.todo-title {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--color-text-primary);
+}
+
+.todo-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.todo-count {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.todo-progress-bar {
+  width: 100px;
+  height: 6px;
+  background-color: var(--color-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.todo-progress-fill {
+  height: 100%;
+  background-color: var(--color-primary);
+  transition: width 0.3s ease;
+}
+
+.todo-section {
+  margin-bottom: 1rem;
+}
+
+.todo-section:last-child {
+  margin-bottom: 0;
+}
+
+.todo-section-title {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin: 0 0 0.5rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.todo-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  margin-bottom: 0.25rem;
+  border-radius: var(--border-radius-sm);
+  transition: background-color 0.2s ease;
+}
+
+.todo-item:hover {
+  background-color: var(--color-hover);
+}
+
+.todo-status-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.todo-content {
+  flex: 1;
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+}
+
+.todo-completed .todo-content {
+  text-decoration: line-through;
+  color: var(--color-text-secondary);
+}
+
+.todo-priority {
+  font-size: 0.75rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.todo-priority-high {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+.todo-priority-medium {
+  background-color: rgba(251, 191, 36, 0.1);
+  color: #d97706;
+}
+
+.todo-priority-low {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+}
