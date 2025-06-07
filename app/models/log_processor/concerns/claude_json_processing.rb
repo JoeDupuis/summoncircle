@@ -14,7 +14,9 @@ module LogProcessor::Concerns::ClaudeJsonProcessing
         { raw_response: item_json, type: "Step::System", content: extract_content(item) }
       end
     when "assistant"
-      if has_tool_use?(item)
+      if has_thinking?(item)
+        { raw_response: item_json, type: "Step::Thinking", content: extract_content(item) }
+      elsif has_tool_use?(item)
         tool_use_id = extract_tool_use_id(item)
         tool_use = item["message"]["content"].find { |c| c["type"] == "tool_use" }
         if tool_use && tool_use["name"] == "Bash"
@@ -35,6 +37,12 @@ module LogProcessor::Concerns::ClaudeJsonProcessing
     end
   end
 
+  def has_thinking?(item)
+    return false unless item.dig("message", "content").is_a?(Array)
+
+    item["message"]["content"].any? { |content_item| content_item["type"] == "thinking" }
+  end
+
   def has_tool_use?(item)
     return false unless item.dig("message", "content").is_a?(Array)
 
@@ -51,7 +59,10 @@ module LogProcessor::Concerns::ClaudeJsonProcessing
       end
     when "assistant"
       if item.dig("message", "content").is_a?(Array)
-        if has_tool_use?(item)
+        if has_thinking?(item)
+          thinking_content = item["message"]["content"].find { |c| c["type"] == "thinking" }
+          thinking_content&.dig("thinking") || item.to_json
+        elsif has_tool_use?(item)
           tool_use = item["message"]["content"].find { |c| c["type"] == "tool_use" }
           if tool_use
             if tool_use["name"] == "Bash"

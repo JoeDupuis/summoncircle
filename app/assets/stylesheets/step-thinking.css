@@ -1,0 +1,106 @@
+.step-thinking {
+  margin: 10px 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #f8f9fa;
+  padding: 12px;
+}
+
+.thinking-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #666;
+}
+
+.thinking-icon {
+  font-size: 1.2em;
+  margin-right: 8px;
+}
+
+.thinking-label {
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.thinking-content {
+  margin-top: 8px;
+  padding: 8px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #eee;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.thinking-content h1,
+.thinking-content h2,
+.thinking-content h3,
+.thinking-content h4,
+.thinking-content h5,
+.thinking-content h6 {
+  margin: 16px 0 8px 0;
+  font-weight: bold;
+  line-height: 1.25;
+}
+
+.thinking-content h1 { font-size: 1.5em; }
+.thinking-content h2 { font-size: 1.3em; }
+.thinking-content h3 { font-size: 1.1em; }
+.thinking-content h4 { font-size: 1em; }
+.thinking-content h5 { font-size: 0.9em; }
+.thinking-content h6 { font-size: 0.8em; }
+
+.thinking-content p {
+  margin: 8px 0;
+}
+
+.thinking-content ul,
+.thinking-content ol {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.thinking-content li {
+  margin: 4px 0;
+}
+
+.thinking-content blockquote {
+  margin: 8px 0;
+  padding: 8px 12px;
+  border-left: 3px solid #ddd;
+  background: #f9f9f9;
+}
+
+.thinking-content code {
+  background: #f5f5f5;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 0.9em;
+}
+
+.thinking-content pre {
+  background: #f5f5f5;
+  padding: 12px;
+  border-radius: 5px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.thinking-content pre code {
+  background: none;
+  padding: 0;
+}
+
+.thinking-content a {
+  color: #0066cc;
+  text-decoration: underline;
+}
+
+.thinking-content a:hover {
+  color: #004499;
+}
