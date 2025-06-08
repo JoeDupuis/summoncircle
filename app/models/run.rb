@@ -83,16 +83,34 @@ class Run < ApplicationRecord
     binds = task.volume_mounts.includes(:volume).map(&:bind_string)
     env_vars = agent.env_strings + project_env_strings
 
-    Docker::Container.create(
-      "Image" => agent.docker_image,
-      "Cmd" => command,
-      "Env" => env_vars,
-      "User" => agent.user_id.to_s,
-      "WorkingDir" => task.agent.workplace_path,
-      "HostConfig" => {
-        "Binds" => binds
-      }
-    )
+    # If MCP SSE endpoint is configured, wrap the command to add MCP configuration
+    if agent.mcp_sse_endpoint.present? && first_run?
+      mcp_config = build_mcp_config(agent.mcp_sse_endpoint)
+      wrapped_command = build_mcp_wrapped_command(command, mcp_config)
+
+      Docker::Container.create(
+        "Image" => agent.docker_image,
+        "Entrypoint" => [ "/bin/sh", "-c" ],
+        "Cmd" => [ wrapped_command ],
+        "Env" => env_vars,
+        "User" => agent.user_id.to_s,
+        "WorkingDir" => task.agent.workplace_path,
+        "HostConfig" => {
+          "Binds" => binds
+        }
+      )
+    else
+      Docker::Container.create(
+        "Image" => agent.docker_image,
+        "Cmd" => command,
+        "Env" => env_vars,
+        "User" => agent.user_id.to_s,
+        "WorkingDir" => task.agent.workplace_path,
+        "HostConfig" => {
+          "Binds" => binds
+        }
+      )
+    end
   end
 
 
@@ -194,6 +212,25 @@ class Run < ApplicationRecord
     if user.ssh_key.present? && agent.ssh_mount_path.present?
       archive_file_to_container(container, user.ssh_key, agent.ssh_mount_path, 0o600)
     end
+  end
+
+  def build_mcp_config(endpoint)
+    # Extract the auth token from Rails credentials
+    auth_token = Rails.application.credentials.dig(:fast_mcp, :auth_token)
+
+    {
+      type: "sse",
+      url: endpoint,
+      authorization_token: auth_token
+    }.to_json
+  end
+
+  def build_mcp_wrapped_command(original_command, mcp_config)
+    # Escape the JSON for shell
+    escaped_config = mcp_config.gsub('"', '\\"')
+
+    # Build the command that adds MCP config then runs the original command
+    "claude add-json -s user summoncircle '#{escaped_config}' && claude #{original_command.join(' ')}"
   end
 
   def archive_file_to_container(container, content, destination_path, permissions = 0o644)
