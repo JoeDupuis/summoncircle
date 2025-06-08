@@ -83,17 +83,9 @@ class Run < ApplicationRecord
     binds = task.volume_mounts.includes(:volume).map(&:bind_string)
     env_vars = agent.env_strings + project_env_strings
 
-    # If MCP SSE endpoint is configured, prepend MCP configuration command
-    final_command = if agent.mcp_sse_endpoint.present? && first_run?
-      mcp_config = build_mcp_config(agent.mcp_sse_endpoint)
-      build_mcp_command_args(mcp_config) + command
-    else
-      command
-    end
-
     Docker::Container.create(
       "Image" => agent.docker_image,
-      "Cmd" => final_command,
+      "Cmd" => command,
       "Env" => env_vars,
       "User" => agent.user_id.to_s,
       "WorkingDir" => task.agent.workplace_path,
@@ -202,6 +194,11 @@ class Run < ApplicationRecord
     if user.ssh_key.present? && agent.ssh_mount_path.present?
       archive_file_to_container(container, user.ssh_key, agent.ssh_mount_path, 0o600)
     end
+
+    # Configure MCP if endpoint is set and this is the first run
+    if agent.mcp_sse_endpoint.present? && first_run?
+      setup_mcp_configuration(container, agent)
+    end
   end
 
   def build_mcp_config(endpoint)
@@ -218,9 +215,13 @@ class Run < ApplicationRecord
     }.to_json
   end
 
-  def build_mcp_command_args(mcp_config)
-    # Build command args for claude mcp add-json
-    [ "mcp", "add-json", "-s", "user", "summoncircle", mcp_config, "&&" ]
+  def setup_mcp_configuration(container, agent)
+    mcp_config = build_mcp_config(agent.mcp_sse_endpoint)
+    
+    # Execute MCP configuration command in the container
+    result = container.exec([ "claude", "mcp", "add-json", "-s", "user", "summoncircle", mcp_config ])
+    
+    Rails.logger.info "MCP configuration result: #{result.inspect}"
   end
 
   def archive_file_to_container(container, content, destination_path, permissions = 0o644)
