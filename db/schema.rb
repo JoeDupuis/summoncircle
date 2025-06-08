@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_06_060235) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_08_080712) do
   create_table "agents", force: :cascade do |t|
     t.string "name"
     t.string "docker_image"
@@ -27,6 +27,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_06_060235) do
     t.string "instructions_mount_path"
     t.string "ssh_mount_path"
     t.string "home_path"
+    t.string "mcp_sse_endpoint"
     t.index ["discarded_at"], name: "index_agents_on_discarded_at"
   end
 

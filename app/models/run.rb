@@ -24,11 +24,14 @@ class Run < ApplicationRecord
       clone_repository if first_run? && should_clone_repository?
       run_setup_script
 
+      if task.agent.mcp_sse_endpoint.present? && first_run?
+        configure_mcp
+      end
+
       container = create_container
       container.start
       setup_container_files(container)
 
-      # Delegate to log processor for container processing and step creation
       processor = task.agent.log_processor_class.new
       processor.process_container(container, self)
       capture_repository_state
@@ -194,6 +197,40 @@ class Run < ApplicationRecord
     if user.ssh_key.present? && agent.ssh_mount_path.present?
       archive_file_to_container(container, user.ssh_key, agent.ssh_mount_path, 0o600)
     end
+  end
+
+
+
+  def configure_mcp
+    agent = task.agent
+    full_url = agent.mcp_sse_endpoint.end_with?("/mcp/sse") ? agent.mcp_sse_endpoint : "#{agent.mcp_sse_endpoint.chomp('/')}/mcp/sse"
+
+    mcp_container = Docker::Container.create(
+      "Image" => agent.docker_image,
+      "Cmd" => [ "mcp", "add", "summoncircle", full_url, "-s", "user", "-t", "sse" ],
+      "Env" => agent.env_strings + project_env_strings,
+      "User" => agent.user_id.to_s,
+      "WorkingDir" => task.agent.workplace_path,
+      "HostConfig" => {
+        "Binds" => task.volume_mounts.includes(:volume).map(&:bind_string)
+      }
+    )
+
+    mcp_container.start
+    wait_result = mcp_container.wait(30)
+    exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
+
+    if exit_code && exit_code != 0
+      logs = mcp_container.logs(stdout: true, stderr: true)
+      clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
+      raise "Failed to configure MCP: #{clean_logs}"
+    end
+
+    Rails.logger.info "MCP configured successfully for summoncircle at #{full_url}"
+  rescue => e
+    raise "MCP configuration error: #{e.message}"
+  ensure
+    mcp_container&.delete(force: true) if defined?(mcp_container)
   end
 
   def archive_file_to_container(container, content, destination_path, permissions = 0o644)

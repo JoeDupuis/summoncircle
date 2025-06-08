@@ -10,6 +10,12 @@
 </p>
 <% end %>
 
+<% if @agent.mcp_sse_endpoint.present? %>
+<p>
+  MCP SSE Endpoint: <%= @agent.mcp_sse_endpoint %>
+</p>
+<% end %>
+
 <p>
   Log Processor: <%= @agent.log_processor %>
 </p>
