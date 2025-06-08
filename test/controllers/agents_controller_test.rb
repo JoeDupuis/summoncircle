@@ -51,6 +51,13 @@ class AgentsControllerTest < ActionDispatch::IntegrationTest
     assert_equal({ "NODE_ENV" => "development", "DEBUG" => "true" }, agent.env_variables)
   end
 
+  test "create persists mcp_sse_endpoint" do
+    login @user
+    post agents_url, params: { agent: { name: "MCPTest", docker_image: "img", workplace_path: "/workspace", mcp_sse_endpoint: "http://localhost:3001" } }
+    agent = Agent.last
+    assert_equal "http://localhost:3001", agent.mcp_sse_endpoint
+  end
+
   test "show requires authentication" do
     get agent_url(@agent)
     assert_redirected_to new_session_path
@@ -78,6 +85,14 @@ class AgentsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to agent_path(@agent)
     @agent.reload
     assert_equal "Updated", @agent.name
+  end
+
+  test "update persists mcp_sse_endpoint" do
+    login @user
+    patch agent_url(@agent), params: { agent: { mcp_sse_endpoint: "http://localhost:4000/mcp/sse" } }
+    assert_redirected_to agent_path(@agent)
+    @agent.reload
+    assert_equal "http://localhost:4000/mcp/sse", @agent.mcp_sse_endpoint
   end
 
   test "destroy requires authentication" do

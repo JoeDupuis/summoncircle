@@ -51,3 +51,21 @@ with_env_vars:
   start_arguments: [ "echo", "{PROMPT}" ]
   env_variables: { "NODE_ENV": "development", "DEBUG": "true" }
   user_id: 1000
+
+with_mcp_endpoint:
+  name: Test Agent with MCP
+  docker_image: example/image:latest
+  workplace_path: "/workspace"
+  start_arguments: [ "echo", "{PROMPT}" ]
+  continue_arguments: [ "echo hello" ]
+  user_id: 1000
+  mcp_sse_endpoint: "http://localhost:3000"
+
+with_mcp_endpoint_full_url:
+  name: Test Agent with MCP Full URL
+  docker_image: example/image:latest
+  workplace_path: "/workspace"
+  start_arguments: [ "echo", "{PROMPT}" ]
+  continue_arguments: [ "echo hello" ]
+  user_id: 1000
+  mcp_sse_endpoint: "http://localhost:3000/mcp/sse"

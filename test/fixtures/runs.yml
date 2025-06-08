@@ -42,3 +42,10 @@ pending_run:
   status: 0 # pending
   started_at: null
   completed_at: null
+
+mcp_existing_run:
+  task: with_mcp_endpoint_has_runs
+  prompt: echo first
+  status: 2 # completed
+  started_at: 2025-05-24 19:13:02
+  completed_at: 2025-05-24 19:13:02
