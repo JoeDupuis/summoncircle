@@ -24,7 +24,6 @@ class Run < ApplicationRecord
       clone_repository if first_run? && should_clone_repository?
       run_setup_script
 
-      # Configure MCP in a separate container if needed
       if task.agent.mcp_sse_endpoint.present? && first_run?
         configure_mcp
       end
@@ -33,7 +32,6 @@ class Run < ApplicationRecord
       container.start
       setup_container_files(container)
 
-      # Delegate to log processor for container processing and step creation
       processor = task.agent.log_processor_class.new
       processor.process_container(container, self)
       capture_repository_state
