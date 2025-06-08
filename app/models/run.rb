@@ -217,7 +217,7 @@ class Run < ApplicationRecord
     )
 
     mcp_container.start
-    wait_result = mcp_container.wait(30) # 30 second timeout
+    wait_result = mcp_container.wait(30)
     exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
 
     if exit_code && exit_code != 0
