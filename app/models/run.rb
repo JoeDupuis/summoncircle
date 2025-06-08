@@ -83,34 +83,24 @@ class Run < ApplicationRecord
     binds = task.volume_mounts.includes(:volume).map(&:bind_string)
     env_vars = agent.env_strings + project_env_strings
 
-    # If MCP SSE endpoint is configured, wrap the command to add MCP configuration
-    if agent.mcp_sse_endpoint.present? && first_run?
+    # If MCP SSE endpoint is configured, prepend MCP configuration command
+    final_command = if agent.mcp_sse_endpoint.present? && first_run?
       mcp_config = build_mcp_config(agent.mcp_sse_endpoint)
-      wrapped_command = build_mcp_wrapped_command(command, mcp_config)
-
-      Docker::Container.create(
-        "Image" => agent.docker_image,
-        "Entrypoint" => [ "/bin/sh", "-c" ],
-        "Cmd" => [ wrapped_command ],
-        "Env" => env_vars,
-        "User" => agent.user_id.to_s,
-        "WorkingDir" => task.agent.workplace_path,
-        "HostConfig" => {
-          "Binds" => binds
-        }
-      )
+      build_mcp_command_args(mcp_config) + command
     else
-      Docker::Container.create(
-        "Image" => agent.docker_image,
-        "Cmd" => command,
-        "Env" => env_vars,
-        "User" => agent.user_id.to_s,
-        "WorkingDir" => task.agent.workplace_path,
-        "HostConfig" => {
-          "Binds" => binds
-        }
-      )
+      command
     end
+
+    Docker::Container.create(
+      "Image" => agent.docker_image,
+      "Cmd" => final_command,
+      "Env" => env_vars,
+      "User" => agent.user_id.to_s,
+      "WorkingDir" => task.agent.workplace_path,
+      "HostConfig" => {
+        "Binds" => binds
+      }
+    )
   end
 
 
@@ -218,19 +208,19 @@ class Run < ApplicationRecord
     # Extract the auth token from Rails credentials
     auth_token = Rails.application.credentials.dig(:fast_mcp, :auth_token)
 
+    # Ensure endpoint has /mcp/sse appended
+    full_url = endpoint.end_with?("/mcp/sse") ? endpoint : "#{endpoint.chomp('/')}/mcp/sse"
+
     {
       type: "sse",
-      url: endpoint,
+      url: full_url,
       authorization_token: auth_token
     }.to_json
   end
 
-  def build_mcp_wrapped_command(original_command, mcp_config)
-    # Escape the JSON for shell
-    escaped_config = mcp_config.gsub('"', '\\"')
-
-    # Build the command that adds MCP config then runs the original command
-    "claude add-json -s user summoncircle '#{escaped_config}' && claude #{original_command.join(' ')}"
+  def build_mcp_command_args(mcp_config)
+    # Build command args for claude add-json
+    [ "add-json", "-s", "user", "summoncircle", mcp_config, "&&" ]
   end
 
   def archive_file_to_container(container, content, destination_path, permissions = 0o644)
