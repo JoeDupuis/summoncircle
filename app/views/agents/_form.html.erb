@@ -17,6 +17,12 @@
   </div>
 
   <div>
+    <%= form.label :mcp_sse_endpoint, "MCP SSE Endpoint" %><br>
+    <%= form.text_field :mcp_sse_endpoint, placeholder: "http://localhost:3000/sse" %>
+    <small class="form-help">Server-Sent Events endpoint for MCP server connection. Leave blank to disable MCP.</small>
+  </div>
+
+  <div>
     <%= form.label :start_arguments %><br>
     <%= form.text_area :start_arguments %>
   </div>
