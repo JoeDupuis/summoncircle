@@ -28,7 +28,7 @@ class Run < ApplicationRecord
       if task.agent.mcp_sse_endpoint.present? && first_run?
         configure_mcp
       end
-      
+
       container = create_container
       container.start
       setup_container_files(container)
@@ -206,13 +206,13 @@ class Run < ApplicationRecord
   def configure_mcp
     agent = task.agent
     full_url = agent.mcp_sse_endpoint.end_with?("/mcp/sse") ? agent.mcp_sse_endpoint : "#{agent.mcp_sse_endpoint.chomp('/')}/mcp/sse"
-    
+
     binds = task.volume_mounts.includes(:volume).map(&:bind_string)
     env_vars = agent.env_strings + project_env_strings
-    
+
     mcp_container = Docker::Container.create(
       "Image" => agent.docker_image,
-      "Cmd" => ["mcp", "add", "summoncircle", full_url, "-s", "user", "-t", "sse"],
+      "Cmd" => [ "mcp", "add", "summoncircle", full_url, "-s", "user", "-t", "sse" ],
       "Env" => env_vars,
       "User" => agent.user_id.to_s,
       "WorkingDir" => task.agent.workplace_path,
@@ -220,17 +220,17 @@ class Run < ApplicationRecord
         "Binds" => binds
       }
     )
-    
+
     mcp_container.start
     wait_result = mcp_container.wait(30) # 30 second timeout
     exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
-    
+
     if exit_code && exit_code != 0
       logs = mcp_container.logs(stdout: true, stderr: true)
       clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
       raise "Failed to configure MCP: #{clean_logs}"
     end
-    
+
     Rails.logger.info "MCP configured successfully for summoncircle at #{full_url}"
   rescue => e
     raise "MCP configuration error: #{e.message}"

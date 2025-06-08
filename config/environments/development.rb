@@ -72,7 +72,7 @@ Rails.application.configure do
 
   # Reduce tidewave logging noise
   config.tidewave.logger = Logger.new("/dev/null") unless ENV["TIDEWAVE_LOG"]
-  
+
   # Allow Docker containers to connect
   config.hosts << "host.docker.internal"
 end
