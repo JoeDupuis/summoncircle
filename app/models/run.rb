@@ -220,7 +220,7 @@ class Run < ApplicationRecord
 
   def build_mcp_command_args(mcp_config)
     # Build command args for claude add-json
-    [ "add-json", "-s", "user", "summoncircle", mcp_config, "&&" ]
+    [ "add-json", "summoncircle", mcp_config, "&&" ]
   end
 
   def archive_file_to_container(container, content, destination_path, permissions = 0o644)
