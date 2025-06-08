@@ -24,6 +24,11 @@ class Run < ApplicationRecord
       clone_repository if first_run? && should_clone_repository?
       run_setup_script
 
+      # Configure MCP in a separate container if needed
+      if task.agent.mcp_sse_endpoint.present? && first_run?
+        configure_mcp
+      end
+      
       container = create_container
       container.start
       setup_container_files(container)
@@ -83,37 +88,16 @@ class Run < ApplicationRecord
     binds = task.volume_mounts.includes(:volume).map(&:bind_string)
     env_vars = agent.env_strings + project_env_strings
 
-    # If MCP is configured and this is first run, we need to run two commands
-    if agent.mcp_sse_endpoint.present? && first_run?
-      mcp_config = build_mcp_config(agent.mcp_sse_endpoint)
-      # Create a shell command that runs MCP config then claude
-      # Need to properly escape arguments for shell
-      escaped_args = command.map { |arg| arg.include?(' ') ? "\"#{arg}\"" : arg }.join(' ')
-      shell_command = "claude mcp add-json -s user summoncircle '#{mcp_config}' && claude #{escaped_args}"
-      
-      Docker::Container.create(
-        "Image" => agent.docker_image,
-        "Entrypoint" => ["/bin/sh", "-c"],
-        "Cmd" => [shell_command],
-        "Env" => env_vars,
-        "User" => agent.user_id.to_s,
-        "WorkingDir" => task.agent.workplace_path,
-        "HostConfig" => {
-          "Binds" => binds
-        }
-      )
-    else
-      Docker::Container.create(
-        "Image" => agent.docker_image,
-        "Cmd" => command,
-        "Env" => env_vars,
-        "User" => agent.user_id.to_s,
-        "WorkingDir" => task.agent.workplace_path,
-        "HostConfig" => {
-          "Binds" => binds
-        }
-      )
-    end
+    Docker::Container.create(
+      "Image" => agent.docker_image,
+      "Cmd" => command,
+      "Env" => env_vars,
+      "User" => agent.user_id.to_s,
+      "WorkingDir" => task.agent.workplace_path,
+      "HostConfig" => {
+        "Binds" => binds
+      }
+    )
   end
 
 
@@ -217,20 +201,42 @@ class Run < ApplicationRecord
     end
   end
 
-  def build_mcp_config(endpoint)
-    # Extract the auth token from Rails credentials
-    auth_token = Rails.application.credentials.dig(:fast_mcp, :auth_token)
 
-    # Ensure endpoint has /mcp/sse appended
-    full_url = endpoint.end_with?("/mcp/sse") ? endpoint : "#{endpoint.chomp('/')}/mcp/sse"
 
-    {
-      type: "sse",
-      url: full_url,
-      authorization_token: auth_token
-    }.to_json
+  def configure_mcp
+    agent = task.agent
+    full_url = agent.mcp_sse_endpoint.end_with?("/mcp/sse") ? agent.mcp_sse_endpoint : "#{agent.mcp_sse_endpoint.chomp('/')}/mcp/sse"
+    
+    binds = task.volume_mounts.includes(:volume).map(&:bind_string)
+    env_vars = agent.env_strings + project_env_strings
+    
+    mcp_container = Docker::Container.create(
+      "Image" => agent.docker_image,
+      "Cmd" => ["mcp", "add", "summoncircle", full_url, "-s", "user", "-t", "sse"],
+      "Env" => env_vars,
+      "User" => agent.user_id.to_s,
+      "WorkingDir" => task.agent.workplace_path,
+      "HostConfig" => {
+        "Binds" => binds
+      }
+    )
+    
+    mcp_container.start
+    wait_result = mcp_container.wait(30) # 30 second timeout
+    exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
+    
+    if exit_code && exit_code != 0
+      logs = mcp_container.logs(stdout: true, stderr: true)
+      clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
+      raise "Failed to configure MCP: #{clean_logs}"
+    end
+    
+    Rails.logger.info "MCP configured successfully for summoncircle at #{full_url}"
+  rescue => e
+    raise "MCP configuration error: #{e.message}"
+  ensure
+    mcp_container&.delete(force: true) if defined?(mcp_container)
   end
-
 
   def archive_file_to_container(container, content, destination_path, permissions = 0o644)
     target_dir = File.dirname(destination_path)
