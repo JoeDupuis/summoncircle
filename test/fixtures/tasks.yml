@@ -85,3 +85,24 @@ for_skip_git_clone:
   user: one
   status: active
   started_at: 2025-05-24 19:14:19
+
+with_mcp_endpoint:
+  project: one
+  agent: with_mcp_endpoint
+  user: one
+  status: active
+  started_at: 2025-05-24 19:14:19
+
+with_mcp_endpoint_full_url:
+  project: one
+  agent: with_mcp_endpoint_full_url
+  user: one
+  status: active
+  started_at: 2025-05-24 19:14:19
+
+with_mcp_endpoint_has_runs:
+  project: one
+  agent: with_mcp_endpoint
+  user: one
+  status: active
+  started_at: 2025-05-24 19:14:19

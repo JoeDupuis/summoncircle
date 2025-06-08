@@ -350,6 +350,127 @@ class RunTest < ActiveSupport::TestCase
     assert_equal 3, run.steps.count
   end
 
+  test "execute! configures MCP on first run when endpoint present" do
+    task = tasks(:with_mcp_endpoint)
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    expect_git_clone_container
+    expect_mcp_container(
+      cmd: [ "mcp", "add", "summoncircle", "http://localhost:3000/mcp/sse", "-s", "user", "-t", "sse" ],
+      output: "MCP configured"
+    )
+    expect_main_container(cmd: [ "echo", "test" ], output: "\x04test")
+    expect_git_diff_container
+
+    run.execute!
+
+    assert run.completed?
+    assert_equal 2, run.steps.count
+  end
+
+  test "execute! appends /mcp/sse to endpoint URL if not present" do
+    task = tasks(:with_mcp_endpoint)
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    expect_git_clone_container
+    expect_mcp_container(
+      cmd: [ "mcp", "add", "summoncircle", "http://localhost:3000/mcp/sse", "-s", "user", "-t", "sse" ],
+      output: "MCP configured"
+    )
+    expect_main_container(cmd: [ "echo", "test" ], output: "\x04test")
+    expect_git_diff_container
+
+    run.execute!
+
+    assert run.completed?
+  end
+
+  test "execute! does not duplicate /mcp/sse if already present in endpoint" do
+    task = tasks(:with_mcp_endpoint_full_url)
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    expect_git_clone_container
+    expect_mcp_container(
+      cmd: [ "mcp", "add", "summoncircle", "http://localhost:3000/mcp/sse", "-s", "user", "-t", "sse" ],
+      output: "MCP configured"
+    )
+    expect_main_container(cmd: [ "echo", "test" ], output: "\x04test")
+    expect_git_diff_container
+
+    run.execute!
+
+    assert run.completed?
+  end
+
+  test "execute! skips MCP configuration on subsequent runs" do
+    task = tasks(:with_mcp_endpoint_has_runs)
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    expect_main_container(cmd: [ "echo hello" ], output: "\x04test")
+    expect_git_diff_container
+
+    run.execute!
+
+    assert run.completed?
+    assert_equal 2, run.steps.count
+  end
+
+  test "execute! skips MCP configuration when endpoint is blank" do
+    task = tasks(:without_runs)
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    expect_git_clone_container
+    expect_main_container(cmd: [ "echo", "STARTING: test" ], output: "\x04test")
+    expect_git_diff_container
+
+    run.execute!
+
+    assert run.completed?
+    assert_equal 2, run.steps.count
+  end
+
+  test "execute! handles MCP configuration failure" do
+    task = tasks(:with_mcp_endpoint)
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    expect_git_clone_container
+    expect_mcp_container(
+      cmd: [ "mcp", "add", "summoncircle", "http://localhost:3000/mcp/sse", "-s", "user", "-t", "sse" ],
+      output: "MCP error: connection refused",
+      status_code: 1
+    )
+
+    run.execute!
+
+    assert run.failed?
+    assert_equal 1, run.steps.count
+    assert_includes run.steps.first.raw_response, "Failed to configure MCP"
+    assert_includes run.steps.first.raw_response, "connection refused"
+  end
+
+  test "execute! cleans up MCP container even on failure" do
+    task = tasks(:with_mcp_endpoint)
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    mcp_container = mock("mcp_container")
+    mcp_container.expects(:start)
+    mcp_container.expects(:wait).returns({ "StatusCode" => 1 })
+    mcp_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "MCP error")
+    mcp_container.expects(:delete).with(force: true)
+
+    expect_git_clone_container
+    Docker::Container.expects(:create).with(
+      has_entries(
+        "Image" => "example/image:latest",
+        "Cmd" => [ "mcp", "add", "summoncircle", "http://localhost:3000/mcp/sse", "-s", "user", "-t", "sse" ]
+      )
+    ).returns(mcp_container)
+
+    run.execute!
+
+    assert run.failed?
+  end
+
   private
 
   def mock_container_with_output(output)
@@ -443,5 +564,29 @@ class RunTest < ActiveSupport::TestCase
     Docker::Container.expects(:create).with(
       has_entries(expectations)
     ).returns(setup_container)
+  end
+
+  def expect_mcp_container(cmd:, output:, status_code: 0, env: nil)
+    mcp_container = mock("mcp_container")
+    mcp_container.expects(:start)
+    mcp_container.expects(:wait).returns({ "StatusCode" => status_code })
+    if status_code != 0
+      mcp_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + output)
+    end
+    mcp_container.expects(:delete).with(force: true)
+
+    expectations = {
+      "Image" => "example/image:latest",
+      "Cmd" => cmd,
+      "WorkingDir" => "/workspace",
+      "User" => "1000"
+    }
+
+    expectations["Env"] = env if env
+    expectations["HostConfig"] = has_entries("Binds" => instance_of(Array))
+
+    Docker::Container.expects(:create).with(
+      has_entries(expectations)
+    ).returns(mcp_container)
   end
 end
