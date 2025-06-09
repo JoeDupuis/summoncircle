@@ -8,8 +8,7 @@
     
     <div class="form-group" data-auto-push-target="branchSelection" style="<%= task.auto_push_enabled? ? '' : 'display: none;' %>">
       <%= form.label :auto_push_branch, "Select Branch to Push" %>
-      <% branches = task.auto_push_enabled? ? task.fetch_branches : [task.auto_push_branch].compact %>
-      <%= render "tasks/branch_select", task: task, branches: branches, form: form %>
+      <%= render "tasks/branch_select", task: task, branches: [task.auto_push_branch].compact, form: form %>
       <%= link_to "Refresh Branches", branches_task_path(task), 
           data: { turbo_method: :get },
           class: "action-button -primary" %>
