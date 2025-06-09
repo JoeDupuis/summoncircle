@@ -443,6 +443,7 @@ DEPENDENCIES
   debug
   discard
   docker-api
+  fast-mcp
   importmap-rails
   jbuilder
   kamal
