@@ -1,6 +1,8 @@
 require "shellwords"
 require "docker"
 
+# NOTE: This tool is kept for manual push operations by agents.
+# For automatic pushing after runs, use the auto-push configuration in Task settings.
 class GitPushTool < ApplicationTool
   description "Push a git branch to a remote repository using GitHub authentication"
 
