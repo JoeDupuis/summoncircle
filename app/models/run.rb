@@ -297,8 +297,6 @@ class Run < ApplicationRecord
     repository_url = project.repository_url_with_token(task.user)
 
     push_commands = [
-      "git config user.email '#{task.user.email_address}'",
-      "git config user.name '#{task.user.email_address.split('@').first}'",
       "git remote set-url origin '#{repository_url}'",
       "git add -A",
       "git diff --cached --quiet || git commit -m 'Auto-push from SummonCircle run #{id}'",
@@ -313,9 +311,11 @@ class Run < ApplicationRecord
       "User" => task.agent.user_id.to_s,
       "Env" => task.agent.env_strings + project_env_strings,
       "HostConfig" => {
-        "Binds" => [ task.workplace_mount.bind_string ]
+        "Binds" => task.volume_mounts.includes(:volume).map(&:bind_string)
       }
     )
+    
+    setup_container_files(push_container)
 
     push_container.start
     wait_result = push_container.wait(300)
