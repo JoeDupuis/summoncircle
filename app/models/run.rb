@@ -186,9 +186,8 @@ class Run < ApplicationRecord
     user = task.user
     env_vars = []
 
-    if user.github_token.present?
-      env_vars << "GITHUB_TOKEN=#{user.github_token}"
-    end
+    # Pass user ID so agents can use it for MCP tools that need user context
+    env_vars << "SUMMONCIRCLE_USER_ID=#{user.id}"
 
     env_vars
   end

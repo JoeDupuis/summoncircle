@@ -7,10 +7,20 @@ class GitPushTool < ApplicationTool
     required(:repo_path).filled(:string).description("Path to the git repository")
     required(:branch).filled(:string).description("Branch name to push")
     optional(:remote).filled(:string).description("Remote name to push to (defaults to 'origin')")
-    required(:github_token).filled(:string).description("GitHub personal access token for authentication")
+    required(:user_id).filled(:integer).description("User ID to fetch GitHub token from")
   end
 
-  def call(repo_path:, branch:, github_token:, remote: "origin")
+  def call(repo_path:, branch:, user_id:, remote: "origin")
+    user = User.find_by(id: user_id)
+    unless user
+      return { success: false, error: "User not found with ID: #{user_id}" }
+    end
+
+    unless user.github_token.present?
+      return { success: false, error: "User does not have a GitHub token configured" }
+    end
+
+    github_token = user.github_token
     repo_path = File.expand_path(repo_path)
 
     unless Dir.exist?(repo_path)

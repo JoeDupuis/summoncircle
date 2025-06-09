@@ -17,6 +17,8 @@ class GitPushToolTest < ActiveSupport::TestCase
     end
 
     @tool = GitPushTool.new
+    @user = users(:one)
+    @user.update!(github_token: "test_token")
   end
 
   teardown do
@@ -29,11 +31,35 @@ class GitPushToolTest < ActiveSupport::TestCase
     assert_raises(ArgumentError) { @tool.call(repo_path: @repo_path, branch: "main") }
   end
 
+  test "returns error when user not found" do
+    result = @tool.call(
+      repo_path: @repo_path,
+      branch: "main",
+      user_id: 999999
+    )
+
+    assert_not result[:success]
+    assert_match(/User not found/, result[:error])
+  end
+
+  test "returns error when user has no github token" do
+    @user.update!(github_token: nil)
+    
+    result = @tool.call(
+      repo_path: @repo_path,
+      branch: "main",
+      user_id: @user.id
+    )
+
+    assert_not result[:success]
+    assert_match(/User does not have a GitHub token configured/, result[:error])
+  end
+
   test "returns error when repository path does not exist" do
     result = @tool.call(
       repo_path: "/nonexistent/path",
       branch: "main",
-      github_token: "test_token"
+      user_id: @user.id
     )
 
     assert_not result[:success]
@@ -47,7 +73,7 @@ class GitPushToolTest < ActiveSupport::TestCase
     result = @tool.call(
       repo_path: non_git_path,
       branch: "main",
-      github_token: "test_token"
+      user_id: @user.id
     )
 
     assert_not result[:success]
@@ -58,7 +84,7 @@ class GitPushToolTest < ActiveSupport::TestCase
     result = @tool.call(
       repo_path: @repo_path,
       branch: "main",
-      github_token: "test_token",
+      user_id: @user.id,
       remote: "nonexistent"
     )
 
@@ -80,7 +106,7 @@ class GitPushToolTest < ActiveSupport::TestCase
     result = @tool.call(
       repo_path: @repo_path,
       branch: "main",
-      github_token: "test_token"
+      user_id: @user.id
     )
 
     assert_not_nil result[:output]
@@ -93,7 +119,7 @@ class GitPushToolTest < ActiveSupport::TestCase
     result = @tool.call(
       repo_path: @repo_path,
       branch: "main",
-      github_token: "test_token"
+      user_id: @user.id
     )
 
     assert_not_nil result[:output]
@@ -109,7 +135,7 @@ class GitPushToolTest < ActiveSupport::TestCase
     result = @tool.call(
       repo_path: @repo_path,
       branch: "main",
-      github_token: "test_token",
+      user_id: @user.id,
       remote: "upstream"
     )
 
@@ -132,7 +158,7 @@ class GitPushToolTest < ActiveSupport::TestCase
     result = tool.call(
       repo_path: @repo_path,
       branch: "main",
-      github_token: "test_token"
+      user_id: @user.id
     )
 
     assert_not result[:success]
