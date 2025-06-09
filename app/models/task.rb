@@ -31,7 +31,7 @@ class Task < ApplicationRecord
     git_container = Docker::Container.create(
       "Image" => agent.docker_image,
       "Entrypoint" => [ "sh" ],
-      "Cmd" => [ "-c", "git branch | sed 's/^\\*\\? *//' | sort" ],
+      "Cmd" => [ "-c", "git branch" ],
       "WorkingDir" => git_working_dir,
       "User" => agent.user_id.to_s,
       "HostConfig" => {
@@ -47,7 +47,9 @@ class Task < ApplicationRecord
 
     if exit_code && exit_code == 0
       Rails.logger.info "Branch fetch output: #{branches_output.inspect}"
-      branches_output.split("\n").map(&:strip).reject(&:empty?)
+      branches_output.split("\n").map do |line|
+        line.sub(/^\*?\s*/, '').strip
+      end.reject(&:empty?).sort
     else
       Rails.logger.error "Branch fetch failed with exit code: #{exit_code}, output: #{branches_output}"
       []
