@@ -68,6 +68,7 @@ class Task < ApplicationRecord
     repo_path = project.repo_path.presence || ""
     working_dir = workplace_mount.container_path
     git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
+
     repository_url = project.repository_url_with_token(user)
 
     push_commands = [
@@ -91,12 +92,6 @@ class Task < ApplicationRecord
 
     push_container.start
     
-    # Set up git config if available
-    if user.git_config.present? && agent.home_path.present?
-      push_container.exec([ "mkdir", "-p", agent.home_path ])
-      encoded_git_config = Base64.strict_encode64(user.git_config)
-      push_container.exec([ "sh", "-c", "echo '#{encoded_git_config}' | base64 -d > #{File.join(agent.home_path, '.gitconfig')}" ])
-    end
     wait_result = push_container.wait(300)
     logs = push_container.logs(stdout: true, stderr: true)
     clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip

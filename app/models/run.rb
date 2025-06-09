@@ -287,6 +287,10 @@ class Run < ApplicationRecord
 
   def push_changes_if_enabled
     return unless task.auto_push_enabled? && task.auto_push_branch.present?
+    push_changes(task.auto_push_branch, "Auto-push from SummonCircle run #{id}")
+  end
+
+  def push_changes(branch, commit_message)
     return unless should_clone_repository?
 
     project = task.project
@@ -299,8 +303,8 @@ class Run < ApplicationRecord
     push_commands = [
       "git remote set-url origin '#{repository_url}'",
       "git add -A",
-      "git diff --cached --quiet || git commit -m 'Auto-push from SummonCircle run #{id}'",
-      "git push origin HEAD:#{task.auto_push_branch}"
+      "git diff --cached --quiet || git commit -m '#{commit_message}'",
+      "git push origin HEAD:#{branch}"
     ].join(" && ")
 
     push_container = Docker::Container.create(
@@ -325,24 +329,26 @@ class Run < ApplicationRecord
 
     if exit_code && exit_code == 0
       steps.create!(
-        raw_response: "Auto-push completed",
+        raw_response: "Push completed",
         type: "Step::System",
-        content: "Successfully pushed changes to branch: #{task.auto_push_branch}\n\nOutput:\n#{clean_logs}"
+        content: "Successfully pushed changes to branch: #{branch}\n\nOutput:\n#{clean_logs}"
       )
     else
       steps.create!(
-        raw_response: "Auto-push failed",
+        raw_response: "Push failed",
         type: "Step::Error",
-        content: "Failed to push changes to branch: #{task.auto_push_branch}\n\nError:\n#{clean_logs}"
+        content: "Failed to push changes to branch: #{branch}\n\nError:\n#{clean_logs}"
       )
+      raise "Push failed: #{clean_logs}"
     end
   rescue => e
-    Rails.logger.error "Auto-push failed: #{e.message}"
+    Rails.logger.error "Push failed: #{e.message}"
     steps.create!(
-      raw_response: "Auto-push error",
+      raw_response: "Push error",
       type: "Step::Error",
-      content: "Auto-push error: #{e.message}"
+      content: "Push error: #{e.message}"
     )
+    raise
   ensure
     push_container&.delete(force: true) if defined?(push_container)
   end
