@@ -67,7 +67,7 @@ class TasksController < ApplicationController
       else
         flash.now[:notice] = "Auto-push settings saved"
       end
-      
+
       render turbo_stream: [
         turbo_stream.replace("auto_push_form", partial: "tasks/auto_push_form", locals: { task: @task }),
         turbo_stream.prepend("flash-messages", partial: "application/flash_messages")
