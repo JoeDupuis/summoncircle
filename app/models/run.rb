@@ -333,17 +333,26 @@ class Run < ApplicationRecord
       git config user.email "agent@summoncircle.com" || true
       git config user.name "SummonCircle Agent" || true
       
-      # Check if there are any changes
-      if git diff --quiet && git diff --cached --quiet; then
-        echo "No changes to commit"
-        exit 0
+      # Check if there are any uncommitted changes
+      if ! git diff --quiet || ! git diff --cached --quiet; then
+        echo "Found uncommitted changes, committing them..."
+        # Add all changes
+        git add -A
+        
+        # Commit with a descriptive message
+        git commit -m "Auto-commit from Run ##{id} at #{Time.current.strftime('%Y-%m-%d %H:%M:%S UTC')}" || true
+      else
+        echo "No uncommitted changes found"
       fi
       
-      # Add all changes
-      git add -A
-      
-      # Commit with a descriptive message
-      git commit -m "Auto-commit from Run ##{id} at #{Time.current.strftime('%Y-%m-%d %H:%M:%S UTC')}" || true
+      # Check if there are any unpushed commits
+      UNPUSHED=$(git log origin/#{branch}..HEAD --oneline 2>/dev/null | wc -l)
+      if [ "$UNPUSHED" -eq "0" ]; then
+        echo "No unpushed commits on branch #{branch}"
+        exit 0
+      else
+        echo "Found $UNPUSHED unpushed commits"
+      fi
       
       # Get the remote URL and add token
       ORIGINAL_URL=$(git remote get-url origin)
