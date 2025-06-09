@@ -1,6 +1,6 @@
 class TasksController < ApplicationController
   before_action :set_project
-  before_action :set_task, only: [ :show, :destroy ]
+  before_action :set_task, only: [ :show, :destroy, :branches, :update_auto_push ]
 
   def index
     @tasks = @project.tasks.kept.includes(:agent, :project)
@@ -47,6 +47,21 @@ class TasksController < ApplicationController
     redirect_to project_tasks_path(@task.project), notice: "Task was successfully archived."
   end
 
+  def branches
+    branches = @task.fetch_branches
+    render json: { branches: branches }
+  rescue => e
+    render json: { error: e.message }, status: :unprocessable_entity
+  end
+
+  def update_auto_push
+    if @task.update(auto_push_params)
+      render turbo_stream: turbo_stream.replace("auto_push_form", partial: "tasks/auto_push_form", locals: { task: @task })
+    else
+      render json: { error: @task.errors.full_messages.join(", ") }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def set_project
@@ -63,5 +78,9 @@ class TasksController < ApplicationController
 
   def task_params
     params.require(:task).permit(:agent_id, :project_id)
+  end
+
+  def auto_push_params
+    params.require(:task).permit(:auto_push_enabled, :auto_push_branch)
   end
 end

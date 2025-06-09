@@ -21,6 +21,42 @@ class Task < ApplicationRecord
     end
   end
 
+  def fetch_branches
+    return [] unless project.repository_url.present?
+
+    repo_path = project.repo_path.presence || ""
+    working_dir = workplace_mount.container_path
+    git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
+
+    git_container = Docker::Container.create(
+      "Image" => agent.docker_image,
+      "Entrypoint" => [ "sh" ],
+      "Cmd" => [ "-c", "git branch -r | grep -v HEAD | sed 's/origin\\///' | sort" ],
+      "WorkingDir" => git_working_dir,
+      "User" => agent.user_id.to_s,
+      "HostConfig" => {
+        "Binds" => [ workplace_mount.bind_string ]
+      }
+    )
+
+    git_container.start
+    wait_result = git_container.wait(30)
+    logs = git_container.logs(stdout: true, stderr: true)
+    branches_output = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
+    exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
+
+    if exit_code && exit_code == 0
+      branches_output.split("\n").map(&:strip).reject(&:empty?)
+    else
+      []
+    end
+  rescue => e
+    Rails.logger.error "Failed to fetch branches: #{e.message}"
+    []
+  ensure
+    git_container&.delete(force: true) if defined?(git_container)
+  end
+
   private
 
   def create_volume_mounts

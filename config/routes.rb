@@ -5,6 +5,10 @@ Rails.application.routes.draw do
   resources :agents
   resources :projects do
     resources :tasks, shallow: true do
+      member do
+        get :branches
+        patch :update_auto_push
+      end
       resources :runs, only: %i[create]
     end
   end
