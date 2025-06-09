@@ -92,7 +92,7 @@ class Task < ApplicationRecord
     )
 
     push_container.start
-    
+
     wait_result = push_container.wait(300)
     logs = push_container.logs(stdout: true, stderr: true)
     clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip

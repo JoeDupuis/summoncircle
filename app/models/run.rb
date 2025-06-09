@@ -287,12 +287,12 @@ class Run < ApplicationRecord
 
   def push_changes_if_enabled
     return unless task.auto_push_enabled? && task.auto_push_branch.present?
-    
+
     begin
       output = task.push_changes_to_branch("Auto-push from SummonCircle run #{id}")
       steps.create!(
         raw_response: "Auto-push completed",
-        type: "Step::System", 
+        type: "Step::System",
         content: "Successfully pushed changes to branch: #{task.auto_push_branch}\n\nOutput:\n#{output}"
       )
     rescue => e
