@@ -7,15 +7,10 @@ class GitPushTool < ApplicationTool
     required(:repo_path).filled(:string).description("Path to the git repository")
     required(:branch).filled(:string).description("Branch name to push")
     optional(:remote).filled(:string).description("Remote name to push to (defaults to 'origin')")
-    optional(:github_token).filled(:string).description("GitHub personal access token for authentication (uses GITHUB_TOKEN env var if not provided)")
+    required(:github_token).filled(:string).description("GitHub personal access token for authentication")
   end
 
-  def call(repo_path:, branch:, remote: "origin", github_token: nil)
-    github_token ||= ENV["GITHUB_TOKEN"]
-
-    unless github_token
-      return { success: false, error: "GitHub token is required. Provide it as a parameter or set GITHUB_TOKEN environment variable." }
-    end
+  def call(repo_path:, branch:, github_token:, remote: "origin")
     repo_path = File.expand_path(repo_path)
 
     unless Dir.exist?(repo_path)

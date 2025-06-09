@@ -26,30 +26,7 @@ class GitPushToolTest < ActiveSupport::TestCase
   test "validates required arguments" do
     assert_raises(ArgumentError) { @tool.call }
     assert_raises(ArgumentError) { @tool.call(repo_path: @repo_path) }
-  end
-
-  test "returns error when github token is not provided" do
-    original_token = ENV["GITHUB_TOKEN"]
-    ENV.delete("GITHUB_TOKEN")
-
-    result = @tool.call(repo_path: @repo_path, branch: "main")
-
-    assert_not result[:success]
-    assert_match(/GitHub token is required/, result[:error])
-  ensure
-    ENV["GITHUB_TOKEN"] = original_token if original_token
-  end
-
-  test "uses environment variable when github token not provided as parameter" do
-    original_token = ENV["GITHUB_TOKEN"]
-    ENV["GITHUB_TOKEN"] = "env_token"
-
-    result = @tool.call(repo_path: @repo_path, branch: "main")
-
-    assert_not_nil result[:output]
-    assert_equal "main", result[:branch]
-  ensure
-    ENV["GITHUB_TOKEN"] = original_token if original_token
+    assert_raises(ArgumentError) { @tool.call(repo_path: @repo_path, branch: "main") }
   end
 
   test "returns error when repository path does not exist" do
