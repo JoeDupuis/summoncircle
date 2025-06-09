@@ -48,7 +48,7 @@ class Task < ApplicationRecord
     if exit_code && exit_code == 0
       Rails.logger.info "Branch fetch output: #{branches_output.inspect}"
       branches_output.split("\n").map do |line|
-        line.sub(/^\*?\s*/, '').strip
+        line.sub(/^\*?\s*/, "").strip
       end.reject(&:empty?).sort
     else
       Rails.logger.error "Branch fetch failed with exit code: #{exit_code}, output: #{branches_output}"

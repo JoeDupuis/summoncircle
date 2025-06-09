@@ -50,8 +50,8 @@ class TasksController < ApplicationController
   def branches
     @branches = @task.fetch_branches
     Rails.logger.info "Fetched branches from controller: #{@branches.inspect}"
-    render turbo_stream: turbo_stream.replace("branch_select_container", 
-                                              partial: "tasks/branch_select", 
+    render turbo_stream: turbo_stream.replace("branch_select_container",
+                                              partial: "tasks/branch_select",
                                               locals: { task: @task, branches: @branches })
   rescue => e
     Rails.logger.error "Branch fetch error: #{e.message}"
