@@ -1,6 +1,6 @@
 class TasksController < ApplicationController
   before_action :set_project
-  before_action :set_task, only: [ :show, :destroy ]
+  before_action :set_task, only: [ :show, :destroy, :branches, :update_auto_push ]
 
   def index
     @tasks = @project.tasks.kept.includes(:agent, :project)
@@ -47,6 +47,41 @@ class TasksController < ApplicationController
     redirect_to project_tasks_path(@task.project), notice: "Task was successfully archived."
   end
 
+  def branches
+    @branches = @task.fetch_branches
+    Rails.logger.info "Fetched branches from controller: #{@branches.inspect}"
+    render turbo_stream: turbo_stream.replace("branch_select_container",
+                                              partial: "tasks/branch_select",
+                                              locals: { task: @task, branches: @branches })
+  rescue => e
+    Rails.logger.error "Branch fetch error: #{e.message}"
+    flash.now[:alert] = "Failed to fetch branches: #{e.message}"
+    render turbo_stream: turbo_stream.prepend("flash-messages", partial: "application/flash_messages")
+  end
+
+  def update_auto_push
+    if @task.update(auto_push_params)
+      # Trigger auto-push if enabled and branch is selected
+      if @task.auto_push_enabled? && @task.auto_push_branch.present?
+        begin
+          @task.push_changes_to_branch
+          flash.now[:notice] = "Auto-push settings saved and changes pushed to #{@task.auto_push_branch}"
+        rescue => e
+          flash.now[:alert] = "Settings saved but push failed: #{e.message}"
+        end
+      else
+        flash.now[:notice] = "Auto-push settings saved"
+      end
+
+      render turbo_stream: [
+        turbo_stream.replace("auto_push_form", partial: "tasks/auto_push_form", locals: { task: @task }),
+        turbo_stream.prepend("flash-messages", partial: "application/flash_messages")
+      ]
+    else
+      render json: { error: @task.errors.full_messages.join(", ") }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def set_project
@@ -63,5 +98,9 @@ class TasksController < ApplicationController
 
   def task_params
     params.require(:task).permit(:agent_id, :project_id)
+  end
+
+  def auto_push_params
+    params.require(:task).permit(:auto_push_enabled, :auto_push_branch)
   end
 end

@@ -35,6 +35,7 @@ class Run < ApplicationRecord
       processor = task.agent.log_processor_class.new
       processor.process_container(container, self)
       capture_repository_state
+      push_changes_if_enabled
       completed!
     rescue => e
       error_message = "Error: #{e.message}\nBacktrace: #{e.backtrace.first(5).join("\n")}"
@@ -282,5 +283,24 @@ class Run < ApplicationRecord
     raise "Setup script error: #{e.message}"
   ensure
     setup_container&.delete(force: true) if defined?(setup_container)
+  end
+
+  def push_changes_if_enabled
+    return unless task.auto_push_enabled? && task.auto_push_branch.present?
+
+    begin
+      task.push_changes_to_branch("Auto-push from SummonCircle run #{id}")
+      steps.create!(
+        raw_response: "Auto-push completed",
+        type: "Step::System",
+        content: "Successfully pushed changes to branch: #{task.auto_push_branch}"
+      )
+    rescue => e
+      steps.create!(
+        raw_response: "Auto-push failed",
+        type: "Step::Error",
+        content: "Failed to push changes to branch: #{task.auto_push_branch}\n\nError: #{e.message}"
+      )
+    end
   end
 end

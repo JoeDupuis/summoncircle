@@ -1,0 +1,20 @@
+<div id="auto_push_form" class="auto-push-form" data-controller="display-toggle">
+  <%= form_with model: task, url: update_auto_push_task_path(task), method: :patch, data: { turbo_frame: "_top" } do |form| %>
+    <div class="form-group">
+      <%= form.check_box :auto_push_enabled, class: "form-check-input", data: { action: "change->display-toggle#toggle" } %>
+      <%= form.label :auto_push_enabled, "Enable Auto Push", class: "form-check-label" %>
+    </div>
+    
+    <div class="form-group" data-display-toggle-target="content" style="<%= task.auto_push_enabled? ? '' : 'display: none;' %>">
+      <%= form.label :auto_push_branch, "Select Branch to Push" %>
+      <%= render "tasks/branch_select", task: task, branches: [task.auto_push_branch].compact, form: form %>
+      <%= link_to "Refresh Branches", branches_task_path(task), 
+          data: { turbo_method: :get },
+          class: "action-button -primary" %>
+    </div>
+    
+    <div class="form-actions">
+      <%= form.submit "Save Auto Push Settings", class: "action-button -primary" %>
+    </div>
+  <% end %>
+</div>
