@@ -1,6 +1,6 @@
 class TasksController < ApplicationController
   before_action :set_project
-  before_action :set_task, only: [ :show, :destroy ]
+  before_action :set_task, only: [ :show, :update, :destroy ]
 
   def index
     @tasks = @project.tasks.kept.includes(:agent, :project)
@@ -42,6 +42,20 @@ class TasksController < ApplicationController
     end
   end
 
+  def update
+    if @task.update(task_params)
+      redirect_to task_path(@task), notice: "Task settings updated successfully."
+    else
+      @show_all_runs = params[:show_all_runs] == "true"
+      if @show_all_runs
+        @runs = @task.runs.includes(steps: :repo_states).order(created_at: :asc)
+      else
+        @runs = @task.runs.includes(steps: :repo_states).order(created_at: :desc).limit(1)
+      end
+      render :show, status: :unprocessable_entity
+    end
+  end
+
   def destroy
     @task.discard
     redirect_to project_tasks_path(@task.project), notice: "Task was successfully archived."
@@ -62,6 +76,6 @@ class TasksController < ApplicationController
   end
 
   def task_params
-    params.require(:task).permit(:agent_id, :project_id)
+    params.require(:task).permit(:agent_id, :project_id, :auto_push_enabled, :auto_push_branch)
   end
 end

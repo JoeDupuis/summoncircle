@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_08_080712) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_09_020712) do
   create_table "agents", force: :cascade do |t|
     t.string "name"
     t.string "docker_image"
@@ -108,6 +108,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_080712) do
     t.datetime "updated_at", null: false
     t.datetime "discarded_at"
     t.integer "user_id", null: false
+    t.string "auto_push_branch"
+    t.boolean "auto_push_enabled", default: false
     t.index ["agent_id"], name: "index_tasks_on_agent_id"
     t.index ["discarded_at"], name: "index_tasks_on_discarded_at"
     t.index ["project_id"], name: "index_tasks_on_project_id"

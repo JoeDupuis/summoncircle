@@ -3,7 +3,14 @@
 <p>Agent: <%= @task.agent.name %></p>
 <p>Project: <%= @task.project.name %></p>
 
-<h2>Runs</h2>
+<div data-controller="tabs" class="tabs-container">
+  <div class="nav">
+    <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="runs" class="tab -active">Runs</button>
+    <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="settings" class="tab">Settings</button>
+  </div>
+  <div class="content">
+    <div data-tabs-target="panel" data-panel-id="runs" class="panel -active">
+      <h2>Runs</h2>
 <% if @task.runs.any? %>
   <% if @task.runs.count > 1 %>
     <div class="run-filter">
@@ -26,8 +33,14 @@
   </div>
 <% end %>
 
-<h2>New Run</h2>
-<%= render "run_form", task: @task, run: Run.new %>
+      <h2>New Run</h2>
+      <%= render "run_form", task: @task, run: Run.new %>
+    </div>
+    <div data-tabs-target="panel" data-panel-id="settings" class="panel">
+      <%= render "auto_push_config", task: @task %>
+    </div>
+  </div>
+</div>
 
 <div class="task-actions">
   <%= link_to 'Archive', task_path(@task), 

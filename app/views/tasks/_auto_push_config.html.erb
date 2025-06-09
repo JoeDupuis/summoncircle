@@ -1,0 +1,19 @@
+<div class="auto-push-config">
+  <h3>Auto Push Configuration</h3>
+  <%= form_with model: task, url: task_path(task), method: :patch, local: true do |f| %>
+    <div class="form-field">
+      <%= f.check_box :auto_push_enabled %>
+      <%= f.label :auto_push_enabled, "Enable automatic push after each run" %>
+    </div>
+    
+    <div class="form-field">
+      <%= f.label :auto_push_branch, "Branch name to push to:" %>
+      <%= f.text_field :auto_push_branch, placeholder: "e.g., main, develop, feature/auto-updates" %>
+      <p class="form-help">Changes will be committed and pushed to this branch after each run completes.</p>
+    </div>
+    
+    <div class="form-actions">
+      <%= f.submit "Save Configuration", class: "action-button -primary" %>
+    </div>
+  <% end %>
+</div>
