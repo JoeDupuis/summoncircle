@@ -5,7 +5,8 @@ export default class extends Controller {
   static values = { 
     taskId: Number,
     branchesUrl: String,
-    enabled: Boolean
+    enabled: Boolean,
+    currentBranch: String
   }
 
   connect() {
@@ -41,7 +42,7 @@ export default class extends Controller {
 
   updateBranchOptions(branches) {
     const select = this.branchSelectTarget
-    const currentValue = select.value
+    const currentValue = this.currentBranchValue || select.value
     
     select.innerHTML = '<option value="">Select a branch...</option>'
     
