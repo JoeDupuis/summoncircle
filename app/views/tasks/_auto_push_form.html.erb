@@ -1,12 +1,11 @@
-<div id="auto_push_form" class="auto-push-form" data-controller="auto-push" 
-     data-auto-push-enabled-value="<%= task.auto_push_enabled %>">
+<div id="auto_push_form" class="auto-push-form" data-controller="checkbox-toggle">
   <%= form_with model: task, url: update_auto_push_task_path(task), method: :patch, data: { turbo_frame: "_top" } do |form| %>
     <div class="form-group">
-      <%= form.check_box :auto_push_enabled, class: "form-check-input", data: { action: "change->auto-push#toggleAutoPush" } %>
+      <%= form.check_box :auto_push_enabled, class: "form-check-input", data: { action: "change->checkbox-toggle#toggle" } %>
       <%= form.label :auto_push_enabled, "Enable Auto Push", class: "form-check-label" %>
     </div>
     
-    <div class="form-group" data-auto-push-target="branchSelection" style="<%= task.auto_push_enabled? ? '' : 'display: none;' %>">
+    <div class="form-group" data-checkbox-toggle-target="content" style="<%= task.auto_push_enabled? ? '' : 'display: none;' %>">
       <%= form.label :auto_push_branch, "Select Branch to Push" %>
       <%= render "tasks/branch_select", task: task, branches: [task.auto_push_branch].compact, form: form %>
       <%= link_to "Refresh Branches", branches_task_path(task), 
