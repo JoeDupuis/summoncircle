@@ -100,6 +100,7 @@ class Task < ApplicationRecord
 
     if exit_code && exit_code == 0
       Rails.logger.info "Successfully pushed changes to branch: #{auto_push_branch}"
+      clean_logs
     else
       Rails.logger.error "Failed to push changes: #{clean_logs}"
       raise "Failed to push changes: #{clean_logs}"
