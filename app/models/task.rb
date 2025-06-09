@@ -31,7 +31,7 @@ class Task < ApplicationRecord
     git_container = Docker::Container.create(
       "Image" => agent.docker_image,
       "Entrypoint" => [ "sh" ],
-      "Cmd" => [ "-c", "git branch | sed 's/^[* ] //' | sort" ],
+      "Cmd" => [ "-c", "git branch | sed 's/^[* ]\\+//' | sort" ],
       "WorkingDir" => git_working_dir,
       "User" => agent.user_id.to_s,
       "HostConfig" => {
