@@ -46,8 +46,10 @@ class Task < ApplicationRecord
     exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
 
     if exit_code && exit_code == 0
+      Rails.logger.info "Branch fetch output: #{branches_output.inspect}"
       branches_output.split("\n").map(&:strip).reject(&:empty?)
     else
+      Rails.logger.error "Branch fetch failed with exit code: #{exit_code}, output: #{branches_output}"
       []
     end
   rescue => e
