@@ -70,7 +70,7 @@ class TasksController < ApplicationController
       
       render turbo_stream: [
         turbo_stream.replace("auto_push_form", partial: "tasks/auto_push_form", locals: { task: @task }),
-        turbo_stream.prepend("flash", partial: "application/flash_messages")
+        turbo_stream.prepend("flash-messages", partial: "application/flash_messages")
       ]
     else
       render json: { error: @task.errors.full_messages.join(", ") }, status: :unprocessable_entity
