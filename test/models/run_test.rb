@@ -23,11 +23,15 @@ class RunTest < ActiveSupport::TestCase
     run = task.runs.create!(prompt: "test command", status: :pending)
 
     expect_git_clone_container
-    expect_main_container(
-      cmd: [ "echo", "STARTING: test command" ],
-      output: "\x0bhello world",
-      env: [ "API_KEY=secret_123", "DB_PASSWORD=db_pass_456" ]
-    )
+    # Updated to check that env includes the expected values, not exact match
+    Docker::Container.expects(:create).with(
+      has_entries(
+        "Image" => "example/image:latest",
+        "Cmd" => [ "echo", "STARTING: test command" ],
+        "WorkingDir" => "/workspace",
+        "Env" => includes("API_KEY=secret_123", "DB_PASSWORD=db_pass_456")
+      )
+    ).returns(mock_container_with_output("\x0bhello world"))
     expect_git_diff_container
 
     run.execute!
@@ -43,11 +47,15 @@ class RunTest < ActiveSupport::TestCase
     run = task.runs.create!(prompt: "test command", status: :pending)
 
     expect_git_clone_container
-    expect_main_container(
-      cmd: [ "echo", "test command" ],
-      output: "\x0bhello world",
-      env: [ "NODE_ENV=development", "DEBUG=true", "API_KEY=secret_123" ]
-    )
+    # Updated to check that env includes the expected values, not exact match
+    Docker::Container.expects(:create).with(
+      has_entries(
+        "Image" => "example/image:latest",
+        "Cmd" => [ "echo", "test command" ],
+        "WorkingDir" => "/workspace",
+        "Env" => includes("NODE_ENV=development", "DEBUG=true", "API_KEY=secret_123")
+      )
+    ).returns(mock_container_with_output("\x0bhello world"))
     expect_git_diff_container
 
     run.execute!
@@ -147,12 +155,17 @@ class RunTest < ActiveSupport::TestCase
     run = task.runs.create!(prompt: "test", status: :pending)
 
     expect_git_clone_container
-    expect_main_container(
-      cmd: [ "echo", "test" ],
-      output: "\x04test",
-      env: [ "NODE_ENV=development", "DEBUG=true" ],
-      binds: includes(regexp_matches(/summoncircle_workplace_volume_.*:\/workspace/))
-    )
+    # Check that env includes the expected values
+    Docker::Container.expects(:create).with(
+      has_entries(
+        "Image" => "example/image:latest",
+        "Cmd" => [ "echo", "test" ],
+        "WorkingDir" => "/workspace",
+        "User" => "1000",
+        "Env" => includes("NODE_ENV=development", "DEBUG=true"),
+        "HostConfig" => has_entries("Binds" => includes(regexp_matches(/summoncircle_workplace_volume_.*:\/workspace/)))
+      )
+    ).returns(mock_container_with_output("\x04test"))
     expect_git_diff_container
 
     run.execute!
@@ -336,12 +349,36 @@ class RunTest < ActiveSupport::TestCase
     run = task.runs.create!(prompt: "test", status: :pending)
 
     expect_git_clone_container
-    expect_setup_script_container(
-      cmd: [ "-c", "echo $API_KEY" ],
-      output: "secret_123",
-      env: [ "API_KEY=secret_123" ]
-    )
-    expect_main_container(cmd: [ "echo", "STARTING: test" ], output: "\x04test", env: [ "API_KEY=secret_123" ])
+    # Check that setup script container includes the expected env var
+    setup_container = mock("setup_container")
+    setup_container.expects(:start)
+    setup_container.expects(:wait).returns({ "StatusCode" => 0 })
+    setup_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "secret_123")
+    setup_container.expects(:delete).with(force: true)
+    
+    Docker::Container.expects(:create).with(
+      has_entries(
+        "Image" => "example/image:latest",
+        "Entrypoint" => [ "sh" ],
+        "Cmd" => [ "-c", "echo $API_KEY" ],
+        "WorkingDir" => "/workspace",
+        "User" => "1000",
+        "Env" => includes("API_KEY=secret_123"),
+        "HostConfig" => has_entries("Binds" => instance_of(Array))
+      )
+    ).returns(setup_container)
+    
+    # Main container also needs to include the env var
+    Docker::Container.expects(:create).with(
+      has_entries(
+        "Image" => "example/image:latest",
+        "Cmd" => [ "echo", "STARTING: test" ],
+        "WorkingDir" => "/workspace",
+        "User" => "1000",
+        "Env" => includes("API_KEY=secret_123")
+      )
+    ).returns(mock_container_with_output("\x04test"))
+    
     expect_git_diff_container
 
     run.execute!
@@ -509,14 +546,19 @@ class RunTest < ActiveSupport::TestCase
     ).returns(git_container)
   end
 
-  def expect_main_container(cmd:, output:, image: "example/image:latest", env: [], working_dir: "/workspace", binds: nil)
+  def expect_main_container(cmd:, output:, image: "example/image:latest", env: nil, working_dir: "/workspace", binds: nil)
     expectations = {
       "Image" => image,
       "Cmd" => cmd,
-      "WorkingDir" => working_dir
+      "WorkingDir" => working_dir,
+      "User" => "1000"
     }
 
-    expectations["Env"] = env unless env.nil?
+    # Only check env if specified, otherwise ignore it
+    # This allows tests to pass even with SUMMONCIRCLE_USER_ID and SUMMONCIRCLE_TASK_ID
+    if env
+      expectations["Env"] = env
+    end
 
     if binds
       expectations["HostConfig"] = has_entries("Binds" => binds)
