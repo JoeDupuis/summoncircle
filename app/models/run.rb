@@ -36,7 +36,7 @@ class Run < ApplicationRecord
       processor.process_container(container, self)
       capture_repository_state
       completed!
-      
+
       # Auto push if enabled
       auto_push_changes if task.auto_push_enabled?
     rescue => e
@@ -259,35 +259,35 @@ class Run < ApplicationRecord
 
   def auto_push_changes
     return unless task.auto_push_enabled? && task.auto_push_branch.present?
-    
+
     Rails.logger.info "Auto-pushing changes to branch: #{task.auto_push_branch}"
-    
+
     project = task.project
     repo_path = detect_repository_path
-    
+
     # Build git commands for commit and push
     github_token = task.user.github_token
     branch = task.auto_push_branch
-    
+
     commands = build_auto_push_commands(repo_path, branch, github_token)
-    
+
     push_container = Docker::Container.create(
       "Image" => task.agent.docker_image,
-      "Entrypoint" => ["bash", "-c"],
-      "Cmd" => [commands],
+      "Entrypoint" => [ "bash", "-c" ],
+      "Cmd" => [ commands ],
       "User" => task.agent.user_id.to_s,
       "WorkingDir" => task.agent.workplace_path,
       "HostConfig" => {
-        "Binds" => [task.workplace_mount.bind_string]
+        "Binds" => [ task.workplace_mount.bind_string ]
       }
     )
-    
+
     push_container.start
     wait_result = push_container.wait(300)
     logs = push_container.logs(stdout: true, stderr: true)
     output = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
     exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
-    
+
     if exit_code == 0
       steps.create!(
         raw_response: "Auto-push completed",
@@ -305,46 +305,46 @@ class Run < ApplicationRecord
     Rails.logger.error "Auto-push failed: #{e.message}"
     steps.create!(
       raw_response: "Auto-push error",
-      type: "Step::Error", 
+      type: "Step::Error",
       content: "Auto-push error: #{e.message}"
     )
   ensure
     push_container&.delete(force: true) if defined?(push_container)
   end
-  
+
   def detect_repository_path
     project = task.project
     repo_path = project.repo_path.presence || ""
     working_dir = task.workplace_mount.container_path
-    
+
     if repo_path.present?
       File.join(working_dir, repo_path.sub(/^\//, ""))
     else
       working_dir
     end
   end
-  
+
   def build_auto_push_commands(repo_path, branch, github_token)
     <<~BASH
       set -e
       cd #{repo_path}
-      
+
       # Configure git if needed
       git config user.email "agent@summoncircle.com" || true
       git config user.name "SummonCircle Agent" || true
-      
+
       # Check if there are any uncommitted changes
       if ! git diff --quiet || ! git diff --cached --quiet; then
         echo "Found uncommitted changes, committing them..."
         # Add all changes
         git add -A
-        
+      #{'  '}
         # Commit with a descriptive message
         git commit -m "Auto-commit from Run ##{id} at #{Time.current.strftime('%Y-%m-%d %H:%M:%S UTC')}" || true
       else
         echo "No uncommitted changes found"
       fi
-      
+
       # Check if there are any unpushed commits
       UNPUSHED=$(git log origin/#{branch}..HEAD --oneline 2>/dev/null | wc -l)
       if [ "$UNPUSHED" -eq "0" ]; then
@@ -353,15 +353,15 @@ class Run < ApplicationRecord
       else
         echo "Found $UNPUSHED unpushed commits"
       fi
-      
+
       # Get the remote URL and add token
       ORIGINAL_URL=$(git remote get-url origin)
-      
+
       # Function to add token to URL
       add_token_to_url() {
         local url="$1"
         local token="$2"
-        
+      #{'  '}
         if [[ "$url" =~ ^git@github\\.com:(.+)$ ]]; then
           echo "https://${token}@github.com/${BASH_REMATCH[1]}"
         elif [[ "$url" =~ ^https://github\\.com/(.+)$ ]]; then
@@ -372,18 +372,18 @@ class Run < ApplicationRecord
           echo "$url"
         fi
       }
-      
+
       # Set the authenticated URL
       AUTH_URL=$(add_token_to_url "$ORIGINAL_URL" "#{github_token}")
       git remote set-url origin "$AUTH_URL"
-      
+
       # Push to the specified branch
       git push origin HEAD:#{branch} -f
       PUSH_STATUS=$?
-      
+
       # Always restore the original URL
       git remote set-url origin "$ORIGINAL_URL"
-      
+
       exit $PUSH_STATUS
     BASH
   end

@@ -30,7 +30,7 @@ class GitPushTool < ApplicationTool
     end
 
     github_token = user.github_token
-    
+
     # Auto-detect repository path if not provided
     if repo_path.nil?
       detected_path = detect_repository_path(task)
@@ -39,10 +39,10 @@ class GitPushTool < ApplicationTool
       end
       repo_path = detected_path
     end
-    
+
     # Build the git commands to run in the container
     commands = build_git_commands(repo_path, branch, remote, github_token)
-    
+
     # Execute in a Docker container with the workspace mounted
     execute_in_container(task, commands, repo_path, branch, remote)
   rescue => e
@@ -54,30 +54,30 @@ class GitPushTool < ApplicationTool
   def detect_repository_path(task)
     agent = task.agent
     project = task.project
-    
+
     # Get the workspace mount
     workplace_mount = task.workplace_mount
-    
+
     # Base workspace path
     workspace_path = agent.workplace_path
-    
+
     # Check if project has a specific repo_path
     if project.repo_path.present?
       # Remove leading slash if present
       subdir = project.repo_path.sub(/^\//, "")
       return File.join(workspace_path, subdir)
     end
-    
+
     # Try to detect the repository by scanning the workspace
     detection_script = <<~BASH
       cd #{Shellwords.escape(workspace_path)}
-      
+
       # First check if the workspace itself is a git repo
       if [ -d ".git" ]; then
         echo "."
         exit 0
       fi
-      
+
       # Otherwise, look for git repos in subdirectories (max depth 2)
       for dir in */ */*/; do
         if [ -d "$dir/.git" ]; then
@@ -85,11 +85,11 @@ class GitPushTool < ApplicationTool
           exit 0
         fi
       done
-      
+
       # No git repo found
       exit 1
     BASH
-    
+
     # Configure Docker if needed
     if agent.docker_host.present?
       Docker.url = agent.docker_host
@@ -99,24 +99,24 @@ class GitPushTool < ApplicationTool
         connect_timeout: 60
       }
     end
-    
+
     container = Docker::Container.create(
       "Image" => agent.docker_image,
-      "Entrypoint" => ["bash", "-c"],
-      "Cmd" => [detection_script],
+      "Entrypoint" => [ "bash", "-c" ],
+      "Cmd" => [ detection_script ],
       "User" => agent.user_id.to_s,
       "WorkingDir" => workspace_path,
       "HostConfig" => {
-        "Binds" => [workplace_mount.bind_string]
+        "Binds" => [ workplace_mount.bind_string ]
       }
     )
-    
+
     container.start
     wait_result = container.wait(30)
     logs = container.logs(stdout: true, stderr: true)
     output = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
     exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
-    
+
     if exit_code == 0 && output.present?
       detected_subdir = output.strip
       if detected_subdir == "."
@@ -141,24 +141,24 @@ class GitPushTool < ApplicationTool
     # 3. Update it with the token
     # 4. Push
     # 5. Restore the original URL
-    
+
     script = <<~BASH
       set -e
       cd #{Shellwords.escape(repo_path)}
-      
+
       if [ ! -d ".git" ]; then
         echo "Error: Not a git repository: #{repo_path}"
         exit 1
       fi
-      
+
       # Get the current remote URL
       ORIGINAL_URL=$(git remote get-url #{Shellwords.escape(remote)})
-      
+
       # Function to add token to URL
       add_token_to_url() {
         local url="$1"
         local token="$2"
-        
+      #{'  '}
         if [[ "$url" =~ ^git@github\\.com:(.+)$ ]]; then
           echo "https://${token}@github.com/${BASH_REMATCH[1]}"
         elif [[ "$url" =~ ^https://github\\.com/(.+)$ ]]; then
@@ -169,30 +169,30 @@ class GitPushTool < ApplicationTool
           echo "$url"
         fi
       }
-      
+
       # Set the authenticated URL
       AUTH_URL=$(add_token_to_url "$ORIGINAL_URL" #{Shellwords.escape(github_token)})
       git remote set-url #{Shellwords.escape(remote)} "$AUTH_URL"
-      
+
       # Try to push
       git push #{Shellwords.escape(remote)} #{Shellwords.escape(branch)} 2>&1
       PUSH_STATUS=$?
-      
+
       # Always restore the original URL
       git remote set-url #{Shellwords.escape(remote)} "$ORIGINAL_URL"
-      
+
       exit $PUSH_STATUS
     BASH
-    
+
     script
   end
-  
+
   def execute_in_container(task, commands, repo_path, branch, remote)
     agent = task.agent
-    
+
     # Get the workspace mount
     workplace_mount = task.workplace_mount
-    
+
     # Configure Docker if needed
     if agent.docker_host.present?
       Docker.url = agent.docker_host
@@ -202,24 +202,24 @@ class GitPushTool < ApplicationTool
         connect_timeout: 60
       }
     end
-    
+
     container = Docker::Container.create(
       "Image" => agent.docker_image,
-      "Entrypoint" => ["bash", "-c"],
-      "Cmd" => [commands],
+      "Entrypoint" => [ "bash", "-c" ],
+      "Cmd" => [ commands ],
       "User" => agent.user_id.to_s,
       "WorkingDir" => agent.workplace_path,
       "HostConfig" => {
-        "Binds" => [workplace_mount.bind_string]
+        "Binds" => [ workplace_mount.bind_string ]
       }
     )
-    
+
     container.start
     wait_result = container.wait(300) # 5 minute timeout
     logs = container.logs(stdout: true, stderr: true)
     output = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
     exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
-    
+
     {
       success: exit_code == 0,
       output: output,
