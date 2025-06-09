@@ -48,10 +48,13 @@ class TasksController < ApplicationController
   end
 
   def branches
-    branches = @task.fetch_branches
-    render json: { branches: branches }
+    @branches = @task.fetch_branches
+    render turbo_stream: turbo_stream.replace("branch_select_container", 
+                                              partial: "tasks/branch_select", 
+                                              locals: { task: @task, branches: @branches })
   rescue => e
-    render json: { error: e.message }, status: :unprocessable_entity
+    flash.now[:alert] = "Failed to fetch branches: #{e.message}"
+    render turbo_stream: turbo_stream.prepend("flash-messages", partial: "application/flash_messages")
   end
 
   def update_auto_push

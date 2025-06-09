@@ -1,8 +1,5 @@
 <div id="auto_push_form" class="auto-push-form" data-controller="auto-push" 
-     data-auto-push-task-id-value="<%= task.id %>"
-     data-auto-push-branches-url-value="<%= branches_task_path(task) %>"
-     data-auto-push-enabled-value="<%= task.auto_push_enabled %>"
-     data-auto-push-current-branch-value="<%= task.auto_push_branch %>">
+     data-auto-push-enabled-value="<%= task.auto_push_enabled %>">
   <%= form_with model: task, url: update_auto_push_task_path(task), method: :patch, data: { turbo_frame: "_top" } do |form| %>
     <div class="form-group">
       <%= form.check_box :auto_push_enabled, class: "form-check-input", data: { action: "change->auto-push#toggleAutoPush" } %>
@@ -11,13 +8,11 @@
     
     <div class="form-group" data-auto-push-target="branchSelection" style="<%= task.auto_push_enabled? ? '' : 'display: none;' %>">
       <%= form.label :auto_push_branch, "Select Branch to Push" %>
-      <%= form.select :auto_push_branch, 
-          options_for_select([task.auto_push_branch].compact, task.auto_push_branch),
-          { include_blank: "Select a branch..." },
-          { class: "form-control", data: { auto_push_target: "branchSelect" } } %>
-      <button type="button" class="action-button -primary" data-action="click->auto-push#fetchBranches">
-        Refresh Branches
-      </button>
+      <% branches = task.auto_push_enabled? ? task.fetch_branches : [task.auto_push_branch].compact %>
+      <%= render "tasks/branch_select", task: task, branches: branches, form: form %>
+      <%= link_to "Refresh Branches", branches_task_path(task), 
+          data: { turbo_method: :get },
+          class: "action-button -primary" %>
     </div>
     
     <div class="form-actions">
