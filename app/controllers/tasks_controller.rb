@@ -56,7 +56,22 @@ class TasksController < ApplicationController
 
   def update_auto_push
     if @task.update(auto_push_params)
-      render turbo_stream: turbo_stream.replace("auto_push_form", partial: "tasks/auto_push_form", locals: { task: @task })
+      # Trigger auto-push if enabled and branch is selected
+      if @task.auto_push_enabled? && @task.auto_push_branch.present?
+        begin
+          @task.push_changes_to_branch
+          flash.now[:notice] = "Auto-push settings saved and changes pushed to #{@task.auto_push_branch}"
+        rescue => e
+          flash.now[:alert] = "Settings saved but push failed: #{e.message}"
+        end
+      else
+        flash.now[:notice] = "Auto-push settings saved"
+      end
+      
+      render turbo_stream: [
+        turbo_stream.replace("auto_push_form", partial: "tasks/auto_push_form", locals: { task: @task }),
+        turbo_stream.prepend("flash", partial: "application/flash_messages")
+      ]
     else
       render json: { error: @task.errors.full_messages.join(", ") }, status: :unprocessable_entity
     end

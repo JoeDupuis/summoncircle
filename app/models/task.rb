@@ -57,6 +57,55 @@ class Task < ApplicationRecord
     git_container&.delete(force: true) if defined?(git_container)
   end
 
+  def push_changes_to_branch
+    return unless auto_push_enabled? && auto_push_branch.present?
+    return unless project.repository_url.present?
+
+    repo_path = project.repo_path.presence || ""
+    working_dir = workplace_mount.container_path
+    git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
+    repository_url = project.repository_url_with_token(user)
+
+    push_commands = [
+      "git config user.email '#{user.email_address}'",
+      "git config user.name '#{user.email_address.split('@').first}'",
+      "git remote set-url origin '#{repository_url}'",
+      "git add -A",
+      "git diff --cached --quiet || git commit -m 'Manual push from SummonCircle'",
+      "git push origin HEAD:#{auto_push_branch}"
+    ].join(" && ")
+
+    push_container = Docker::Container.create(
+      "Image" => agent.docker_image,
+      "Entrypoint" => [ "sh" ],
+      "Cmd" => [ "-c", push_commands ],
+      "WorkingDir" => git_working_dir,
+      "User" => agent.user_id.to_s,
+      "Env" => agent.env_strings + project.secrets.map { |s| "#{s.key}=#{s.value}" },
+      "HostConfig" => {
+        "Binds" => [ workplace_mount.bind_string ]
+      }
+    )
+
+    push_container.start
+    wait_result = push_container.wait(300)
+    logs = push_container.logs(stdout: true, stderr: true)
+    clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
+    exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
+
+    if exit_code && exit_code == 0
+      Rails.logger.info "Successfully pushed changes to branch: #{auto_push_branch}"
+    else
+      Rails.logger.error "Failed to push changes: #{clean_logs}"
+      raise "Failed to push changes: #{clean_logs}"
+    end
+  rescue => e
+    Rails.logger.error "Push error: #{e.message}"
+    raise
+  ensure
+    push_container&.delete(force: true) if defined?(push_container)
+  end
+
   private
 
   def create_volume_mounts
