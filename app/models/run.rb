@@ -186,8 +186,9 @@ class Run < ApplicationRecord
     user = task.user
     env_vars = []
 
-    # Pass user ID so agents can use it for MCP tools that need user context
+    # Pass user ID and task ID so agents can use them for MCP tools
     env_vars << "SUMMONCIRCLE_USER_ID=#{user.id}"
+    env_vars << "SUMMONCIRCLE_TASK_ID=#{task.id}"
 
     env_vars
   end
