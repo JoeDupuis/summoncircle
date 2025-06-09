@@ -287,69 +287,20 @@ class Run < ApplicationRecord
 
   def push_changes_if_enabled
     return unless task.auto_push_enabled? && task.auto_push_branch.present?
-    push_changes(task.auto_push_branch, "Auto-push from SummonCircle run #{id}")
-  end
-
-  def push_changes(branch, commit_message)
-    return unless should_clone_repository?
-
-    project = task.project
-    repo_path = project.repo_path.presence || ""
-    working_dir = task.workplace_mount.container_path
-    git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
-
-    repository_url = project.repository_url_with_token(task.user)
-
-    push_commands = [
-      "git remote set-url origin '#{repository_url}'",
-      "git add -A",
-      "git diff --cached --quiet || git commit -m '#{commit_message}'",
-      "git push origin HEAD:#{branch}"
-    ].join(" && ")
-
-    push_container = Docker::Container.create(
-      "Image" => task.agent.docker_image,
-      "Entrypoint" => [ "sh" ],
-      "Cmd" => [ "-c", push_commands ],
-      "WorkingDir" => git_working_dir,
-      "User" => task.agent.user_id.to_s,
-      "Env" => task.agent.env_strings + project_env_strings,
-      "HostConfig" => {
-        "Binds" => task.volume_mounts.includes(:volume).map(&:bind_string)
-      }
-    )
     
-    setup_container_files(push_container)
-
-    push_container.start
-    wait_result = push_container.wait(300)
-    logs = push_container.logs(stdout: true, stderr: true)
-    clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
-    exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
-
-    if exit_code && exit_code == 0
+    begin
+      task.push_changes_to_branch("Auto-push from SummonCircle run #{id}")
       steps.create!(
-        raw_response: "Push completed",
-        type: "Step::System",
-        content: "Successfully pushed changes to branch: #{branch}\n\nOutput:\n#{clean_logs}"
+        raw_response: "Auto-push completed",
+        type: "Step::System", 
+        content: "Successfully pushed changes to branch: #{task.auto_push_branch}"
       )
-    else
+    rescue => e
       steps.create!(
-        raw_response: "Push failed",
+        raw_response: "Auto-push failed",
         type: "Step::Error",
-        content: "Failed to push changes to branch: #{branch}\n\nError:\n#{clean_logs}"
+        content: "Failed to push changes to branch: #{task.auto_push_branch}\n\nError: #{e.message}"
       )
-      raise "Push failed: #{clean_logs}"
     end
-  rescue => e
-    Rails.logger.error "Push failed: #{e.message}"
-    steps.create!(
-      raw_response: "Push error",
-      type: "Step::Error",
-      content: "Push error: #{e.message}"
-    )
-    raise
-  ensure
-    push_container&.delete(force: true) if defined?(push_container)
   end
 end

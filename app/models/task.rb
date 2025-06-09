@@ -61,7 +61,7 @@ class Task < ApplicationRecord
     git_container&.delete(force: true) if defined?(git_container)
   end
 
-  def push_changes_to_branch
+  def push_changes_to_branch(commit_message = nil)
     return unless auto_push_enabled? && auto_push_branch.present?
     return unless project.repository_url.present?
 
@@ -70,11 +70,12 @@ class Task < ApplicationRecord
     git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
 
     repository_url = project.repository_url_with_token(user)
+    commit_message ||= "Manual push from SummonCircle"
 
     push_commands = [
       "git remote set-url origin '#{repository_url}'",
       "git add -A",
-      "git diff --cached --quiet || git commit -m 'Manual push from SummonCircle'",
+      "git diff --cached --quiet || git commit -m '#{commit_message}'",
       "git push origin HEAD:#{auto_push_branch}"
     ].join(" && ")
 
