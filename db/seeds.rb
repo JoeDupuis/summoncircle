@@ -31,7 +31,7 @@ if Rails.env.development?
     CONFIG
   end
 
-  Agent.find_or_create_by!(name: "Claude") do |agent|
+  claude_agent = Agent.find_or_create_by!(name: "Claude") do |agent|
     agent.docker_image = "claude_max:latest"
     agent.workplace_path = "/workspace"
     agent.home_path = "/home/claude"
@@ -41,11 +41,11 @@ if Rails.env.development?
     agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ]
   end
 
-  Volume.find_or_create_by!(agent: Agent.find_by(name: "Claude"), name: "home") do |volume|
+  Volume.find_or_create_by!(agent: claude_agent, name: "home") do |volume|
     volume.path = "/home/claude"
   end
 
-  Agent.find_or_create_by!(name: "Claude Json") do |agent|
+  claude_json_agent = Agent.find_or_create_by!(name: "Claude Json") do |agent|
     agent.docker_image = "claude_max:latest"
     agent.workplace_path = "/workspace"
     agent.home_path = "/home/claude"
@@ -56,11 +56,11 @@ if Rails.env.development?
     agent.log_processor = "ClaudeJson"
   end
 
-  Volume.find_or_create_by!(agent: Agent.find_by(name: "Claude Json"), name: "home") do |volume|
+  Volume.find_or_create_by!(agent: claude_json_agent, name: "home") do |volume|
     volume.path = "/home/claude"
   end
 
-  Agent.find_or_create_by!(name: "Claude Streaming") do |agent|
+  claude_streaming_agent = Agent.find_or_create_by!(name: "Claude Streaming") do |agent|
     agent.docker_image = "claude_max:latest"
     agent.workplace_path = "/workspace"
     agent.home_path = "/home/claude"
@@ -71,7 +71,7 @@ if Rails.env.development?
     agent.log_processor = "ClaudeStreamingJson"
   end
 
-  Volume.find_or_create_by!(agent: Agent.find_by(name: "Claude Streaming"), name: "home") do |volume|
+  Volume.find_or_create_by!(agent: claude_streaming_agent, name: "home") do |volume|
     volume.path = "/home/claude"
   end
 
