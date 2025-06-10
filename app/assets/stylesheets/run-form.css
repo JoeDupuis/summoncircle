@@ -18,4 +18,11 @@
 
 .run-form > .actions {
   margin-top: 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.run-form .auto-push-form {
+  display: inline-block;
 }
