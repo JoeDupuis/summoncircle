@@ -60,7 +60,10 @@ class TasksController < ApplicationController
   end
 
   def update_auto_push
-    if @task.update(auto_push_params)
+    # Set auto_push_enabled based on whether a branch is selected
+    auto_push_enabled = params[:task][:auto_push_branch].present?
+
+    if @task.update(auto_push_branch: params[:task][:auto_push_branch], auto_push_enabled: auto_push_enabled)
       # Trigger auto-push if enabled and branch is selected
       if @task.auto_push_enabled? && @task.auto_push_branch.present?
         begin
