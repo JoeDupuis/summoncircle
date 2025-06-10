@@ -37,6 +37,7 @@ class Run < ApplicationRecord
       capture_repository_state
       push_changes_if_enabled
       completed!
+      broadcast_refresh_auto_push_form
     rescue => e
       error_message = "Error: #{e.message}\nBacktrace: #{e.backtrace.first(5).join("\n")}"
       Rails.logger.error "Run execution failed: #{e.class} - #{e.message}"
@@ -55,6 +56,13 @@ class Run < ApplicationRecord
 
   def broadcast_update
     broadcast_replace_later_to(task, target: self, partial: "tasks/run", locals: { run: self })
+  end
+
+  def broadcast_refresh_auto_push_form
+    broadcast_replace_later_to(task, 
+      target: "auto_push_form", 
+      partial: "tasks/auto_push_form", 
+      locals: { task: task.reload })
   end
 
   private

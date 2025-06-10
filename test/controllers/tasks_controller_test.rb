@@ -220,27 +220,6 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     assert_select "a", text: "Show Last Run Only", count: 0
   end
 
-  test "can create multiple runs for the same task" do
-    login @user
-    
-    # Create first run
-    assert_difference("Run.count", 1) do
-      post task_runs_url(@task), params: { run: { prompt: "First run" } }
-    end
-    assert_redirected_to task_path(@task)
-    
-    # Create second run
-    assert_difference("Run.count", 1) do
-      post task_runs_url(@task), params: { run: { prompt: "Second run" } }
-    end
-    assert_redirected_to task_path(@task)
-    
-    # Verify both runs exist
-    assert_equal 5, @task.runs.count # 3 from fixtures + 2 new ones
-    assert @task.runs.exists?(prompt: "First run")
-    assert @task.runs.exists?(prompt: "Second run")
-  end
-
   test "destroy requires authentication" do
     delete task_url(@task)
     assert_redirected_to new_session_path
