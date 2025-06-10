@@ -1,9 +1,12 @@
 <%= form_with model: task, url: update_auto_push_task_path(task), method: :patch, class: "auto-push-form", data: { turbo_frame: "_top" } do |form| %>
   <%= form.label :auto_push_branch, "Auto Push:", class: "auto-push-label" %>
-  <%= form.select :auto_push_branch, 
-      options_for_select([task.auto_push_branch].compact, task.auto_push_branch),
-      { include_blank: "Select branch..." },
-      class: "auto-push-select" %>
+  <div id="branch_select_container" style="display: inline-block;">
+    <% branches = task.fetch_branches rescue [] %>
+    <%= form.select :auto_push_branch, 
+        options_for_select(branches, task.auto_push_branch),
+        { include_blank: "Select branch..." },
+        class: "auto-push-select" %>
+  </div>
   <%= link_to "↻", branches_task_path(task), 
       data: { turbo_method: :get },
       class: "action-button -mini",
