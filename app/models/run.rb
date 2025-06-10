@@ -59,9 +59,9 @@ class Run < ApplicationRecord
   end
 
   def broadcast_refresh_auto_push_form
-    broadcast_replace_to(task, 
-      target: "auto_push_form", 
-      partial: "tasks/auto_push_form", 
+    broadcast_replace_to(task,
+      target: "auto_push_form",
+      partial: "tasks/auto_push_form",
       locals: { task: task.reload })
   end
 
