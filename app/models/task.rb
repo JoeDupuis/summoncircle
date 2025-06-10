@@ -21,6 +21,10 @@ class Task < ApplicationRecord
     end
   end
 
+  def branches
+    @branches ||= fetch_branches
+  end
+
   def fetch_branches
     return [] unless project.repository_url.present?
 

@@ -1,6 +1,9 @@
 require "test_helper"
 
 class RunTest < ActiveSupport::TestCase
+  setup do
+    Task.any_instance.stubs(:branches).returns([])
+  end
   # Docker prefixes logs with 8 bytes of metadata
   DOCKER_LOG_HEADER = "\x01\x00\x00\x00\x00\x00\x00"
 
@@ -29,6 +32,7 @@ class RunTest < ActiveSupport::TestCase
       env: [ "API_KEY=secret_123", "DB_PASSWORD=db_pass_456" ]
     )
     expect_git_diff_container
+    expect_broadcast_refresh
 
     run.execute!
 
@@ -49,6 +53,7 @@ class RunTest < ActiveSupport::TestCase
       env: [ "NODE_ENV=development", "DEBUG=true", "API_KEY=secret_123" ]
     )
     expect_git_diff_container
+    expect_broadcast_refresh
 
     run.execute!
 
@@ -472,6 +477,10 @@ class RunTest < ActiveSupport::TestCase
   end
 
   private
+
+  def expect_broadcast_refresh
+    Run.any_instance.expects(:broadcast_refresh_auto_push_form).once
+  end
 
   def mock_container_with_output(output)
     mock_container = mock("container")

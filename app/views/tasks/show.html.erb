@@ -28,6 +28,7 @@
 
 <h2>New Run</h2>
 <%= render "run_form", task: @task, run: Run.new %>
+<%= render "tasks/auto_push_form", task: @task %>
 
 <div class="task-actions">
   <%= link_to 'Archive', task_path(@task), 
