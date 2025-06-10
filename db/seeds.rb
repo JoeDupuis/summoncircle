@@ -9,25 +9,39 @@
 #   end
 
 if Rails.env.development?
-  User.find_or_create_by!(email_address: "dev@example.com") do |user|
+  dev_user = User.find_or_create_by!(email_address: "dev@example.com") do |user|
     user.password = "password"
     user.password_confirmation = "password"
     user.role = "admin"
   end
+  dev_user.update!(git_config: <<~CONFIG)
+    [user]
+      name = Dev User
+      email = dev@example.com
+  CONFIG
 
-  User.find_or_create_by!(email_address: "user@example.com") do |user|
+  standard_user = User.find_or_create_by!(email_address: "user@example.com") do |user|
     user.password = "password"
     user.password_confirmation = "password"
     user.role = "standard"
   end
+  standard_user.update!(git_config: <<~CONFIG)
+    [user]
+      name = Standard User
+      email = user@example.com
+  CONFIG
 
   claude_agent = Agent.find_or_create_by!(name: "Claude") do |agent|
     agent.docker_image = "claude_max:latest"
     agent.workplace_path = "/workspace"
-    agent.home_path = "/home/claude"
     agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ]
     agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ]
   end
+  claude_agent.update!(
+    home_path: "/home/claude",
+    instructions_mount_path: "/home/claude/.claude/CLAUDE.md",
+    mcp_sse_endpoint: "http://host.docker.internal:3000"
+  )
 
   Volume.find_or_create_by!(agent: claude_agent, name: "home") do |volume|
     volume.path = "/home/claude"
@@ -40,6 +54,11 @@ if Rails.env.development?
     agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "json", "--verbose", "-p", "{PROMPT}" ]
     agent.log_processor = "ClaudeJson"
   end
+  claude_json_agent.update!(
+    home_path: "/home/claude",
+    instructions_mount_path: "/home/claude/.claude/CLAUDE.md",
+    mcp_sse_endpoint: "http://host.docker.internal:3000"
+  )
 
   Volume.find_or_create_by!(agent: claude_json_agent, name: "home") do |volume|
     volume.path = "/home/claude"
@@ -52,6 +71,11 @@ if Rails.env.development?
     agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "stream-json", "--verbose", "-p", "{PROMPT}" ]
     agent.log_processor = "ClaudeStreamingJson"
   end
+  claude_streaming_agent.update!(
+    home_path: "/home/claude",
+    instructions_mount_path: "/home/claude/.claude/CLAUDE.md",
+    mcp_sse_endpoint: "http://host.docker.internal:3000"
+  )
 
   Volume.find_or_create_by!(agent: claude_streaming_agent, name: "home") do |volume|
     volume.path = "/home/claude"
