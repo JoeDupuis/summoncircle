@@ -18,30 +18,27 @@
 
 .run-form > .actions {
   margin-top: 10px;
-  display: flex;
-  align-items: center;
-  gap: 15px;
 }
 
-.run-form .auto-push-form {
+.auto-push-form {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-left: auto;
+  margin-top: 10px;
 }
 
-.run-form .auto-push-form .auto-push-label {
+.auto-push-form .auto-push-label {
   margin: 0;
   font-weight: normal;
 }
 
-.run-form .auto-push-form .auto-push-select {
+.auto-push-form .auto-push-select {
   padding: 4px 8px;
   border-radius: 4px;
   border: 1px solid #ccc;
 }
 
-.run-form .auto-push-form .action-button.-mini {
+.auto-push-form .action-button.-mini {
   padding: 4px 8px;
   font-size: 14px;
 }
