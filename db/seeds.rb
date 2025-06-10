@@ -13,18 +13,30 @@ if Rails.env.development?
     user.password = "password"
     user.password_confirmation = "password"
     user.role = "admin"
+    user.git_config = <<~CONFIG
+      [user]
+        name = Dev User
+        email = dev@example.com
+    CONFIG
   end
 
   User.find_or_create_by!(email_address: "user@example.com") do |user|
     user.password = "password"
     user.password_confirmation = "password"
     user.role = "standard"
+    user.git_config = <<~CONFIG
+      [user]
+        name = Standard User
+        email = user@example.com
+    CONFIG
   end
 
   claude_agent = Agent.find_or_create_by!(name: "Claude") do |agent|
     agent.docker_image = "claude_max:latest"
     agent.workplace_path = "/workspace"
     agent.home_path = "/home/claude"
+    agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
+    agent.mcp_sse_endpoint = "http://host.docker.internal:3000"
     agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ]
     agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ]
   end
@@ -36,6 +48,9 @@ if Rails.env.development?
   claude_json_agent = Agent.find_or_create_by!(name: "Claude Json") do |agent|
     agent.docker_image = "claude_max:latest"
     agent.workplace_path = "/workspace"
+    agent.home_path = "/home/claude"
+    agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
+    agent.mcp_sse_endpoint = "http://host.docker.internal:3000"
     agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "json", "--verbose", "-p", "{PROMPT}" ]
     agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "json", "--verbose", "-p", "{PROMPT}" ]
     agent.log_processor = "ClaudeJson"
@@ -48,6 +63,9 @@ if Rails.env.development?
   claude_streaming_agent = Agent.find_or_create_by!(name: "Claude Streaming") do |agent|
     agent.docker_image = "claude_max:latest"
     agent.workplace_path = "/workspace"
+    agent.home_path = "/home/claude"
+    agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
+    agent.mcp_sse_endpoint = "http://host.docker.internal:3000"
     agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "stream-json", "--verbose", "-p", "{PROMPT}" ]
     agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "stream-json", "--verbose", "-p", "{PROMPT}" ]
     agent.log_processor = "ClaudeStreamingJson"
