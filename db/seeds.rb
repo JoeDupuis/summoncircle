@@ -9,75 +9,69 @@
 #   end
 
 if Rails.env.development?
-  dev_user = User.find_or_create_by!(email_address: "dev@example.com") do |user|
+  User.find_or_create_by!(email_address: "dev@example.com") do |user|
     user.password = "password"
     user.password_confirmation = "password"
     user.role = "admin"
+    user.git_config = <<~CONFIG
+      [user]
+        name = Dev User
+        email = dev@example.com
+    CONFIG
   end
-  dev_user.update!(git_config: <<~CONFIG)
-    [user]
-      name = Dev User
-      email = dev@example.com
-  CONFIG
 
-  standard_user = User.find_or_create_by!(email_address: "user@example.com") do |user|
+  User.find_or_create_by!(email_address: "user@example.com") do |user|
     user.password = "password"
     user.password_confirmation = "password"
     user.role = "standard"
+    user.git_config = <<~CONFIG
+      [user]
+        name = Standard User
+        email = user@example.com
+    CONFIG
   end
-  standard_user.update!(git_config: <<~CONFIG)
-    [user]
-      name = Standard User
-      email = user@example.com
-  CONFIG
 
-  claude_agent = Agent.find_or_create_by!(name: "Claude") do |agent|
+  Agent.find_or_create_by!(name: "Claude") do |agent|
     agent.docker_image = "claude_max:latest"
     agent.workplace_path = "/workspace"
+    agent.home_path = "/home/claude"
+    agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
+    agent.mcp_sse_endpoint = "http://host.docker.internal:3000"
     agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ]
     agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ]
   end
-  claude_agent.update!(
-    home_path: "/home/claude",
-    instructions_mount_path: "/home/claude/.claude/CLAUDE.md",
-    mcp_sse_endpoint: "http://host.docker.internal:3000"
-  )
 
-  Volume.find_or_create_by!(agent: claude_agent, name: "home") do |volume|
+  Volume.find_or_create_by!(agent: Agent.find_by(name: "Claude"), name: "home") do |volume|
     volume.path = "/home/claude"
   end
 
-  claude_json_agent = Agent.find_or_create_by!(name: "Claude Json") do |agent|
+  Agent.find_or_create_by!(name: "Claude Json") do |agent|
     agent.docker_image = "claude_max:latest"
     agent.workplace_path = "/workspace"
+    agent.home_path = "/home/claude"
+    agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
+    agent.mcp_sse_endpoint = "http://host.docker.internal:3000"
     agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "json", "--verbose", "-p", "{PROMPT}" ]
     agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "json", "--verbose", "-p", "{PROMPT}" ]
     agent.log_processor = "ClaudeJson"
   end
-  claude_json_agent.update!(
-    home_path: "/home/claude",
-    instructions_mount_path: "/home/claude/.claude/CLAUDE.md",
-    mcp_sse_endpoint: "http://host.docker.internal:3000"
-  )
 
-  Volume.find_or_create_by!(agent: claude_json_agent, name: "home") do |volume|
+  Volume.find_or_create_by!(agent: Agent.find_by(name: "Claude Json"), name: "home") do |volume|
     volume.path = "/home/claude"
   end
 
-  claude_streaming_agent = Agent.find_or_create_by!(name: "Claude Streaming") do |agent|
+  Agent.find_or_create_by!(name: "Claude Streaming") do |agent|
     agent.docker_image = "claude_max:latest"
     agent.workplace_path = "/workspace"
+    agent.home_path = "/home/claude"
+    agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
+    agent.mcp_sse_endpoint = "http://host.docker.internal:3000"
     agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "stream-json", "--verbose", "-p", "{PROMPT}" ]
     agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "stream-json", "--verbose", "-p", "{PROMPT}" ]
     agent.log_processor = "ClaudeStreamingJson"
   end
-  claude_streaming_agent.update!(
-    home_path: "/home/claude",
-    instructions_mount_path: "/home/claude/.claude/CLAUDE.md",
-    mcp_sse_endpoint: "http://host.docker.internal:3000"
-  )
 
-  Volume.find_or_create_by!(agent: claude_streaming_agent, name: "home") do |volume|
+  Volume.find_or_create_by!(agent: Agent.find_by(name: "Claude Streaming"), name: "home") do |volume|
     volume.path = "/home/claude"
   end
 
