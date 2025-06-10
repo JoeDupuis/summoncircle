@@ -1,0 +1,26 @@
+.auto-push {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.auto-push > .label {
+  margin: 0;
+  font-weight: normal;
+}
+
+.auto-push > .selector {
+  display: inline-block;
+}
+
+.auto-push > .selector > .select {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.auto-push > .button {
+  padding: 4px 8px;
+  font-size: 14px;
+}
