@@ -9,7 +9,7 @@
 #   end
 
 if Rails.env.development?
-  User.find_or_create_by!(email_address: "dev@example.com") do |user|
+  dev_user = User.find_or_create_by!(email_address: "dev@example.com") do |user|
     user.password = "password"
     user.password_confirmation = "password"
     user.role = "admin"
@@ -20,7 +20,11 @@ if Rails.env.development?
     CONFIG
   end
 
-  User.find_or_create_by!(email_address: "user@example.com") do |user|
+  if ENV["GITHUB_TOKEN"].present? && dev_user.github_token.blank?
+    dev_user.update!(github_token: ENV["GITHUB_TOKEN"])
+  end
+
+  standard_user = User.find_or_create_by!(email_address: "user@example.com") do |user|
     user.password = "password"
     user.password_confirmation = "password"
     user.role = "standard"
@@ -29,6 +33,10 @@ if Rails.env.development?
         name = Standard User
         email = user@example.com
     CONFIG
+  end
+
+  if ENV["GITHUB_TOKEN"].present? && standard_user.github_token.blank?
+    standard_user.update!(github_token: ENV["GITHUB_TOKEN"])
   end
 
   claude_agent = Agent.find_or_create_by!(name: "Claude") do |agent|
