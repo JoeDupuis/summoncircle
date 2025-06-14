@@ -1,0 +1,15 @@
+<div class="chat-panel">
+  <% if runs.any? %>
+    <div id="chat-messages">
+      <% runs.each do |run| %>
+        <%= render "runs/chat_item", run: run %>
+      <% end %>
+    </div>
+  <% else %>
+    <p>No conversation yet.</p>
+  <% end %>
+  <%= render "tasks/run_form", task: task, run: Run.new %>
+  <% if Current.user&.github_token.present? %>
+    <%= render "tasks/auto_push_form", task: task %>
+  <% end %>
+</div>
