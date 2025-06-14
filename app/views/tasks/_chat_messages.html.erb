@@ -1,3 +1,9 @@
-<% runs.each do |run| %>
-  <%= render "runs/chat_item", run: run %>
-<% end %>
+<div id="chat-messages">
+  <% if runs.any? %>
+    <% runs.each do |run| %>
+      <%= render "runs/chat_item", run: run %>
+    <% end %>
+  <% else %>
+    <p>No conversation yet.</p>
+  <% end %>
+</div>
