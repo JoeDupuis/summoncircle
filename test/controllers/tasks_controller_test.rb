@@ -173,20 +173,21 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     assert_select "pre", text: "fallback raw data"
   end
 
-  test "show displays only last run by default" do
+  test "show displays all prompts in chat but only last log by default" do
     login @user
-    new_run = @task.runs.create!(prompt: "newest run", created_at: Time.current)
+    @task.runs.create!(prompt: "newest run", created_at: Time.current)
 
     get task_url(@task)
     assert_response :success
 
     assert_includes response.body, "newest run"
-    assert_not_includes response.body, "echo hello"
+    assert_includes response.body, "echo hello"
+    assert_select "#runs-list > div.run-item", count: 1
   end
 
-  test "show displays all runs when show_all_runs parameter is true" do
+  test "show displays all logs when show_all_runs parameter is true" do
     login @user
-    new_run = @task.runs.create!(prompt: "newest run", created_at: Time.current)
+    @task.runs.create!(prompt: "newest run", created_at: Time.current)
 
     get task_url(@task, show_all_runs: true)
     assert_response :success
@@ -194,6 +195,7 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "newest run"
     assert_includes response.body, "echo hello"
     assert_includes response.body, "echo world"
+    assert_select "#runs-list > div.run-item", minimum: 2
   end
 
   test "show displays correct toggle button text when multiple runs exist" do

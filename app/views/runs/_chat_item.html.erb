@@ -1,0 +1,20 @@
+<div class="chat-item">
+  <div class="user-message">
+    <%= markdown(run.prompt) %>
+  </div>
+  <% result_step = run.steps.find { |s| s.is_a?(Step::Result) } %>
+  <% error_step = run.steps.find { |s| s.is_a?(Step::Error) } %>
+  <% if result_step %>
+    <div class="assistant-message">
+      <%= markdown(result_step.content) %>
+    </div>
+  <% elsif error_step %>
+    <div class="assistant-message">
+      <pre><%= error_step.content %></pre>
+    </div>
+  <% elsif run.status == "running" %>
+    <div class="assistant-message">
+      Processing...
+    </div>
+  <% end %>
+</div>
