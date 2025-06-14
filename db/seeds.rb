@@ -20,8 +20,8 @@ if Rails.env.development?
     CONFIG
   end
 
-  if ENV["GITHUB_TOKEN"].present? && dev_user.github_token.blank?
-    dev_user.update!(github_token: ENV["GITHUB_TOKEN"])
+  if ENV["SEED_GITHUB_TOKEN"].present? && dev_user.github_token.blank?
+    dev_user.update!(github_token: ENV["SEED_GITHUB_TOKEN"])
   end
 
   standard_user = User.find_or_create_by!(email_address: "user@example.com") do |user|
@@ -35,8 +35,8 @@ if Rails.env.development?
     CONFIG
   end
 
-  if ENV["GITHUB_TOKEN"].present? && standard_user.github_token.blank?
-    standard_user.update!(github_token: ENV["GITHUB_TOKEN"])
+  if ENV["SEED_GITHUB_TOKEN"].present? && standard_user.github_token.blank?
+    standard_user.update!(github_token: ENV["SEED_GITHUB_TOKEN"])
   end
 
   claude_agent = Agent.find_or_create_by!(name: "Claude") do |agent|
