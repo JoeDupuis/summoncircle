@@ -53,6 +53,12 @@ if Rails.env.development?
     volume.path = "/home/claude"
   end
 
+  Volume.find_or_create_by!(agent: claude_agent, name: "claude_config") do |volume|
+    volume.path = "/home/claude/.claude"
+    volume.external = true
+    volume.external_name = "claude_config"
+  end
+
   claude_json_agent = Agent.find_or_create_by!(name: "Claude Json") do |agent|
     agent.docker_image = "claude_max:latest"
     agent.workplace_path = "/workspace"
@@ -68,6 +74,12 @@ if Rails.env.development?
     volume.path = "/home/claude"
   end
 
+  Volume.find_or_create_by!(agent: claude_json_agent, name: "claude_config") do |volume|
+    volume.path = "/home/claude/.claude"
+    volume.external = true
+    volume.external_name = "claude_config"
+  end
+
   claude_streaming_agent = Agent.find_or_create_by!(name: "Claude Streaming") do |agent|
     agent.docker_image = "claude_max:latest"
     agent.workplace_path = "/workspace"
@@ -81,6 +93,12 @@ if Rails.env.development?
 
   Volume.find_or_create_by!(agent: claude_streaming_agent, name: "home") do |volume|
     volume.path = "/home/claude"
+  end
+
+  Volume.find_or_create_by!(agent: claude_streaming_agent, name: "claude_config") do |volume|
+    volume.path = "/home/claude/.claude"
+    volume.external = true
+    volume.external_name = "claude_config"
   end
 
   Project.find_or_create_by!(name: "SummonCircle") do |project|

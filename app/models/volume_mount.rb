@@ -19,7 +19,11 @@ class VolumeMount < ApplicationRecord
   def generate_volume_name
     return if volume_name.present?
 
-    base_name = volume&.name || "workplace"
-    self.volume_name = "summoncircle_#{base_name}_volume_#{SecureRandom.uuid}"
+    if volume&.external?
+      self.volume_name = volume.external_name
+    else
+      base_name = volume&.name || "workplace"
+      self.volume_name = "summoncircle_#{base_name}_volume_#{SecureRandom.uuid}"
+    end
   end
 end

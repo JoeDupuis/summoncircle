@@ -42,6 +42,11 @@
     <%= form.text_area :volumes_config, readonly: !agent.new_record? %>
     <% unless agent.new_record? %>
       <small class="form-help">Volumes cannot be edited after creation</small>
+    <% else %>
+      <small class="form-help">
+        Format: <code>{"volume_name": "/path"}</code> for managed volumes<br>
+        or <code>{"volume_name": {"path": "/path", "external": true, "external_name": "docker_volume_name"}}</code> for external Docker volumes
+      </small>
     <% end %>
   </div>
 
