@@ -1,6 +1,9 @@
-<div class="chat-item">
+<div id="<%= dom_id(run, :chat_item) %>" class="chat-item">
   <div class="user-message">
     <%= markdown(run.prompt) %>
+  </div>
+  <div class="log-link">
+    <%= link_to "View log", task_path(run.task, selected_run_id: run.id), class: "chat-log-link" %>
   </div>
   <% result_step = run.steps.find { |s| s.is_a?(Step::Result) } %>
   <% error_step = run.steps.find { |s| s.is_a?(Step::Error) } %>

@@ -1,9 +1,7 @@
 <div class="chat-panel">
   <% if runs.any? %>
     <div id="chat-messages">
-      <% runs.each do |run| %>
-        <%= render "runs/chat_item", run: run %>
-      <% end %>
+      <%= render "tasks/chat_messages", runs: runs %>
     </div>
   <% else %>
     <p>No conversation yet.</p>
