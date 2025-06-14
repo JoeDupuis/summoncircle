@@ -26,8 +26,8 @@ FastMcp.mount_in_rails(
   # localhost_only: true, # Set to false to allow connections from other hosts
   # whitelist specific ips to if you want to run on localhost and allow connections from other IPs
   allowed_ips: [ "127.0.0.1", "::1", "172.18.0.1" ],
-  authenticate: false,       # TODO can't use auth until https://github.com/anthropics/claude-code/issues/1763 is fixed
-  # auth_token: Rails.application.credentials.dig(:fast_mcp, :auth_token), # Required if authenticate: true
+  authenticate: Rails.application.credentials.dig(:fast_mcp, :auth_token).present?,
+  auth_token: Rails.application.credentials.dig(:fast_mcp, :auth_token) || "dummy-token-for-precompile"
 ) do |server|
   Rails.application.config.after_initialize do
     # FastMcp will automatically discover and register:
