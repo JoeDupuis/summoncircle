@@ -58,7 +58,7 @@ class Run < ApplicationRecord
   end
 
   def broadcast_update
-    broadcast_replace_later_to(task, target: self, partial: "tasks/run", locals: { run: self })
+    broadcast_replace_later_to(task, target: self, partial: "tasks/run", locals: { run: self, show_chat: true })
   end
 
   def broadcast_chat_append
