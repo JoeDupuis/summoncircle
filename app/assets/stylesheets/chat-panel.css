@@ -37,3 +37,15 @@
 .chat-item > .assistant-message {
   background: #f0f0f0;
 }
+
+@media (prefers-color-scheme: dark) {
+  .chat-item > .user-message {
+    background: #0f2a3f;
+    color: #e6e6e6;
+  }
+
+  .chat-item > .assistant-message {
+    background: #2d2d2d;
+    color: #e6e6e6;
+  }
+}
