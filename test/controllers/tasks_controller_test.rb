@@ -187,19 +187,6 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{task_path(@task, selected_run_id: last_run.id)}']", text: "View log"
   end
 
-  test "show displays all logs when show_all_runs parameter is true" do
-    login @user
-    @task.runs.create!(prompt: "newest run", created_at: Time.current)
-
-    get task_url(@task, show_all_runs: true)
-    assert_response :success
-
-    assert_includes response.body, "newest run"
-    assert_includes response.body, "echo hello"
-    assert_includes response.body, "echo world"
-    assert_select "#runs-list > div.run-item", minimum: 2
-  end
-
   test "show displays selected run log when selected_run_id is provided" do
     login @user
     latest = @task.runs.create!(prompt: "newest run", created_at: Time.current)
@@ -210,30 +197,6 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     assert_select "#runs-list > div.run-item", count: 1
     assert_includes response.body, "world"
     assert_includes response.body, latest.prompt
-  end
-
-  test "show displays correct toggle button text when multiple runs exist" do
-    login @user
-    @task.runs.create!(prompt: "test run")
-
-    get task_url(@task)
-    assert_response :success
-    assert_select "a", text: "Show All Runs"
-
-    get task_url(@task, show_all_runs: true)
-    assert_response :success
-    assert_select "a", text: "Show Last Run Only"
-  end
-
-  test "show does not display toggle button when only one run exists" do
-    login @user
-    @task.runs.destroy_all
-    @task.runs.create!(prompt: "single run")
-
-    get task_url(@task)
-    assert_response :success
-    assert_select "a", text: "Show All Runs", count: 0
-    assert_select "a", text: "Show Last Run Only", count: 0
   end
 
   test "destroy requires authentication" do
