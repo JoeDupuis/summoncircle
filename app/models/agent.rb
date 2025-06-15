@@ -5,7 +5,7 @@ class Agent < ApplicationRecord
   has_many :volumes, dependent: :destroy
   has_many :agent_specific_settings, dependent: :destroy
 
-  accepts_nested_attributes_for :agent_specific_settings, allow_destroy: true, reject_if: :reject_new_marked_for_destruction
+  accepts_nested_attributes_for :agent_specific_settings, allow_destroy: true
 
   validates :name, presence: true
   validates :docker_image, presence: true
@@ -69,11 +69,5 @@ class Agent < ApplicationRecord
 
   def log_processor_class
     "LogProcessor::#{log_processor}".constantize
-  end
-
-  private
-
-  def reject_new_marked_for_destruction(attributes)
-    attributes["id"].blank? && attributes["_destroy"] == "1"
   end
 end

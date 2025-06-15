@@ -98,21 +98,26 @@
       <div>
         <%= label_tag "agent_specific_settings", "Enable settings for this agent:" %><br>
         
-        <% available_settings.each_with_index do |setting_type, index| %>
+        <%# Build fields for existing settings %>
+        <% agent.agent_specific_settings.each do |setting| %>
+          <%= form.fields_for :agent_specific_settings, setting do |setting_form| %>
+            <%= setting_form.hidden_field :id %>
+            <%= setting_form.hidden_field :type %>
+            <%= setting_form.hidden_field :_destroy, class: "destroy-field", data: { setting_type: setting.type } %>
+          <% end %>
+        <% end %>
+        
+        <%# Show checkboxes for all available settings %>
+        <% available_settings.each do |setting_type| %>
           <% existing = agent.agent_specific_settings.find { |s| s.type == setting_type[:type] } %>
-          <% setting = existing || agent.agent_specific_settings.build(type: setting_type[:type]) %>
-          
           <div style="margin: 10px 0;">
-            <%= form.fields_for :agent_specific_settings, setting, child_index: existing ? existing.id : "new_#{index}" do |setting_form| %>
-              <%= setting_form.hidden_field :type %>
-              <%= setting_form.hidden_field :id if existing %>
-              
-              <%= setting_form.check_box :_destroy, 
-                  { checked: existing.nil?, id: "destroy_#{setting_type[:type].underscore}" }, 
-                  "1", "0" %>
-              <%= setting_form.label :_destroy, setting_type[:display_name], for: "destroy_#{setting_type[:type].underscore}" %>
-              <small class="form-help" style="display: block; margin-left: 25px;"><%= setting_type[:description] %></small>
-            <% end %>
+            <%= check_box_tag "enable_settings[#{setting_type[:type]}]", 
+                "1", 
+                existing.present?,
+                id: "enable_#{setting_type[:type].underscore}",
+                data: { setting_type: setting_type[:type] } %>
+            <%= label_tag "enable_#{setting_type[:type].underscore}", setting_type[:display_name] %>
+            <small class="form-help" style="display: block; margin-left: 25px;"><%= setting_type[:description] %></small>
           </div>
         <% end %>
       </div>
