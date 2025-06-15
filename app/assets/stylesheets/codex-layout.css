@@ -20,11 +20,13 @@
   .codex-layout > .chat-panel,
   .codex-layout > .log-panel {
     display: none;
+    width: 100%;
   }
 
   .codex-layout > .chat-panel.-active,
   .codex-layout > .log-panel.-active {
     display: block;
+    width: 100%;
   }
 
   .chat-tab {
