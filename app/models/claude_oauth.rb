@@ -124,9 +124,9 @@ class ClaudeOauth
       begin
         data = JSON.parse(output)
         # The credentials are nested under claudeAiOauth key
-        oauth_data = data['claudeAiOauth'] || data
-        expiry_timestamp = oauth_data['expiresAt'] || oauth_data['expires_at']
-        
+        oauth_data = data["claudeAiOauth"] || data
+        expiry_timestamp = oauth_data["expiresAt"] || oauth_data["expires_at"]
+
         if expiry_timestamp && expiry_timestamp.is_a?(Numeric)
           Time.at(expiry_timestamp / 1000)
         else
