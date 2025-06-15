@@ -5,6 +5,13 @@
   white-space: pre-wrap;
 }
 
+@media (prefers-color-scheme: dark) {
+  .instructions-preview {
+    background-color: #2d2d2d;
+    color: #e6e6e6;
+  }
+}
+
 .instructions-preview.-scrollable {
   max-height: 200px;
   overflow-y: auto;
