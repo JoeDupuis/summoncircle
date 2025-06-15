@@ -1,18 +1,34 @@
-body.tasks.show {
+html body.tasks.show {
   max-width: 100% !important;
   width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
+  display: block !important;
+  grid-template-columns: none !important;
 }
 
-body.tasks.show > header,
-body.tasks.show > header > nav {
+html body.tasks.show > * {
+  grid-column: unset !important;
+}
+
+html body.tasks.show header {
   max-width: 100% !important;
   width: 100% !important;
+  margin: 0 !important;
+  grid-column: unset !important;
+}
+
+html body.tasks.show header nav {
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+html body.tasks.show header nav ul {
+  max-width: 100% !important;
   padding: 0 1rem !important;
 }
 
-body.tasks.show > main {
+html body.tasks.show main {
   max-width: 100% !important;
   width: 100% !important;
   padding: 0 !important;
