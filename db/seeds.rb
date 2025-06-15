@@ -59,6 +59,8 @@ if Rails.env.development?
     volume.external_name = "claude_config"
   end
 
+  ClaudeOauthSetting.find_or_create_by!(agent: claude_agent)
+
   claude_json_agent = Agent.find_or_create_by!(name: "Claude Json") do |agent|
     agent.docker_image = "claude_max:latest"
     agent.workplace_path = "/workspace"
@@ -80,6 +82,8 @@ if Rails.env.development?
     volume.external_name = "claude_config"
   end
 
+  ClaudeOauthSetting.find_or_create_by!(agent: claude_json_agent)
+
   claude_streaming_agent = Agent.find_or_create_by!(name: "Claude Streaming") do |agent|
     agent.docker_image = "claude_max:latest"
     agent.workplace_path = "/workspace"
@@ -100,6 +104,8 @@ if Rails.env.development?
     volume.external = true
     volume.external_name = "claude_config"
   end
+
+  ClaudeOauthSetting.find_or_create_by!(agent: claude_streaming_agent)
 
   Project.find_or_create_by!(name: "SummonCircle") do |project|
     project.repository_url = "https://github.com/JoeDupuis/summoncircle"

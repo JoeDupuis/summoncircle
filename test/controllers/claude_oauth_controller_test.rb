@@ -8,9 +8,9 @@ class ClaudeOauthControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should get login_start" do
-    # Mock the service to avoid Docker calls in tests
-    ClaudeOauthService.any_instance.stubs(:login_start).returns("https://claude.ai/oauth/authorize?test=1")
-    
+    # Mock the oauth to avoid Docker calls in tests
+    ClaudeOauth.any_instance.stubs(:login_start).returns("https://claude.ai/oauth/authorize?test=1")
+
     get oauth_login_start_agent_url(@agent)
     assert_response :success
   end
@@ -22,17 +22,17 @@ class ClaudeOauthControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should handle login_finish with code" do
-    ClaudeOauthService.any_instance.stubs(:login_finish).returns(true)
-    
+    ClaudeOauth.any_instance.stubs(:login_finish).returns(true)
+
     post oauth_login_finish_agent_url(@agent, code: "test_code")
     assert_redirected_to @agent
     assert_equal "OAuth login successful!", flash[:notice]
   end
 
   test "should refresh tokens" do
-    ClaudeOauthService.any_instance.stubs(:check_credentials_exist).returns(true)
-    ClaudeOauthService.any_instance.stubs(:refresh_token).returns(true)
-    
+    ClaudeOauth.any_instance.stubs(:check_credentials_exist).returns(true)
+    ClaudeOauth.any_instance.stubs(:refresh_token).returns(true)
+
     post oauth_refresh_agent_url(@agent)
     assert_redirected_to @agent
     assert_equal "OAuth tokens refreshed successfully!", flash[:notice]

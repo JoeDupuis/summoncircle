@@ -1,6 +1,6 @@
 require "docker"
 
-class ClaudeOauthService
+class ClaudeOauth
   OAUTH_IMAGE = "claude_oauth:latest"
   VOLUME_NAME = "claude_config"
 

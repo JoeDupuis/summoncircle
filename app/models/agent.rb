@@ -3,6 +3,7 @@ class Agent < ApplicationRecord
 
   has_many :tasks, dependent: :destroy
   has_many :volumes, dependent: :destroy
+  has_many :agent_specific_settings, dependent: :destroy
 
   validates :name, presence: true
   validates :docker_image, presence: true

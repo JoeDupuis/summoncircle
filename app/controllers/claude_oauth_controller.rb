@@ -2,8 +2,8 @@ class ClaudeOauthController < ApplicationController
   before_action :set_agent
 
   def login_start
-    service = ClaudeOauthService.new(@agent)
-    @login_url = service.login_start
+    oauth = ClaudeOauth.new(@agent)
+    @login_url = oauth.login_start
 
     if @login_url.blank?
       redirect_to @agent, alert: "Failed to generate OAuth login URL"
@@ -21,9 +21,9 @@ class ClaudeOauthController < ApplicationController
       return
     end
 
-    service = ClaudeOauthService.new(@agent)
+    oauth = ClaudeOauth.new(@agent)
 
-    if service.login_finish(authorization_code)
+    if oauth.login_finish(authorization_code)
       redirect_to @agent, notice: "OAuth login successful!"
     else
       redirect_to @agent, alert: "OAuth login failed. Please try again."
@@ -34,14 +34,14 @@ class ClaudeOauthController < ApplicationController
   end
 
   def refresh
-    service = ClaudeOauthService.new(@agent)
+    oauth = ClaudeOauth.new(@agent)
 
-    unless service.check_credentials_exist
+    unless oauth.check_credentials_exist
       redirect_to @agent, alert: "No OAuth credentials to refresh"
       return
     end
 
-    if service.refresh_token
+    if oauth.refresh_token
       redirect_to @agent, notice: "OAuth tokens refreshed successfully!"
     else
       redirect_to @agent, alert: "Failed to refresh OAuth tokens. Please login again."

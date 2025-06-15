@@ -10,7 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_15_020426) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_15_021535) do
+  create_table "agent_specific_settings", force: :cascade do |t|
+    t.integer "agent_id", null: false
+    t.string "type", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agent_id", "type"], name: "index_agent_specific_settings_on_agent_id_and_type", unique: true
+    t.index ["agent_id"], name: "index_agent_specific_settings_on_agent_id"
+  end
+
   create_table "agents", force: :cascade do |t|
     t.string "name"
     t.string "docker_image"
@@ -150,6 +159,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_15_020426) do
     t.index ["agent_id"], name: "index_volumes_on_agent_id"
   end
 
+  add_foreign_key "agent_specific_settings", "agents"
   add_foreign_key "repo_states", "steps"
   add_foreign_key "runs", "tasks"
   add_foreign_key "secrets", "projects"
