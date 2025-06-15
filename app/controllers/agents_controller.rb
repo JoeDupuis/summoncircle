@@ -14,9 +14,14 @@ class AgentsController < ApplicationController
 
   def create
     @agent = Agent.new(agent_params.except(:volumes_config))
+
+    # Filter out new settings marked for destruction
+    if @agent.agent_specific_settings.any?
+      @agent.agent_specific_settings = @agent.agent_specific_settings.reject(&:marked_for_destruction?)
+    end
+
     if @agent.save
       create_volumes_from_config(@agent, params[:agent][:volumes_config])
-      @agent.update_setting_types(params[:agent_setting_types])
       redirect_to @agent, notice: "Agent was successfully created."
     else
       render :new, status: :unprocessable_entity
@@ -34,8 +39,6 @@ class AgentsController < ApplicationController
         @agent.volumes.destroy_all
         create_volumes_from_config(@agent, volumes_config)
       end
-
-      @agent.update_setting_types(params[:agent_setting_types])
 
       redirect_to @agent, notice: "Agent was successfully updated."
     else

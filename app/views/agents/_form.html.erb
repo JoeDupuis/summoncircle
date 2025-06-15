@@ -97,15 +97,22 @@
     <% if available_settings.any? %>
       <div>
         <%= label_tag "agent_specific_settings", "Enable settings for this agent:" %><br>
-        <% current_types = agent.agent_specific_settings.map(&:type) %>
-        <% available_settings.each do |setting| %>
+        
+        <% available_settings.each_with_index do |setting_type, index| %>
+          <% existing = agent.agent_specific_settings.find { |s| s.type == setting_type[:type] } %>
+          <% setting = existing || agent.agent_specific_settings.build(type: setting_type[:type]) %>
+          
           <div style="margin: 10px 0;">
-            <%= check_box_tag "agent_setting_types[]", setting[:type], 
-                current_types.include?(setting[:type]), 
-                id: "setting_#{setting[:type].underscore}",
-                data: { setting_type: setting[:type] } %>
-            <%= label_tag "setting_#{setting[:type].underscore}", setting[:display_name] %>
-            <small class="form-help" style="display: block; margin-left: 25px;"><%= setting[:description] %></small>
+            <%= form.fields_for :agent_specific_settings, setting, child_index: existing ? existing.id : "new_#{index}" do |setting_form| %>
+              <%= setting_form.hidden_field :type %>
+              <%= setting_form.hidden_field :id if existing %>
+              
+              <%= setting_form.check_box :_destroy, 
+                  { checked: existing.nil?, id: "destroy_#{setting_type[:type].underscore}" }, 
+                  "1", "0" %>
+              <%= setting_form.label :_destroy, setting_type[:display_name], for: "destroy_#{setting_type[:type].underscore}" %>
+              <small class="form-help" style="display: block; margin-left: 25px;"><%= setting_type[:description] %></small>
+            <% end %>
           </div>
         <% end %>
       </div>
