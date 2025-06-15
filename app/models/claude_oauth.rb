@@ -103,11 +103,15 @@ class ClaudeOauth
   end
 
   def get_token_expiry
-    return nil unless check_credentials_exist
+    Rails.logger.info "ClaudeOauth#get_token_expiry: Starting token expiry check for agent #{@agent.id}"
+    
+    credentials_exist = check_credentials_exist
+    Rails.logger.info "ClaudeOauth#get_token_expiry: Credentials exist? #{credentials_exist}"
+    return nil unless credentials_exist
 
     container = Docker::Container.create(
       "Image" => OAUTH_IMAGE,
-      "Entrypoint" => [ "/usr/bin/ruby" ],
+      "Entrypoint" => [ "ruby" ],
       "Cmd" => [ "-e", "require 'json'; data = JSON.parse(File.read('/home/claude/.claude/.credentials.json')); puts data['expiresAt']" ],
       "User" => @agent.user_id.to_s,
       "HostConfig" => {
@@ -118,15 +122,25 @@ class ClaudeOauth
     container.start
     wait_result = container.wait(10)
     logs = container.logs(stdout: true, stderr: true)
+    raw_logs = logs
     output = clean_logs(logs).strip
+    
+    Rails.logger.info "ClaudeOauth#get_token_expiry: Container exit code: #{wait_result['StatusCode']}"
+    Rails.logger.info "ClaudeOauth#get_token_expiry: Raw logs: #{raw_logs.inspect}"
+    Rails.logger.info "ClaudeOauth#get_token_expiry: Cleaned output: '#{output}'"
+    Rails.logger.info "ClaudeOauth#get_token_expiry: Output matches digits? #{output.match?(/^\d+$/)}"
 
     if wait_result["StatusCode"] == 0 && output.match?(/^\d+$/)
-      Time.at(output.to_i / 1000)
+      expiry_time = Time.at(output.to_i / 1000)
+      Rails.logger.info "ClaudeOauth#get_token_expiry: Parsed expiry time: #{expiry_time}"
+      expiry_time
     else
+      Rails.logger.warn "ClaudeOauth#get_token_expiry: Failed to parse expiry. Exit code: #{wait_result['StatusCode']}, Output: '#{output}'"
       nil
     end
   rescue => e
-    Rails.logger.error "Failed to get token expiry: #{e.message}"
+    Rails.logger.error "ClaudeOauth#get_token_expiry: Exception occurred: #{e.class} - #{e.message}"
+    Rails.logger.error "ClaudeOauth#get_token_expiry: Backtrace: #{e.backtrace.first(5).join("\n")}"
     nil
   ensure
     container&.delete(force: true) if defined?(container)
