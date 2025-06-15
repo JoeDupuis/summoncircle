@@ -105,13 +105,6 @@
           ),
           {},
           { class: "form-select" } %>
-      <% if available_settings.any? %>
-        <small class="form-help">
-          <% available_settings.each do |setting| %>
-            <strong><%= setting[:display_name] %>:</strong> <%= setting[:description] %><br>
-          <% end %>
-        </small>
-      <% end %>
     </div>
     
     <% if current_setting %>
