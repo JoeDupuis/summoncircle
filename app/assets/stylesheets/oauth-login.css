@@ -1,0 +1,47 @@
+.oauth-login {
+  & > .instructions {
+    max-width: 600px;
+    margin: 2rem 0;
+  }
+  
+  & > .instructions > .url-container {
+    margin: 2rem 0;
+    padding: 1rem;
+    background: #f5f5f5;
+    border-radius: 4px;
+  }
+  
+  & > .instructions > .url-container > .url {
+    width: 100%;
+    font-family: monospace;
+    font-size: 0.9em;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    resize: vertical;
+  }
+  
+  & .field {
+    margin: 1rem 0;
+  }
+  
+  & .field > label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+  }
+  
+  & .field input[type="text"] {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  & .actions {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+  }
+}

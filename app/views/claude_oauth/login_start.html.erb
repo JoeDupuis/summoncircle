@@ -1,97 +1,32 @@
-<h1>Claude OAuth Login</h1>
+<div class="oauth-login">
+  <h1>Claude OAuth Login</h1>
 
-<div class="oauth-instructions">
-  <p>To configure OAuth for <%= @agent.name %>:</p>
-  
-  <ol>
-    <li>Copy the URL below and paste it into your browser</li>
-    <li>Log in to Anthropic and authorize the application</li>
-    <li>After authorization, you'll be redirected to a page with an authorization code</li>
-    <li>Copy the authorization code and paste it in the form below</li>
-  </ol>
+  <div class="instructions">
+    <p>To configure OAuth for <%= @agent.name %>:</p>
+    
+    <ol>
+      <li>Copy the URL below and paste it into your browser</li>
+      <li>Log in to Anthropic and authorize the application</li>
+      <li>After authorization, you'll be redirected to a page with an authorization code</li>
+      <li>Copy the authorization code and paste it in the form below</li>
+    </ol>
 
-  <div class="oauth-url-container">
-    <label>OAuth Login URL:</label>
-    <textarea readonly class="oauth-url" rows="4"><%= @login_url %></textarea>
-    <button type="button" onclick="navigator.clipboard.writeText(this.previousElementSibling.value)" class="button -secondary">Copy URL</button>
+    <div class="url-container">
+      <label>OAuth Login URL:</label>
+      <textarea readonly class="url" rows="4"><%= @login_url %></textarea>
+      <button type="button" onclick="navigator.clipboard.writeText(this.previousElementSibling.value)" class="button -secondary">Copy URL</button>
+    </div>
+
+    <%= form_with url: oauth_login_finish_agent_path(@agent), method: :post, local: true do |form| %>
+      <div class="field">
+        <%= form.label :code, "Authorization Code:" %>
+        <%= form.text_field :code, placeholder: "Paste the authorization code here", required: true %>
+      </div>
+
+      <div class="actions">
+        <%= form.submit "Complete OAuth Login", class: "button -primary" %>
+        <%= link_to "Cancel", @agent, class: "button" %>
+      </div>
+    <% end %>
   </div>
-
-  <%= form_with url: oauth_login_finish_agent_path(@agent), method: :post, local: true do |form| %>
-    <div class="field">
-      <%= form.label :code, "Authorization Code:" %>
-      <%= form.text_field :code, placeholder: "Paste the authorization code here", required: true %>
-    </div>
-
-    <div class="actions">
-      <%= form.submit "Complete OAuth Login", class: "button -primary" %>
-      <%= link_to "Cancel", @agent, class: "button" %>
-    </div>
-  <% end %>
 </div>
-
-<style>
-  .oauth-instructions {
-    max-width: 600px;
-    margin: 2rem 0;
-  }
-  
-  .oauth-url-container {
-    margin: 2rem 0;
-    padding: 1rem;
-    background: #f5f5f5;
-    border-radius: 4px;
-  }
-  
-  .oauth-url {
-    width: 100%;
-    font-family: monospace;
-    font-size: 0.9em;
-    margin: 0.5rem 0;
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    resize: vertical;
-  }
-  
-  .field {
-    margin: 1rem 0;
-  }
-  
-  .field label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: bold;
-  }
-  
-  .field input[type="text"] {
-    width: 100%;
-    padding: 0.5rem;
-    font-size: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-  }
-  
-  .actions {
-    margin-top: 2rem;
-    display: flex;
-    gap: 1rem;
-  }
-  
-  .button {
-    padding: 0.5rem 1rem;
-    text-decoration: none;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    display: inline-block;
-  }
-  
-  .button.-primary {
-    background: #007bff;
-    color: white;
-  }
-  
-  .button.-secondary {
-    background: #6c757d;
-    color: white;
-  }
-</style>
