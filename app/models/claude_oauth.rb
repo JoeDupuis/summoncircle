@@ -103,16 +103,12 @@ class ClaudeOauth
   end
 
   def get_token_expiry
-    Rails.logger.info "ClaudeOauth#get_token_expiry: Starting token expiry check for agent #{@agent.id}"
-    
-    credentials_exist = check_credentials_exist
-    Rails.logger.info "ClaudeOauth#get_token_expiry: Credentials exist? #{credentials_exist}"
-    return nil unless credentials_exist
+    return nil unless check_credentials_exist
 
     container = Docker::Container.create(
       "Image" => OAUTH_IMAGE,
-      "Entrypoint" => [ "ruby" ],
-      "Cmd" => [ "-e", "require 'json'; data = JSON.parse(File.read('/home/claude/.claude/.credentials.json')); puts data['expiresAt']" ],
+      "Entrypoint" => [ "/bin/sh" ],
+      "Cmd" => [ "-c", "cat /home/claude/.claude/.credentials.json" ],
       "User" => @agent.user_id.to_s,
       "HostConfig" => {
         "Binds" => [ "#{VOLUME_NAME}:/home/claude/.claude" ]
@@ -122,25 +118,29 @@ class ClaudeOauth
     container.start
     wait_result = container.wait(10)
     logs = container.logs(stdout: true, stderr: true)
-    raw_logs = logs
     output = clean_logs(logs).strip
-    
-    Rails.logger.info "ClaudeOauth#get_token_expiry: Container exit code: #{wait_result['StatusCode']}"
-    Rails.logger.info "ClaudeOauth#get_token_expiry: Raw logs: #{raw_logs.inspect}"
-    Rails.logger.info "ClaudeOauth#get_token_expiry: Cleaned output: '#{output}'"
-    Rails.logger.info "ClaudeOauth#get_token_expiry: Output matches digits? #{output.match?(/^\d+$/)}"
 
-    if wait_result["StatusCode"] == 0 && output.match?(/^\d+$/)
-      expiry_time = Time.at(output.to_i / 1000)
-      Rails.logger.info "ClaudeOauth#get_token_expiry: Parsed expiry time: #{expiry_time}"
-      expiry_time
+    if wait_result["StatusCode"] == 0 && output.present?
+      begin
+        data = JSON.parse(output)
+        # The credentials are nested under claudeAiOauth key
+        oauth_data = data['claudeAiOauth'] || data
+        expiry_timestamp = oauth_data['expiresAt'] || oauth_data['expires_at']
+        
+        if expiry_timestamp && expiry_timestamp.is_a?(Numeric)
+          Time.at(expiry_timestamp / 1000)
+        else
+          nil
+        end
+      rescue JSON::ParserError => e
+        Rails.logger.error "Failed to parse OAuth credentials JSON: #{e.message}"
+        nil
+      end
     else
-      Rails.logger.warn "ClaudeOauth#get_token_expiry: Failed to parse expiry. Exit code: #{wait_result['StatusCode']}, Output: '#{output}'"
       nil
     end
   rescue => e
-    Rails.logger.error "ClaudeOauth#get_token_expiry: Exception occurred: #{e.class} - #{e.message}"
-    Rails.logger.error "ClaudeOauth#get_token_expiry: Backtrace: #{e.backtrace.first(5).join("\n")}"
+    Rails.logger.error "Failed to get token expiry: #{e.message}"
     nil
   ensure
     container&.delete(force: true) if defined?(container)
