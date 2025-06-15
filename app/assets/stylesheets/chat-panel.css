@@ -11,7 +11,7 @@
 
 @media (min-width: 769px) {
   .chat-panel {
-    max-height: 75vh;
+    max-height: 100vh;
   }
 
   #chat-messages {
