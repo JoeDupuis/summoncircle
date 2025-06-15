@@ -92,6 +92,28 @@
   </div>
 
   <div>
+    <h3>Agent-Specific Settings</h3>
+    <% available_settings = AgentSpecificSetting.available_types %>
+    <% if available_settings.any? %>
+      <div>
+        <%= label_tag "agent_specific_settings", "Enable settings for this agent:" %><br>
+        <% selected_types = agent.agent_specific_settings.pluck(:type) %>
+        <% available_settings.each do |setting| %>
+          <div style="margin: 10px 0;">
+            <%= check_box_tag "agent_specific_settings[]", setting[:type], 
+                selected_types.include?(setting[:type]), 
+                id: "setting_#{setting[:type].underscore}" %>
+            <%= label_tag "setting_#{setting[:type].underscore}", setting[:display_name] %>
+            <small class="form-help" style="display: block; margin-left: 25px;"><%= setting[:description] %></small>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p><small class="form-help">No agent-specific settings available.</small></p>
+    <% end %>
+  </div>
+
+  <div>
     <%= form.submit %>
   </div>
 <% end %>

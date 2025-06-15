@@ -16,4 +16,12 @@ class ClaudeOauthSetting < AgentSpecificSetting
     Rails.logger.error "Failed to get token expiry: #{e.message}"
     nil
   end
+
+  def self.display_name
+    "Claude OAuth"
+  end
+
+  def self.description
+    "Enable OAuth authentication for Claude CLI access"
+  end
 end

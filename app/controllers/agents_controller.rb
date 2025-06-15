@@ -16,6 +16,7 @@ class AgentsController < ApplicationController
     @agent = Agent.new(agent_params.except(:volumes_config))
     if @agent.save
       create_volumes_from_config(@agent, params[:agent][:volumes_config])
+      handle_agent_specific_settings(@agent)
       redirect_to @agent, notice: "Agent was successfully created."
     else
       render :new, status: :unprocessable_entity
@@ -33,6 +34,10 @@ class AgentsController < ApplicationController
         @agent.volumes.destroy_all
         create_volumes_from_config(@agent, volumes_config)
       end
+
+      # Handle agent-specific settings
+      handle_agent_specific_settings(@agent)
+
       redirect_to @agent, notice: "Agent was successfully updated."
     else
       render :edit, status: :unprocessable_entity
@@ -72,5 +77,23 @@ class AgentsController < ApplicationController
       end
     rescue JSON::ParserError
       Rails.logger.error "Invalid JSON in volumes_config"
+    end
+
+    def handle_agent_specific_settings(agent)
+      # Get the selected setting types from params
+      selected_types = params[:agent_specific_settings] || []
+
+      # Get all currently enabled setting types
+      current_types = agent.agent_specific_settings.pluck(:type)
+
+      # Add new settings
+      (selected_types - current_types).each do |type|
+        agent.agent_specific_settings.create!(type: type)
+      end
+
+      # Remove deselected settings
+      (current_types - selected_types).each do |type|
+        agent.agent_specific_settings.where(type: type).destroy_all
+      end
     end
 end

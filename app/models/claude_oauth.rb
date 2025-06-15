@@ -84,7 +84,7 @@ class ClaudeOauth
   def check_credentials_exist
     container = Docker::Container.create(
       "Image" => OAUTH_IMAGE,
-      "Entrypoint" => [ "sh" ],
+      "Entrypoint" => [ "/bin/sh" ],
       "Cmd" => [ "-c", "[ -f /home/claude/.claude/.credentials.json ] && echo 'yes' || echo 'no'" ],
       "User" => @agent.user_id.to_s,
       "HostConfig" => {
@@ -107,7 +107,7 @@ class ClaudeOauth
 
     container = Docker::Container.create(
       "Image" => OAUTH_IMAGE,
-      "Entrypoint" => [ "sh" ],
+      "Entrypoint" => [ "/bin/sh" ],
       "Cmd" => [ "-c", "cat /home/claude/.claude/.credentials.json | grep -o '\"expiresAt\":[0-9]*' | cut -d: -f2" ],
       "User" => @agent.user_id.to_s,
       "HostConfig" => {
@@ -134,6 +134,7 @@ class ClaudeOauth
   def create_oauth_container(command)
     Docker::Container.create(
       "Image" => OAUTH_IMAGE,
+      "Entrypoint" => [ "ruby" ],
       "Cmd" => command,
       "User" => @agent.user_id.to_s,
       "HostConfig" => {
@@ -150,7 +151,9 @@ class ClaudeOauth
   end
 
   def ensure_image_exists
-    Docker::Image.exist?(OAUTH_IMAGE)
+    unless Docker::Image.exist?(OAUTH_IMAGE)
+      raise "OAuth Docker image not found. Please build it using the claude_oauth repository."
+    end
   rescue Docker::Error::NotFoundError
     raise "OAuth Docker image not found. Please build it using the claude_oauth repository."
   end
