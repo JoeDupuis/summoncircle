@@ -1,0 +1,30 @@
+body.tasks.show {
+  max-width: 100%;
+}
+
+body.tasks.show > main {
+  max-width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+body.tasks.show h1,
+body.tasks.show h2,
+body.tasks.show h3,
+body.tasks.show h4,
+body.tasks.show h5,
+body.tasks.show h6,
+body.tasks.show p {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+body.tasks.show .codex-layout {
+  margin: 0;
+  max-width: 100%;
+  padding: 0 1rem;
+}
+
+body.tasks.show .task-actions {
+  margin: 1rem;
+}
