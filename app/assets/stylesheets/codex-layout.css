@@ -36,4 +36,7 @@
   .chat-tab {
     display: none;
   }
+  .codex-layout > .nav {
+    display: none;
+  }
 }
