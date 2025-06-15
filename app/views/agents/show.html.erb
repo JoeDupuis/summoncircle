@@ -108,7 +108,7 @@
 </p>
 
 <% @agent.agent_specific_settings.each do |setting| %>
-  <%= render partial: setting.render_partial, locals: { setting.class.name.underscore.to_sym => setting } %>
+  <%= render setting %>
 <% end %>
 
 <div class="agent-actions">
