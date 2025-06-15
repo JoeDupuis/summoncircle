@@ -1,3 +1,4 @@
+
 .chat-panel {
   display: flex;
   flex-direction: column;
@@ -6,6 +7,16 @@
 
 #chat-messages {
   flex: 1;
+}
+
+@media (min-width: 769px) {
+  .chat-panel {
+    max-height: 100vh;
+  }
+
+  #chat-messages {
+    overflow-y: auto;
+  }
 }
 
 .chat-item {

@@ -33,6 +33,10 @@
 }
 
 @media (min-width: 769px) {
+  .codex-layout > .log-panel {
+    overflow-y: auto;
+    max-height: 100vh;
+  }
   .chat-tab {
     display: none;
   }
