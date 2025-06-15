@@ -93,16 +93,12 @@
 
   <div>
     <h3>Agent-Specific Settings</h3>
-    <% available_settings = AgentSpecificSetting.available_types %>
     <% current_setting = agent.agent_specific_settings.first %>
     
     <div>
       <%= form.label :agent_specific_setting_type, "Agent Type:" %><br>
       <%= form.select :agent_specific_setting_type,
-          options_for_select(
-            [["None", ""]] + available_settings.map { |s| [s[:display_name], s[:type]] },
-            current_setting&.type
-          ),
+          agent_type_options(current_setting),
           {},
           { class: "form-select" } %>
     </div>

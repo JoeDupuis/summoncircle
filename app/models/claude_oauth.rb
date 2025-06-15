@@ -107,8 +107,8 @@ class ClaudeOauth
 
     container = Docker::Container.create(
       "Image" => OAUTH_IMAGE,
-      "Entrypoint" => [ "/bin/sh" ],
-      "Cmd" => [ "-c", "cat /home/claude/.claude/.credentials.json | grep -o '\"expiresAt\":[0-9]*' | cut -d: -f2" ],
+      "Entrypoint" => [ "/usr/bin/ruby" ],
+      "Cmd" => [ "-e", "require 'json'; data = JSON.parse(File.read('/home/claude/.claude/.credentials.json')); puts data['expiresAt']" ],
       "User" => @agent.user_id.to_s,
       "HostConfig" => {
         "Binds" => [ "#{VOLUME_NAME}:/home/claude/.claude" ]
@@ -120,11 +120,14 @@ class ClaudeOauth
     logs = container.logs(stdout: true, stderr: true)
     output = clean_logs(logs).strip
 
-    if output.match?(/^\d+$/)
+    if wait_result["StatusCode"] == 0 && output.match?(/^\d+$/)
       Time.at(output.to_i / 1000)
     else
       nil
     end
+  rescue => e
+    Rails.logger.error "Failed to get token expiry: #{e.message}"
+    nil
   ensure
     container&.delete(force: true) if defined?(container)
   end
