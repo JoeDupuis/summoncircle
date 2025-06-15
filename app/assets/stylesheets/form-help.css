@@ -4,3 +4,9 @@
   margin-top: 4px;
   display: block;
 }
+
+@media (prefers-color-scheme: dark) {
+  .form-help {
+    color: #b3b3b3;
+  }
+}
