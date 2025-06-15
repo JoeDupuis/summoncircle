@@ -1,7 +1,7 @@
 require "docker"
 
 class ClaudeOauth
-  OAUTH_IMAGE = "claude_oauth:latest"
+  OAUTH_IMAGE = "joedupuis/claude_oauth:latest"
   VOLUME_NAME = "claude_config"
 
   def initialize(agent)
@@ -14,7 +14,7 @@ class ClaudeOauth
     ensure_image_exists
 
     container = create_oauth_container(
-      [ "/home/claude/login_start.rb" ]
+      [ "login_start" ]
     )
 
     container.start
@@ -39,7 +39,7 @@ class ClaudeOauth
     ensure_image_exists
 
     container = create_oauth_container(
-      [ "/home/claude/login_finish.rb", authorization_code ]
+      [ "login_finish", authorization_code ]
     )
 
     container.start
@@ -63,7 +63,7 @@ class ClaudeOauth
     ensure_image_exists
 
     container = create_oauth_container(
-      [ "/home/claude/refresh_token.rb", "--force" ]
+      [ "refresh_token", "--force" ]
     )
 
     container.start
@@ -151,7 +151,6 @@ class ClaudeOauth
   def create_oauth_container(command)
     Docker::Container.create(
       "Image" => OAUTH_IMAGE,
-      "Entrypoint" => [ "ruby" ],
       "Cmd" => command,
       "User" => @agent.user_id.to_s,
       "HostConfig" => {
