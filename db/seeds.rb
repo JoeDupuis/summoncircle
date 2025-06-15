@@ -40,7 +40,7 @@ if Rails.env.development?
   end
 
   claude_agent = Agent.find_or_create_by!(name: "Claude") do |agent|
-    agent.docker_image = "claude_max:latest"
+    agent.docker_image = "joedupuis/claude_oauth:latest"
     agent.workplace_path = "/workspace"
     agent.home_path = "/home/claude"
     agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
@@ -62,7 +62,7 @@ if Rails.env.development?
   ClaudeOauthSetting.find_or_create_by!(agent: claude_agent)
 
   claude_json_agent = Agent.find_or_create_by!(name: "Claude Json") do |agent|
-    agent.docker_image = "claude_max:latest"
+    agent.docker_image = "joedupuis/claude_oauth:latest"
     agent.workplace_path = "/workspace"
     agent.home_path = "/home/claude"
     agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
@@ -85,7 +85,7 @@ if Rails.env.development?
   ClaudeOauthSetting.find_or_create_by!(agent: claude_json_agent)
 
   claude_streaming_agent = Agent.find_or_create_by!(name: "Claude Streaming") do |agent|
-    agent.docker_image = "claude_max:latest"
+    agent.docker_image = "joedupuis/claude_oauth:latest"
     agent.workplace_path = "/workspace"
     agent.home_path = "/home/claude"
     agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
