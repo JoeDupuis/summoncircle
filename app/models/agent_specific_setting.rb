@@ -11,7 +11,7 @@ class AgentSpecificSetting < ApplicationRecord
   def self.available_types
     # Ensure all setting classes are loaded
     Rails.application.eager_load! if Rails.env.development?
-    
+
     descendants.map do |klass|
       {
         type: klass.name,

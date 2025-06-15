@@ -16,7 +16,7 @@ class AgentsController < ApplicationController
     @agent = Agent.new(agent_params.except(:volumes_config))
     if @agent.save
       create_volumes_from_config(@agent, params[:agent][:volumes_config])
-      @agent.update_agent_specific_settings(params[:agent_specific_settings])
+      handle_agent_setting_types
       redirect_to @agent, notice: "Agent was successfully created."
     else
       render :new, status: :unprocessable_entity
@@ -35,7 +35,7 @@ class AgentsController < ApplicationController
         create_volumes_from_config(@agent, volumes_config)
       end
 
-      @agent.update_agent_specific_settings(params[:agent_specific_settings])
+      handle_agent_setting_types
 
       redirect_to @agent, notice: "Agent was successfully updated."
     else
@@ -55,7 +55,8 @@ class AgentsController < ApplicationController
 
     def agent_params
       params.require(:agent)
-            .permit(:name, :docker_image, :docker_host, :workplace_path, :start_arguments, :continue_arguments, :volumes_config, :env_variables_json, :log_processor, :user_id, :instructions_mount_path, :ssh_mount_path, :home_path, :mcp_sse_endpoint)
+            .permit(:name, :docker_image, :docker_host, :workplace_path, :start_arguments, :continue_arguments, :volumes_config, :env_variables_json, :log_processor, :user_id, :instructions_mount_path, :ssh_mount_path, :home_path, :mcp_sse_endpoint,
+                    agent_specific_settings_attributes: [ :id, :type, :_destroy ])
     end
 
     def create_volumes_from_config(agent, volumes_config)
@@ -76,5 +77,20 @@ class AgentsController < ApplicationController
       end
     rescue JSON::ParserError
       Rails.logger.error "Invalid JSON in volumes_config"
+    end
+
+    def handle_agent_setting_types
+      selected_types = params[:agent_setting_types] || []
+      current_types = @agent.agent_specific_settings.pluck(:type)
+
+      # Add new settings
+      (selected_types - current_types).each do |type|
+        @agent.agent_specific_settings.create!(type: type)
+      end
+
+      # Remove deselected settings
+      (current_types - selected_types).each do |type|
+        @agent.agent_specific_settings.where(type: type).destroy_all
+      end
     end
 end

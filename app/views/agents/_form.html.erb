@@ -97,12 +97,13 @@
     <% if available_settings.any? %>
       <div>
         <%= label_tag "agent_specific_settings", "Enable settings for this agent:" %><br>
-        <% selected_types = agent.agent_specific_settings.pluck(:type) %>
+        <% current_types = agent.agent_specific_settings.map(&:type) %>
         <% available_settings.each do |setting| %>
           <div style="margin: 10px 0;">
-            <%= check_box_tag "agent_specific_settings[]", setting[:type], 
-                selected_types.include?(setting[:type]), 
-                id: "setting_#{setting[:type].underscore}" %>
+            <%= check_box_tag "agent_setting_types[]", setting[:type], 
+                current_types.include?(setting[:type]), 
+                id: "setting_#{setting[:type].underscore}",
+                data: { setting_type: setting[:type] } %>
             <%= label_tag "setting_#{setting[:type].underscore}", setting[:display_name] %>
             <small class="form-help" style="display: block; margin-left: 25px;"><%= setting[:description] %></small>
           </div>
