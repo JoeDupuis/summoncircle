@@ -92,6 +92,26 @@
   </div>
 
   <div>
+    <h3>Agent-Specific Settings</h3>
+    <% current_setting = agent.agent_specific_settings.first %>
+    
+    <div>
+      <%= form.label :agent_specific_setting_type, "Agent Type:" %><br>
+      <%= form.select :agent_specific_setting_type,
+          agent_type_options(current_setting),
+          {},
+          { class: "form-select" } %>
+    </div>
+    
+    <% if current_setting %>
+      <%= form.fields_for :agent_specific_settings, current_setting do |setting_form| %>
+        <%= setting_form.hidden_field :id %>
+        <%= setting_form.hidden_field :_destroy, value: false %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div>
     <%= form.submit %>
   </div>
 <% end %>

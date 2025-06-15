@@ -1,0 +1,32 @@
+<div class="oauth-login">
+  <h1>Claude OAuth Login</h1>
+
+  <div class="instructions">
+    <p>To configure OAuth for <%= @agent.name %>:</p>
+    
+    <ol>
+      <li>Copy the URL below and paste it into your browser</li>
+      <li>Log in to Anthropic and authorize the application</li>
+      <li>After authorization, you'll be redirected to a page with an authorization code</li>
+      <li>Copy the authorization code and paste it in the form below</li>
+    </ol>
+
+    <div class="url-container">
+      <label>OAuth Login URL:</label>
+      <textarea readonly class="url" rows="4"><%= @login_url %></textarea>
+      <button type="button" onclick="navigator.clipboard.writeText(this.previousElementSibling.value)" class="button -secondary">Copy URL</button>
+    </div>
+
+    <%= form_with url: oauth_login_finish_agent_path(@agent), method: :post, local: true do |form| %>
+      <div class="field">
+        <%= form.label :code, "Authorization Code:" %>
+        <%= form.text_field :code, placeholder: "Paste the authorization code here", required: true %>
+      </div>
+
+      <div class="actions">
+        <%= form.submit "Complete OAuth Login", class: "button -primary" %>
+        <%= link_to "Cancel", @agent, class: "button" %>
+      </div>
+    <% end %>
+  </div>
+</div>

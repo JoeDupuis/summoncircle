@@ -33,6 +33,7 @@ class AgentsController < ApplicationController
         @agent.volumes.destroy_all
         create_volumes_from_config(@agent, volumes_config)
       end
+
       redirect_to @agent, notice: "Agent was successfully updated."
     else
       render :edit, status: :unprocessable_entity
@@ -51,7 +52,8 @@ class AgentsController < ApplicationController
 
     def agent_params
       params.require(:agent)
-            .permit(:name, :docker_image, :docker_host, :workplace_path, :start_arguments, :continue_arguments, :volumes_config, :env_variables_json, :log_processor, :user_id, :instructions_mount_path, :ssh_mount_path, :home_path, :mcp_sse_endpoint)
+            .permit(:name, :docker_image, :docker_host, :workplace_path, :start_arguments, :continue_arguments, :volumes_config, :env_variables_json, :log_processor, :user_id, :instructions_mount_path, :ssh_mount_path, :home_path, :mcp_sse_endpoint, :agent_specific_setting_type,
+                    agent_specific_settings_attributes: [ :id, :type, :_destroy ])
     end
 
     def create_volumes_from_config(agent, volumes_config)

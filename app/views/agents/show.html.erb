@@ -107,6 +107,10 @@
   <%= link_to 'Configure Git', user_settings_path, class: 'button' %>
 </p>
 
+<% @agent.agent_specific_settings.each do |setting| %>
+  <%= render setting %>
+<% end %>
+
 <div class="agent-actions">
   <%= link_to 'Edit', edit_agent_path(@agent) %> |
   <%= link_to 'Archive', agent_path(@agent), 
