@@ -58,8 +58,17 @@ class AgentsController < ApplicationController
       return unless volumes_config.present?
 
       volumes_data = JSON.parse(volumes_config)
-      volumes_data.each do |volume_name, path|
-        agent.volumes.create!(name: volume_name, path: path)
+      volumes_data.each do |volume_name, config|
+        if config.is_a?(Hash)
+          agent.volumes.create!(
+            name: volume_name,
+            path: config["path"],
+            external: config["external"] == true,
+            external_name: config["external_name"]
+          )
+        else
+          agent.volumes.create!(name: volume_name, path: config)
+        end
       end
     rescue JSON::ParserError
       Rails.logger.error "Invalid JSON in volumes_config"

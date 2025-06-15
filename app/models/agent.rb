@@ -15,7 +15,17 @@ class Agent < ApplicationRecord
     return @volumes_config if @volumes_config.present?
     return "" if volumes.empty?
 
-    volumes.pluck(:name, :path).to_h.to_json
+    volumes.map do |volume|
+      if volume.external?
+        [ volume.name, {
+          "path" => volume.path,
+          "external" => true,
+          "external_name" => volume.external_name
+        } ]
+      else
+        [ volume.name, volume.path ]
+      end
+    end.to_h.to_json
   end
 
   def env_variables_json
