@@ -1,0 +1,12 @@
+.oauth-config {
+  & > .actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  & > .note {
+    margin-top: 1rem;
+    font-size: 0.9em;
+    color: #666;
+  }
+}

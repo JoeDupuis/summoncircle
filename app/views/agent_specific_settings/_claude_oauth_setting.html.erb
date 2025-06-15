@@ -1,52 +1,47 @@
-<h2>OAuth Configuration</h2>
-<% begin %>
-  <% if claude_oauth_setting.credentials_exist? %>
-    <p>
-      <strong>Status:</strong> <span class="status-indicator -success">OAuth configured</span><br>
-      <% expires_at = claude_oauth_setting.token_expiry %>
-      <% if expires_at %>
-        <strong>Token expires at:</strong> <%= expires_at.strftime('%Y-%m-%d %H:%M:%S') %>
-        <% if expires_at < Time.now %>
-          <span class="status-indicator -error">(Expired)</span>
-        <% elsif expires_at < 1.hour.from_now %>
-          <span class="status-indicator -warning">(Expiring soon)</span>
+<div class="oauth-config">
+  <h2>OAuth Configuration</h2>
+  <% begin %>
+    <% if claude_oauth_setting.credentials_exist? %>
+      <p>
+        <strong>Status:</strong> <span class="status-indicator -success">OAuth configured</span><br>
+        <% expires_at = claude_oauth_setting.token_expiry %>
+        <% if expires_at %>
+          <strong>Token expires at:</strong> <%= expires_at.strftime('%Y-%m-%d %H:%M:%S') %>
+          <% if expires_at < Time.now %>
+            <span class="status-indicator -error">(Expired)</span>
+          <% elsif expires_at < 1.hour.from_now %>
+            <span class="status-indicator -warning">(Expiring soon)</span>
+          <% end %>
         <% end %>
-      <% end %>
-    </p>
-    <div style="display: flex; gap: 1rem;">
-      <%= button_to 'Refresh Token', oauth_refresh_agent_path(claude_oauth_setting.agent), method: :post, class: 'button -secondary' %>
-      <%= link_to 'Reconfigure OAuth', oauth_login_start_agent_path(claude_oauth_setting.agent), class: 'button' %>
-    </div>
-  <% else %>
+      </p>
+      <div class="actions">
+        <%= button_to 'Refresh Token', oauth_refresh_agent_path(claude_oauth_setting.agent), method: :post, class: 'button -secondary' %>
+        <%= link_to 'Reconfigure OAuth', oauth_login_start_agent_path(claude_oauth_setting.agent), class: 'button' %>
+      </div>
+    <% else %>
+      <p>
+        <strong>Status:</strong> <span class="status-indicator -warning">OAuth not configured</span>
+      </p>
+      <p>
+        <%= link_to 'Configure OAuth', oauth_login_start_agent_path(claude_oauth_setting.agent), class: 'button -primary' %>
+      </p>
+    <% end %>
+  <% rescue Docker::Error::NotFoundError %>
     <p>
-      <strong>Status:</strong> <span class="status-indicator -warning">OAuth not configured</span>
+      <strong>Status:</strong> <span class="status-indicator -error">OAuth Docker image not found</span>
     </p>
     <p>
-      <%= link_to 'Configure OAuth', oauth_login_start_agent_path(claude_oauth_setting.agent), class: 'button -primary' %>
+      <em>Run <code>bin/rails claude_oauth:setup</code> to build the OAuth Docker image</em>
+    </p>
+  <% rescue => e %>
+    <p>
+      <strong>Status:</strong> <span class="status-indicator -error">OAuth configuration error</span>
+    </p>
+    <p>
+      <em>Error: <%= e.message %></em>
     </p>
   <% end %>
-<% rescue Docker::Error::NotFoundError %>
-  <p>
-    <strong>Status:</strong> <span class="status-indicator -error">OAuth Docker image not found</span>
+  <p class="note">
+    <em>Note: OAuth credentials are stored in Docker volume 'claude_config'</em>
   </p>
-  <p>
-    <em>Run <code>bin/rails claude_oauth:setup</code> to build the OAuth Docker image</em>
-  </p>
-<% rescue => e %>
-  <p>
-    <strong>Status:</strong> <span class="status-indicator -error">OAuth configuration error</span>
-  </p>
-  <p>
-    <em>Error: <%= e.message %></em>
-  </p>
-<% end %>
-<p class="oauth-note">
-  <em>Note: OAuth credentials are stored in Docker volume 'claude_config'</em>
-</p>
-<style>
-  .oauth-note {
-    margin-top: 1rem;
-    font-size: 0.9em;
-    color: #666;
-  }
-</style>
+</div>
