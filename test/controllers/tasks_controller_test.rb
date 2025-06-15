@@ -173,51 +173,30 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     assert_select "pre", text: "fallback raw data"
   end
 
-  test "show displays only last run by default" do
+  test "show displays all prompts in chat but only last log by default" do
     login @user
-    new_run = @task.runs.create!(prompt: "newest run", created_at: Time.current)
+    @task.runs.create!(prompt: "newest run", created_at: Time.current)
 
     get task_url(@task)
-    assert_response :success
-
-    assert_includes response.body, "newest run"
-    assert_not_includes response.body, "echo hello"
-  end
-
-  test "show displays all runs when show_all_runs parameter is true" do
-    login @user
-    new_run = @task.runs.create!(prompt: "newest run", created_at: Time.current)
-
-    get task_url(@task, show_all_runs: true)
     assert_response :success
 
     assert_includes response.body, "newest run"
     assert_includes response.body, "echo hello"
-    assert_includes response.body, "echo world"
+    assert_select "#runs-list > div.run-item", count: 1
+    last_run = @task.runs.order(created_at: :desc).first
+    assert_select "a[href='#{task_path(@task, selected_run_id: last_run.id)}']", text: "View log"
   end
 
-  test "show displays correct toggle button text when multiple runs exist" do
+  test "show displays selected run log when selected_run_id is provided" do
     login @user
-    @task.runs.create!(prompt: "test run")
+    latest = @task.runs.create!(prompt: "newest run", created_at: Time.current)
 
-    get task_url(@task)
+    get task_url(@task, selected_run_id: runs(:two).id)
     assert_response :success
-    assert_select "a", text: "Show All Runs"
 
-    get task_url(@task, show_all_runs: true)
-    assert_response :success
-    assert_select "a", text: "Show Last Run Only"
-  end
-
-  test "show does not display toggle button when only one run exists" do
-    login @user
-    @task.runs.destroy_all
-    @task.runs.create!(prompt: "single run")
-
-    get task_url(@task)
-    assert_response :success
-    assert_select "a", text: "Show All Runs", count: 0
-    assert_select "a", text: "Show Last Run Only", count: 0
+    assert_select "#runs-list > div.run-item", count: 1
+    assert_includes response.body, "world"
+    assert_includes response.body, latest.prompt
   end
 
   test "destroy requires authentication" do

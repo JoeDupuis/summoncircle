@@ -1,7 +1,7 @@
 <% repo_states = run.repo_states %>
 <div data-controller="tabs" class="tabs-container">
   <div class="nav">
-    <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="steps" class="tab -active">Steps</button>
+    <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="steps" class="tab -active">Log</button>
     <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="raw" class="tab">Raw</button>
     <% repo_states.each_with_index do |repo_state, index| %>
       <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="diff-<%= index %>" class="tab">

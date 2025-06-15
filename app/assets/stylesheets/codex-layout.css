@@ -1,0 +1,42 @@
+.codex-layout {
+  display: flex;
+  gap: 20px;
+}
+
+
+.codex-layout > .chat-panel {
+  width: 40%;
+}
+
+.codex-layout > .log-panel {
+  width: 60%;
+}
+
+@media (max-width: 768px) {
+  .codex-layout {
+    flex-direction: column;
+  }
+
+  .codex-layout > .chat-panel,
+  .codex-layout > .log-panel {
+    display: none;
+  }
+
+  .codex-layout > .chat-panel.-active,
+  .codex-layout > .log-panel.-active {
+    display: block;
+  }
+
+  .chat-tab {
+    display: inline-block;
+  }
+}
+
+@media (min-width: 769px) {
+  .chat-tab {
+    display: none;
+  }
+  .codex-layout > .nav {
+    display: none;
+  }
+}
