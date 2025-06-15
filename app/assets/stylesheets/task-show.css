@@ -1,11 +1,22 @@
 body.tasks.show {
-  max-width: 100%;
+  max-width: 100% !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body.tasks.show > header,
+body.tasks.show > header > nav {
+  max-width: 100% !important;
+  width: 100% !important;
+  padding: 0 1rem !important;
 }
 
 body.tasks.show > main {
-  max-width: 100%;
-  padding: 0;
-  margin: 0;
+  max-width: 100% !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 body.tasks.show h1,
@@ -21,8 +32,14 @@ body.tasks.show p {
 
 body.tasks.show .codex-layout {
   margin: 0;
-  max-width: 100%;
+  max-width: 100% !important;
+  width: 100% !important;
   padding: 0 1rem;
+}
+
+body.tasks.show .chat-panel,
+body.tasks.show .log-panel {
+  max-width: 100% !important;
 }
 
 body.tasks.show .task-actions {
