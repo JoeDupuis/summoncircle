@@ -3,6 +3,7 @@
   gap: 20px;
 }
 
+
 .codex-layout > .chat-panel {
   width: 40%;
 }
@@ -16,25 +17,23 @@
     flex-direction: column;
   }
 
-  .codex-layout > .chat-panel {
+  .codex-layout > .chat-panel,
+  .codex-layout > .log-panel {
     display: none;
+  }
+
+  .codex-layout > .chat-panel.-active,
+  .codex-layout > .log-panel.-active {
+    display: block;
   }
 
   .chat-tab {
     display: inline-block;
   }
-
-  .chat-panel-tab {
-    display: block;
-  }
 }
 
 @media (min-width: 769px) {
   .chat-tab {
-    display: none;
-  }
-
-  .chat-panel-tab {
     display: none;
   }
 }

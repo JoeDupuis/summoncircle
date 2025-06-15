@@ -1,5 +1,5 @@
 <div id="runs-list">
-  <% runs.each_with_index do |run, index| %>
-    <%= render "tasks/run", run: run, show_chat: index.zero? %>
+  <% runs.each do |run| %>
+    <%= render "tasks/run", run: run %>
   <% end %>
 </div>
