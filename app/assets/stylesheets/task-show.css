@@ -16,6 +16,7 @@ html body.tasks.show header {
   width: 100% !important;
   margin: 0 !important;
   grid-column: unset !important;
+  padding-bottom: 0 !important;
 }
 
 html body.tasks.show header nav {
