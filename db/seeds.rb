@@ -59,6 +59,10 @@ if Rails.env.development?
     volume.external_name = "claude_config"
   end
 
+  Volume.find_or_create_by!(agent: claude_agent, name: "claude_projects") do |volume|
+    volume.path = "/home/claude/.claude/projects"
+  end
+
   ClaudeOauthSetting.find_or_create_by!(agent: claude_agent)
 
   claude_json_agent = Agent.find_or_create_by!(name: "Claude Json") do |agent|
@@ -82,6 +86,10 @@ if Rails.env.development?
     volume.external_name = "claude_config"
   end
 
+  Volume.find_or_create_by!(agent: claude_json_agent, name: "claude_projects") do |volume|
+    volume.path = "/home/claude/.claude/projects"
+  end
+
   ClaudeOauthSetting.find_or_create_by!(agent: claude_json_agent)
 
   claude_streaming_agent = Agent.find_or_create_by!(name: "Claude Streaming") do |agent|
@@ -103,6 +111,10 @@ if Rails.env.development?
     volume.path = "/home/claude/.claude"
     volume.external = true
     volume.external_name = "claude_config"
+  end
+
+  Volume.find_or_create_by!(agent: claude_streaming_agent, name: "claude_projects") do |volume|
+    volume.path = "/home/claude/.claude/projects"
   end
 
   ClaudeOauthSetting.find_or_create_by!(agent: claude_streaming_agent)
