@@ -88,7 +88,7 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal 2, run.steps.count
+    assert_equal 3, run.steps.count
     assert_equal "hello world", run.steps.first.raw_response
     assert run.steps.last.content.start_with?("Repository state captured")
   end
@@ -108,7 +108,7 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal 2, run.steps.count
+    assert_equal 3, run.steps.count
     assert_equal "continued output", run.steps.first.raw_response
   end
 
@@ -163,7 +163,7 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal 2, run.steps.count
+    assert_equal 3, run.steps.count
   end
 
   test "execute! clones repository on first run with default repo_path" do
@@ -184,7 +184,7 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal 2, run.steps.count
+    assert_equal 3, run.steps.count
   end
 
   test "execute! clones repository on first run with custom repo_path" do
@@ -205,7 +205,7 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal 2, run.steps.count
+    assert_equal 3, run.steps.count
   end
 
   test "execute! handles git clone failure" do
@@ -242,7 +242,7 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal 2, run.steps.count
+    assert_equal 3, run.steps.count
   end
 
   test "should_clone_repository? returns false when repository_url is blank" do
@@ -269,7 +269,7 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal 1, run.steps.count # No repo state step since no repository_url
+    assert_equal 2, run.steps.count # No repo state step since no repository_url
   end
 
   test "execute! runs setup script on first run when present" do
@@ -289,7 +289,7 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal 3, run.steps.count
+    assert_equal 4, run.steps.count
     setup_step = run.steps.find { |s| s.content&.start_with?("Setup script executed") }
     assert_not_nil setup_step
     assert_includes setup_step.content, "Setup complete!"
@@ -309,7 +309,7 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal 2, run.steps.count
+    assert_equal 3, run.steps.count
     assert_nil run.steps.find { |s| s.content&.start_with?("Setup script executed") }
   end
 
@@ -352,7 +352,7 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal 3, run.steps.count
+    assert_equal 4, run.steps.count
   end
 
   test "execute! configures MCP on first run when endpoint present" do
@@ -370,7 +370,7 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal 2, run.steps.count
+    assert_equal 3, run.steps.count
   end
 
   test "execute! appends /mcp/sse to endpoint URL if not present" do
@@ -417,7 +417,7 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal 2, run.steps.count
+    assert_equal 3, run.steps.count
   end
 
   test "execute! skips MCP configuration when endpoint is blank" do
@@ -431,7 +431,7 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal 2, run.steps.count
+    assert_equal 3, run.steps.count
   end
 
   test "execute! handles MCP configuration failure" do

@@ -45,8 +45,10 @@ class RunLogProcessingTest < ActiveSupport::TestCase
     step_data_list = processor.process(text_logs)
     step_data_list.each { |step_data| run.steps.create!(step_data) }
 
-    assert_equal 1, run.steps.count
+    assert_equal 2, run.steps.count
     assert_equal "Step::Text", run.steps.first.type
     assert_equal text_logs, run.steps.first.content
+    assert_equal "Step::Result", run.steps.second.type
+    assert_equal text_logs, run.steps.second.content
   end
 end
