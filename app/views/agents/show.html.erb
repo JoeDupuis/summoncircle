@@ -107,6 +107,36 @@
   <%= link_to 'Configure Git', user_settings_path, class: 'button' %>
 </p>
 
+<% if @agent.name == "Claude" %>
+  <h2>OAuth Configuration</h2>
+  <% if @agent.oauth_credentials.present? %>
+    <p>
+      <strong>Status:</strong> <span class="status-indicator -success">OAuth configured</span><br>
+      <% credentials = JSON.parse(@agent.oauth_credentials) rescue {} %>
+      <% if credentials.dig("claudeAiOauth", "expiresAt") %>
+        <% expires_at = Time.at(credentials.dig("claudeAiOauth", "expiresAt") / 1000) %>
+        <strong>Token expires at:</strong> <%= expires_at.strftime('%Y-%m-%d %H:%M:%S') %>
+        <% if expires_at < Time.now %>
+          <span class="status-indicator -error">(Expired)</span>
+        <% elsif expires_at < 1.hour.from_now %>
+          <span class="status-indicator -warning">(Expiring soon)</span>
+        <% end %>
+      <% end %>
+    </p>
+    <div style="display: flex; gap: 1rem;">
+      <%= button_to 'Refresh Token', oauth_refresh_agent_path(@agent), method: :post, class: 'button -secondary' %>
+      <%= link_to 'Reconfigure OAuth', oauth_login_start_agent_path(@agent), class: 'button' %>
+    </div>
+  <% else %>
+    <p>
+      <strong>Status:</strong> <span class="status-indicator -warning">OAuth not configured</span>
+    </p>
+    <p>
+      <%= link_to 'Configure OAuth', oauth_login_start_agent_path(@agent), class: 'button -primary' %>
+    </p>
+  <% end %>
+<% end %>
+
 <div class="agent-actions">
   <%= link_to 'Edit', edit_agent_path(@agent) %> |
   <%= link_to 'Archive', agent_path(@agent), 
