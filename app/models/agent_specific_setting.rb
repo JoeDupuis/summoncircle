@@ -3,6 +3,10 @@ class AgentSpecificSetting < ApplicationRecord
 
   validates :type, presence: true
 
+  def to_partial_path
+    "agent_specific_settings/#{self.class.name.underscore}"
+  end
+
   # Get all available agent-specific setting types
   def self.available_types
     # Ensure all setting classes are loaded
