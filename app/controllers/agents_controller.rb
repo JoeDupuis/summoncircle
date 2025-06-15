@@ -14,12 +14,6 @@ class AgentsController < ApplicationController
 
   def create
     @agent = Agent.new(agent_params.except(:volumes_config))
-
-    # Filter out new settings marked for destruction
-    if @agent.agent_specific_settings.any?
-      @agent.agent_specific_settings = @agent.agent_specific_settings.reject(&:marked_for_destruction?)
-    end
-
     if @agent.save
       create_volumes_from_config(@agent, params[:agent][:volumes_config])
       redirect_to @agent, notice: "Agent was successfully created."
