@@ -4,4 +4,5 @@ class Volume < ApplicationRecord
 
   validates :name, presence: true
   validates :path, presence: true
+  validates :external_name, presence: true, if: :external?
 end

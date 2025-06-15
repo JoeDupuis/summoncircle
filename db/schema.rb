@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_09_021050) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_14_232533) do
   create_table "agents", force: :cascade do |t|
     t.string "name"
     t.string "docker_image"
@@ -145,6 +145,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_09_021050) do
     t.integer "agent_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "external", default: false
+    t.string "external_name"
     t.index ["agent_id"], name: "index_volumes_on_agent_id"
   end
 
