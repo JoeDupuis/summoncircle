@@ -8,13 +8,5 @@
       | <strong>Completed:</strong> <%= run.completed_at.strftime("%Y-%m-%d %H:%M:%S") %>
     <% end %>
   </p>
-  <% if run.steps.any? %>
-    <%= render "runs/tabs", run: run, show_chat: local_assigns[:show_chat] %>
-  <% elsif run.status == 'running' %>
-    <p class="title">Output:</p>
-    <div class="run-spinner">
-      <div class="spinner"></div>
-      Processing...
-    </div>
-  <% end %>
+  <%= render "runs/tabs", run: run, show_chat: local_assigns[:show_chat] %>
 </div>

@@ -8,15 +8,6 @@
   <%= render "tasks/chat_panel", task: @task, runs: @task.runs.order(:created_at) %>
   <div class="log-panel">
     <% if @task.runs.any? %>
-      <% if @task.runs.count > 1 %>
-        <div class="run-filter">
-          <% if @show_all_runs %>
-            <%= link_to "Show Last Run Only", task_path(@task, selected_run_id: @selected_run&.id), class: "action-button -primary" %>
-          <% else %>
-            <%= link_to "Show All Runs", task_path(@task, show_all_runs: true, selected_run_id: @selected_run&.id), class: "action-button -success" %>
-          <% end %>
-        </div>
-      <% end %>
       <%= render "tasks/runs_list", runs: @runs %>
     <% else %>
       <div id="runs-list">
