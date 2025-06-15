@@ -70,4 +70,19 @@ class Agent < ApplicationRecord
   def log_processor_class
     "LogProcessor::#{log_processor}".constantize
   end
+
+  def update_setting_types(selected_types)
+    selected_types ||= []
+    current_types = agent_specific_settings.pluck(:type)
+
+    # Add new settings
+    (selected_types - current_types).each do |type|
+      agent_specific_settings.create!(type: type)
+    end
+
+    # Remove deselected settings
+    (current_types - selected_types).each do |type|
+      agent_specific_settings.where(type: type).destroy_all
+    end
+  end
 end
