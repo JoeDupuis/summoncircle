@@ -1,5 +1,6 @@
 class Task < ApplicationRecord
   include Discard::Model
+  include GitCredentialHelper
 
   belongs_to :project
   belongs_to :agent
@@ -73,7 +74,7 @@ class Task < ApplicationRecord
     working_dir = workplace_mount.container_path
     git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
 
-    repository_url = project.repository_url_with_token(user)
+    repository_url = project.repository_url
     commit_message ||= "Manual push from SummonCircle"
 
     push_commands = [
@@ -83,7 +84,7 @@ class Task < ApplicationRecord
       "git push origin HEAD:#{auto_push_branch}"
     ].join(" && ")
 
-    push_container = Docker::Container.create(
+    container_config = {
       "Image" => agent.docker_image,
       "Entrypoint" => [ "sh" ],
       "Cmd" => [ "-c", push_commands ],
@@ -93,8 +94,10 @@ class Task < ApplicationRecord
       "HostConfig" => {
         "Binds" => volume_mounts.includes(:volume).map(&:bind_string)
       }
-    )
+    }
 
+    container_config = setup_git_credentials(container_config, user.github_token)
+    push_container = Docker::Container.create(container_config)
     push_container.start
 
     wait_result = push_container.wait(300)

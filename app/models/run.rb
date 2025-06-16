@@ -1,5 +1,6 @@
 class Run < ApplicationRecord
   include ActionView::RecordIdentifier
+  include GitCredentialHelper
   belongs_to :task
   has_many :siblings, through: :task, source: :runs
   has_many :steps, -> { order(:id) }, dependent: :destroy
@@ -124,9 +125,9 @@ class Run < ApplicationRecord
     repo_path = project.repo_path.presence || ""
     working_dir = task.workplace_mount.container_path
     clone_target = repo_path.presence&.sub(/^\//, "") || "."
-    repository_url = project.repository_url_with_token(task.user)
+    repository_url = project.repository_url
 
-    git_container = Docker::Container.create(
+    container_config = {
       "Image" => task.agent.docker_image,
       "Entrypoint" => [ "sh" ],
       "Cmd" => [ "-c", "git clone #{repository_url} #{clone_target}" ],
@@ -135,7 +136,11 @@ class Run < ApplicationRecord
       "HostConfig" => {
         "Binds" => [ task.workplace_mount.bind_string ]
       }
-    )
+    }
+
+    container_config = setup_git_credentials(container_config, task.user&.github_token)
+    git_container = Docker::Container.create(container_config)
+
     git_container.start
     wait_result = git_container.wait(300)
     logs = git_container.logs(stdout: true, stderr: true)
