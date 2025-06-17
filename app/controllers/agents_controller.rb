@@ -17,7 +17,12 @@ class AgentsController < ApplicationController
       @agent.name = "Copy of #{source_agent.name}"
 
       @agent.volumes_config = source_agent.volumes_config
-      @agent.agent_specific_setting_type = source_agent.agent_specific_settings.first&.type
+
+      if source_agent.agent_specific_settings.any?
+        source_setting = source_agent.agent_specific_settings.first
+        @agent.agent_specific_setting_type = source_setting.type
+        @agent.agent_specific_settings.build(type: source_setting.type)
+      end
     end
   end
 
