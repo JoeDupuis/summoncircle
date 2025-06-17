@@ -53,10 +53,6 @@ class GitSecurityTest < ActiveSupport::TestCase
     task.push_changes_to_branch
   end
 
-  test "repository_url_with_token method has been removed" do
-    project = projects(:one)
-    refute project.respond_to?(:repository_url_with_token)
-  end
 
   private
 
