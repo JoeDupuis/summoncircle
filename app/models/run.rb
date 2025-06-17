@@ -77,6 +77,19 @@ class Run < ApplicationRecord
       locals: { task: task })
   end
 
+  def total_cost
+    steps.where.not(cost_usd: nil).sum(:cost_usd)
+  end
+
+  def total_tokens
+    {
+      input: steps.where.not(input_tokens: nil).sum(:input_tokens),
+      output: steps.where.not(output_tokens: nil).sum(:output_tokens),
+      cache_creation: steps.where.not(cache_creation_tokens: nil).sum(:cache_creation_tokens),
+      cache_read: steps.where.not(cache_read_tokens: nil).sum(:cache_read_tokens)
+    }
+  end
+
   private
 
 

@@ -26,6 +26,19 @@ class Task < ApplicationRecord
     @branches ||= fetch_branches(self)
   end
 
+  def total_cost
+    runs.joins(:steps).where.not(steps: { cost_usd: nil }).sum("steps.cost_usd")
+  end
+
+  def total_tokens
+    {
+      input: runs.joins(:steps).where.not(steps: { input_tokens: nil }).sum("steps.input_tokens"),
+      output: runs.joins(:steps).where.not(steps: { output_tokens: nil }).sum("steps.output_tokens"),
+      cache_creation: runs.joins(:steps).where.not(steps: { cache_creation_tokens: nil }).sum("steps.cache_creation_tokens"),
+      cache_read: runs.joins(:steps).where.not(steps: { cache_read_tokens: nil }).sum("steps.cache_read_tokens")
+    }
+  end
+
 
   private
 

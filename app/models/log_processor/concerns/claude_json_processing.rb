@@ -33,7 +33,17 @@ module LogProcessor::Concerns::ClaudeJsonProcessing
       tool_use_id = extract_tool_result_id(item)
       { raw_response: item_json, type: "Step::ToolResult", content: extract_content(item), tool_use_id: tool_use_id }
     when "result"
-      { raw_response: item_json, type: "Step::Result", content: item["result"] || extract_content(item) }
+      step_data = { raw_response: item_json, type: "Step::Result", content: item["result"] || extract_content(item) }
+      if item["total_cost_usd"]
+        step_data[:cost_usd] = item["total_cost_usd"]
+      end
+      if item["usage"]
+        step_data[:input_tokens] = item["usage"]["input_tokens"]
+        step_data[:output_tokens] = item["usage"]["output_tokens"]
+        step_data[:cache_creation_tokens] = item["usage"]["cache_creation_input_tokens"]
+        step_data[:cache_read_tokens] = item["usage"]["cache_read_input_tokens"]
+      end
+      step_data
     else
       { raw_response: item_json, type: "Step::Text", content: extract_content(item) }
     end
