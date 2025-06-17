@@ -355,6 +355,59 @@ class RunTest < ActiveSupport::TestCase
     assert_equal 4, run.steps.count
   end
 
+  test "execute! clones SSH repository with SSH key on first run" do
+    task = tasks(:for_repo_clone)
+    agent = task.agent
+    agent.update!(ssh_mount_path: "/home/user/.ssh/id_rsa")
+
+    user = task.user
+    user.update!(ssh_key: "-----BEGIN OPENSSH PRIVATE KEY-----\ntest_ssh_key\n-----END OPENSSH PRIVATE KEY-----")
+
+    project = task.project
+    project.update!(repository_url: "git@github.com:test/repo.git")
+
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    # Mock git container creation for SSH clone
+    expect_git_clone_container(
+      log_output: "Cloning into '.'...",
+      cmd: [ "-c", "git clone git@github.com:test/repo.git ." ],
+      working_dir: "/workspace",
+      binds: instance_of(Array)
+    )
+
+    # Mock main container with SSH key mount verification
+    main_container = mock("main_container")
+    main_container.expects(:start)
+    main_container.expects(:wait).returns({ "StatusCode" => 0 })
+    main_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "test")
+    main_container.expects(:delete).with(force: true)
+
+    # Expect SSH key to be copied to container
+    run.expects(:archive_file_to_container).with do |container, content, path, mode|
+      if path&.include?("/.ssh/")
+        assert_equal user.ssh_key, content
+        assert_equal 0o600, mode
+      end
+      true
+    end.at_least_once
+
+    Docker::Container.expects(:create).with(
+      has_entries(
+        "Image" => "example/image:latest",
+        "Cmd" => [ "echo", "STARTING: test" ],
+        "WorkingDir" => "/workspace"
+      )
+    ).returns(main_container)
+
+    expect_git_diff_container
+
+    run.execute!
+
+    assert run.completed?
+    assert_equal 3, run.steps.count
+  end
+
   test "execute! configures MCP on first run when endpoint present" do
     task = tasks(:with_mcp_endpoint)
     run = task.runs.create!(prompt: "test", status: :pending)

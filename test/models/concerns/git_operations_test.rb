@@ -64,6 +64,53 @@ class GitOperationsTest < ActiveSupport::TestCase
     run.clone_repository
   end
 
+  test "clone_repository works with SSH URLs" do
+    task = tasks(:without_runs)
+    user = task.user
+    user.update!(ssh_key: "ssh-rsa AAAAB3NzaC1...")
+
+    project = task.project
+    project.update!(repository_url: "git@github.com:JoeDupuis/shenanigans.git")
+
+    run = task.runs.create!(prompt: "test")
+
+    Docker::Container.expects(:create).with do |config|
+      assert_match(/git-ssh-wrapper\.sh/, config["Cmd"][1])
+      assert_match(/StrictHostKeyChecking=no/, config["Cmd"][1])
+      assert_match(/git clone git@github\.com:JoeDupuis\/shenanigans\.git/, config["Cmd"][1])
+      env = config["Env"] || []
+      refute_includes env, "GITHUB_TOKEN="
+      refute_includes env, "GIT_ASKPASS=/tmp/git-askpass.sh"
+      true
+    end.returns(mock_container)
+
+    run.clone_repository
+  end
+
+  test "push_changes_to_branch works with SSH URLs" do
+    task = tasks(:without_runs)
+    user = task.user
+    user.update!(ssh_key: "ssh-rsa AAAAB3NzaC1...")
+
+    project = task.project
+    project.update!(repository_url: "git@github.com:JoeDupuis/shenanigans.git")
+    task.update!(auto_push_enabled: true, auto_push_branch: "main")
+    task.workplace_mount
+
+    Docker::Container.expects(:create).with do |config|
+      assert_match(/git remote set-url origin 'git@github\.com:JoeDupuis\/shenanigans\.git'/, config["Cmd"][1])
+      assert_match(/git-ssh-wrapper\.sh/, config["Cmd"][1])
+      assert_match(/StrictHostKeyChecking=no/, config["Cmd"][1])
+      assert_match(/git push/, config["Cmd"][1])
+      env = config["Env"] || []
+      refute_includes env, "GITHUB_TOKEN="
+      refute_includes env, "GIT_ASKPASS=/tmp/git-askpass.sh"
+      true
+    end.returns(mock_container)
+
+    task.push_changes_to_branch
+  end
+
   private
 
   def mock_container

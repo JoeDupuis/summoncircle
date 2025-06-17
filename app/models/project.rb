@@ -4,11 +4,11 @@ class Project < ApplicationRecord
   has_many :tasks, dependent: :destroy
   has_many :secrets, dependent: :destroy
   validates :name, presence: true
-  validates :repository_url, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid HTTP or HTTPS URL", allow_blank: true }
+  validate :valid_repository_url
 
   def safe_repository_url
     return nil unless repository_url.present?
-    return nil unless repository_url.start_with?("http://", "https://")
+    return nil unless valid_git_url?(repository_url)
 
     repository_url
   end
@@ -32,5 +32,23 @@ class Project < ApplicationRecord
 
   def secret_values
     secrets.pluck(:value)
+  end
+
+  private
+
+  def valid_repository_url
+    return if repository_url.blank?
+    return if valid_git_url?(repository_url)
+
+    errors.add(:repository_url, "must be a valid HTTP, HTTPS, or SSH git URL")
+  end
+
+  def valid_git_url?(url)
+    return false if url.blank?
+
+    ssh_url_pattern = /\A(ssh:\/\/)?git@[\w\.-]+:[\w\.\/-]+\.git\z/
+    http_url_pattern = /\Ahttps?:\/\/.+\z/
+
+    url.match?(ssh_url_pattern) || url.match?(http_url_pattern)
   end
 end

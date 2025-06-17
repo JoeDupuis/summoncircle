@@ -13,6 +13,64 @@ class ProjectTest < ActiveSupport::TestCase
     assert_nil project.repository_url
   end
 
+  test "validates HTTPS repository URLs" do
+    project = Project.new(name: "Example", repository_url: "https://github.com/user/repo.git")
+    assert project.valid?
+  end
+
+  test "validates HTTP repository URLs" do
+    project = Project.new(name: "Example", repository_url: "http://github.com/user/repo.git")
+    assert project.valid?
+  end
+
+  test "validates SSH repository URLs with git@ format" do
+    project = Project.new(name: "Example", repository_url: "git@github.com:JoeDupuis/shenanigans.git")
+    assert project.valid?
+  end
+
+  test "validates SSH repository URLs with ssh:// format" do
+    project = Project.new(name: "Example", repository_url: "ssh://git@github.com:JoeDupuis/shenanigans.git")
+    assert project.valid?
+  end
+
+  test "rejects invalid repository URLs" do
+    invalid_urls = [
+      "ftp://example.com/repo.git",
+      "not-a-url",
+      "git@github.com:user/repo",  # Missing .git
+      "github.com:user/repo.git",   # Missing git@
+      "https://",
+      "http://"
+    ]
+
+    invalid_urls.each do |url|
+      project = Project.new(name: "Example", repository_url: url)
+      assert_not project.valid?, "Expected #{url} to be invalid"
+      assert_includes project.errors[:repository_url], "must be a valid HTTP, HTTPS, or SSH git URL"
+    end
+  end
+
+  test "safe_repository_url returns URL for valid URLs" do
+    project = Project.new(name: "Example")
+
+    valid_urls = [
+      "https://github.com/user/repo.git",
+      "http://github.com/user/repo.git",
+      "git@github.com:JoeDupuis/shenanigans.git",
+      "ssh://git@github.com:JoeDupuis/shenanigans.git"
+    ]
+
+    valid_urls.each do |url|
+      project.repository_url = url
+      assert_equal url, project.safe_repository_url, "Expected safe_repository_url to return #{url}"
+    end
+  end
+
+  test "safe_repository_url returns nil for invalid URLs" do
+    project = Project.new(name: "Example", repository_url: "ftp://example.com/repo.git")
+    assert_nil project.safe_repository_url
+  end
+
   test "repo_path can be nil" do
     project = Project.new(name: "Example", repository_url: "https://example.com/repo.git")
     assert project.valid?
