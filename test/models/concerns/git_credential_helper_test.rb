@@ -15,7 +15,10 @@ class GitCredentialHelperTest < ActiveSupport::TestCase
       "Cmd" => [ "-c", "git clone repo" ]
     }
 
-    result = @helper.setup_git_credentials(container_config, nil)
+    user = mock("user")
+    user.stubs(:github_token).returns(nil)
+
+    result = @helper.setup_git_credentials(container_config, user, "https://github.com/test/repo.git")
 
     assert_equal container_config["Image"], result["Image"]
     assert_nil result["Env"]
@@ -27,7 +30,10 @@ class GitCredentialHelperTest < ActiveSupport::TestCase
       "Cmd" => [ "-c", "git clone repo" ]
     }
 
-    result = @helper.setup_git_credentials(container_config, "test_token_123")
+    user = mock("user")
+    user.stubs(:github_token).returns("test_token_123")
+
+    result = @helper.setup_git_credentials(container_config, user, "https://github.com/test/repo.git")
 
     assert_includes result["Env"], "GITHUB_TOKEN=test_token_123"
     assert_includes result["Env"], "GIT_ASKPASS=/tmp/git-askpass.sh"
@@ -39,7 +45,10 @@ class GitCredentialHelperTest < ActiveSupport::TestCase
       "Cmd" => [ "-c", "git clone repo" ]
     }
 
-    result = @helper.setup_git_credentials(container_config, "test_token_123")
+    user = mock("user")
+    user.stubs(:github_token).returns("test_token_123")
+
+    result = @helper.setup_git_credentials(container_config, user, "https://github.com/test/repo.git")
 
     assert_equal "-c", result["Cmd"][0]
     cmd = result["Cmd"][1]
@@ -54,10 +63,27 @@ class GitCredentialHelperTest < ActiveSupport::TestCase
       "Cmd" => [ "-c", "git clone repo" ]
     }
 
-    result = @helper.setup_git_credentials(container_config, "test_token_123")
+    user = mock("user")
+    user.stubs(:github_token).returns("test_token_123")
+
+    result = @helper.setup_git_credentials(container_config, user, "https://github.com/test/repo.git")
     cmd = result["Cmd"][1]
 
     assert_match(/Username.*echo "x-access-token"/, cmd)
     assert_match(/Password.*echo "\$GITHUB_TOKEN"/, cmd)
+  end
+
+  test "setup_git_credentials returns unmodified config for non-github URLs" do
+    container_config = {
+      "Image" => "test:latest",
+      "Cmd" => [ "-c", "git clone repo" ]
+    }
+
+    user = mock("user")
+    user.stubs(:github_token).returns("test_token_123")
+
+    result = @helper.setup_git_credentials(container_config, user, "https://example.com/test/repo.git")
+
+    assert_equal container_config, result
   end
 end

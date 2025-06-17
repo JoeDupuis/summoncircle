@@ -138,7 +138,7 @@ class Run < ApplicationRecord
       }
     }
 
-    container_config = setup_git_credentials(container_config, task.user&.github_token)
+    container_config = setup_git_credentials(container_config, task.user, project.repository_url)
     git_container = Docker::Container.create(container_config)
 
     git_container.start
