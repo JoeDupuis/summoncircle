@@ -37,8 +37,7 @@ module GitOperations
       task: task,
       command: push_commands,
       error_message: "Failed to push changes",
-      with_credentials: true,
-      use_all_mounts: true
+      with_credentials: true
     )
   end
 
@@ -98,7 +97,7 @@ module GitOperations
 
   private
 
-  def run_git_command(task:, command:, error_message:, return_logs: false, with_credentials: false, use_all_mounts: false, working_dir: nil, skip_repo_path: false)
+  def run_git_command(task:, command:, error_message:, return_logs: false, with_credentials: false, working_dir: nil, skip_repo_path: false)
     repo_path = task.project.repo_path.presence || ""
     working_dir ||= task.workplace_mount.container_path
     git_working_dir = if skip_repo_path
@@ -113,14 +112,11 @@ module GitOperations
       "Cmd" => [ "-c", command ],
       "WorkingDir" => git_working_dir,
       "User" => task.agent.user_id.to_s,
+      "Env" => task.agent.env_strings + task.project.secrets.map { |s| "#{s.key}=#{s.value}" },
       "HostConfig" => {
-        "Binds" => use_all_mounts ? task.volume_mounts.includes(:volume).map(&:bind_string) : [ task.workplace_mount.bind_string ]
+        "Binds" => task.volume_mounts.includes(:volume).map(&:bind_string)
       }
     }
-
-    if use_all_mounts
-      container_config["Env"] = task.agent.env_strings + task.project.secrets.map { |s| "#{s.key}=#{s.value}" }
-    end
 
     if with_credentials
       container_config = setup_git_credentials(container_config, task.user, task.project.repository_url)
