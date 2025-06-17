@@ -44,6 +44,7 @@ if Rails.env.development?
     agent.workplace_path = "/workspace"
     agent.home_path = "/home/claude"
     agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
+    agent.ssh_mount_path = "/home/claude/.ssh/id_rsa"
     agent.mcp_sse_endpoint = "http://host.docker.internal:3000"
     agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ]
     agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ]
@@ -70,6 +71,7 @@ if Rails.env.development?
     agent.workplace_path = "/workspace"
     agent.home_path = "/home/claude"
     agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
+    agent.ssh_mount_path = "/home/claude/.ssh/id_rsa"
     agent.mcp_sse_endpoint = "http://host.docker.internal:3000"
     agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "json", "--verbose", "-p", "{PROMPT}" ]
     agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "json", "--verbose", "-p", "{PROMPT}" ]
@@ -97,6 +99,7 @@ if Rails.env.development?
     agent.workplace_path = "/workspace"
     agent.home_path = "/home/claude"
     agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
+    agent.ssh_mount_path = "/home/claude/.ssh/id_rsa"
     agent.mcp_sse_endpoint = "http://host.docker.internal:3000"
     agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "stream-json", "--verbose", "-p", "{PROMPT}" ]
     agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "stream-json", "--verbose", "-p", "{PROMPT}" ]
