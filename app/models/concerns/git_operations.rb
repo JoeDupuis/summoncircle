@@ -5,32 +5,23 @@ module GitOperations
     task ||= self.is_a?(Task) ? self : self.task
     project = task.project
     repo_path = project.repo_path.presence || ""
-    working_dir = task.workplace_mount.container_path
     clone_target = repo_path.presence&.sub(/^\//, "") || "."
     repository_url = project.repository_url
 
-    container_config = {
-      "Image" => task.agent.docker_image,
-      "Entrypoint" => [ "sh" ],
-      "Cmd" => [ "-c", "git clone #{repository_url} #{clone_target}" ],
-      "WorkingDir" => working_dir,
-      "User" => task.agent.user_id.to_s,
-      "HostConfig" => {
-        "Binds" => [ task.workplace_mount.bind_string ]
-      }
-    }
-
-    run_git_command(container_config, task.user, project.repository_url, "Failed to clone repository")
+    run_git_command(
+      task: task,
+      command: "git clone #{repository_url} #{clone_target}",
+      working_dir: task.workplace_mount.container_path,
+      error_message: "Failed to clone repository",
+      with_credentials: true,
+      skip_repo_path: true  # Clone operates from workspace root
+    )
   end
 
   def push_changes_to_branch(commit_message = nil)
     task = self.is_a?(Task) ? self : self.task
     return unless task.auto_push_enabled? && task.auto_push_branch.present?
     return unless task.project.repository_url.present?
-
-    repo_path = task.project.repo_path.presence || ""
-    working_dir = task.workplace_mount.container_path
-    git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
 
     repository_url = task.project.repository_url
     commit_message ||= "Manual push from SummonCircle"
@@ -42,42 +33,26 @@ module GitOperations
       "git push origin HEAD:#{task.auto_push_branch}"
     ].join(" && ")
 
-    container_config = {
-      "Image" => task.agent.docker_image,
-      "Entrypoint" => [ "sh" ],
-      "Cmd" => [ "-c", push_commands ],
-      "WorkingDir" => git_working_dir,
-      "User" => task.agent.user_id.to_s,
-      "Env" => task.agent.env_strings + task.project.secrets.map { |s| "#{s.key}=#{s.value}" },
-      "HostConfig" => {
-        "Binds" => task.volume_mounts.includes(:volume).map(&:bind_string)
-      }
-    }
-
-    run_git_command(container_config, task.user, task.project.repository_url, "Failed to push changes")
+    run_git_command(
+      task: task,
+      command: push_commands,
+      error_message: "Failed to push changes",
+      with_credentials: true,
+      use_all_mounts: true
+    )
   end
 
   def fetch_branches(task = nil)
     task ||= self.is_a?(Task) ? self : self.task
     return [] unless task.project.repository_url.present?
 
-    repo_path = task.project.repo_path.presence || ""
-    working_dir = task.workplace_mount.container_path
-    git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
-
-    container_config = {
-      "Image" => task.agent.docker_image,
-      "Entrypoint" => [ "sh" ],
-      "Cmd" => [ "-c", "git branch" ],
-      "WorkingDir" => git_working_dir,
-      "User" => task.agent.user_id.to_s,
-      "HostConfig" => {
-        "Binds" => [ task.workplace_mount.bind_string ]
-      }
-    }
-
     begin
-      logs = run_git_command(container_config, nil, nil, "Failed to fetch branches", return_logs: true)
+      logs = run_git_command(
+        task: task,
+        command: "git branch",
+        error_message: "Failed to fetch branches",
+        return_logs: true
+      )
       branches = logs.split("\n").map { |line| line.strip.gsub(/^\* /, "") }.reject(&:blank?)
       branches.presence || []
     rescue => e
@@ -92,24 +67,18 @@ module GitOperations
     project = task.project
     return nil unless project.repository_url.present?
 
-    repo_path = project.repo_path.presence || ""
-    working_dir = task.workplace_mount.container_path
-    git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
-
-    container_config = {
-      "Image" => task.agent.docker_image,
-      "Entrypoint" => [ "sh" ],
-      "Cmd" => [ "-c", "git add -N . && git diff HEAD --unified=10" ],
-      "WorkingDir" => git_working_dir,
-      "User" => task.agent.user_id.to_s,
-      "HostConfig" => {
-        "Binds" => [ task.workplace_mount.bind_string ]
-      }
-    }
-
     begin
-      diff_output = run_git_command(container_config, nil, nil, "Failed to capture git diff", return_logs: true)
+      diff_output = run_git_command(
+        task: task,
+        command: "git add -N . && git diff HEAD --unified=10",
+        error_message: "Failed to capture git diff",
+        return_logs: true
+      )
       return nil if diff_output.blank?
+
+      repo_path = project.repo_path.presence || ""
+      working_dir = task.workplace_mount.container_path
+      git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
 
       repo_state_step = run.steps.create!(
         raw_response: "Repository state captured",
@@ -129,8 +98,33 @@ module GitOperations
 
   private
 
-  def run_git_command(container_config, user, repository_url, error_message, return_logs: false)
-    container_config = setup_git_credentials(container_config, user, repository_url) if user && repository_url
+  def run_git_command(task:, command:, error_message:, return_logs: false, with_credentials: false, use_all_mounts: false, working_dir: nil, skip_repo_path: false)
+    repo_path = task.project.repo_path.presence || ""
+    working_dir ||= task.workplace_mount.container_path
+    git_working_dir = if skip_repo_path
+      working_dir
+    else
+      File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
+    end
+
+    container_config = {
+      "Image" => task.agent.docker_image,
+      "Entrypoint" => [ "sh" ],
+      "Cmd" => [ "-c", command ],
+      "WorkingDir" => git_working_dir,
+      "User" => task.agent.user_id.to_s,
+      "HostConfig" => {
+        "Binds" => use_all_mounts ? task.volume_mounts.includes(:volume).map(&:bind_string) : [ task.workplace_mount.bind_string ]
+      }
+    }
+
+    if use_all_mounts
+      container_config["Env"] = task.agent.env_strings + task.project.secrets.map { |s| "#{s.key}=#{s.value}" }
+    end
+
+    if with_credentials
+      container_config = setup_git_credentials(container_config, task.user, task.project.repository_url)
+    end
 
     git_container = Docker::Container.create(container_config)
     git_container.start
