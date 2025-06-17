@@ -1,6 +1,6 @@
 class TasksController < ApplicationController
   before_action :set_project
-  before_action :set_task, only: [ :show, :destroy, :branches, :update_auto_push ]
+  before_action :set_task, only: [ :show, :destroy, :branches, :update_auto_push, :edit_description, :update_description ]
 
   def index
     @tasks = @project.tasks.kept.includes(:agent, :project)
@@ -83,6 +83,18 @@ class TasksController < ApplicationController
     end
   end
 
+  def edit_description
+    render partial: "tasks/description_form", locals: { task: @task }
+  end
+
+  def update_description
+    if @task.update(description_params)
+      render partial: "tasks/description", locals: { task: @task }
+    else
+      render partial: "tasks/description_form", locals: { task: @task }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def set_project
@@ -98,10 +110,14 @@ class TasksController < ApplicationController
   end
 
   def task_params
-    params.require(:task).permit(:agent_id, :project_id)
+    params.require(:task).permit(:agent_id, :project_id, :description)
   end
 
   def auto_push_params
     params.require(:task).permit(:auto_push_enabled, :auto_push_branch)
+  end
+
+  def description_params
+    params.require(:task).permit(:description)
   end
 end

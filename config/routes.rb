@@ -14,6 +14,8 @@ Rails.application.routes.draw do
       member do
         get :branches
         patch :update_auto_push
+        get :edit_description
+        patch :update_description
       end
       resources :runs, only: %i[create]
     end

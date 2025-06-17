@@ -1,0 +1,2 @@
+<% desc = task.description.presence || "#{task.agent.name} in #{task.project.name}" %>
+<p><%= desc %> <%= link_to 'Edit', edit_description_task_path(task), data: { turbo_frame: dom_id(task, :description) } %></p>

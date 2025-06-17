@@ -1,5 +1,9 @@
 <h1>Task <%= @task.id %></h1>
 
+<%= turbo_frame_tag dom_id(@task, :description) do %>
+  <%= render "tasks/description", task: @task %>
+<% end %>
+
 <p>Agent: <%= @task.agent.name %></p>
 <p>Project: <%= @task.project.name %></p>
 

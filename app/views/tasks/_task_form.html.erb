@@ -22,6 +22,11 @@
     </div>
   </div>
 
+  <div class="field">
+    <%= form.label :description %><br>
+    <%= form.text_field :description %>
+  </div>
+
   <div data-controller="prompt">
     <%= form.label :prompt %><br>
     <%= form.text_area :prompt, data: { prompt_target: "textarea", action: "keydown->prompt#keydown" } %>
