@@ -172,6 +172,11 @@ EOF
     git_container = Docker::Container.create(container_config)
     git_container.start
 
+    # Setup SSH key if needed for SSH URLs
+    if task.project.repository_url&.match?(/\Agit@|ssh:\/\//)
+      setup_ssh_key_in_container(git_container, task)
+    end
+
     wait_result = git_container.wait(300)
     logs = git_container.logs(stdout: true, stderr: true)
     clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
@@ -253,5 +258,27 @@ EOF
         Password*) echo "$#{platform_config[:env_var]}" ;;
       esac
     BASH
+  end
+
+  def setup_ssh_key_in_container(container, task)
+    agent = task.agent
+    user = task.user
+    
+    return unless user.ssh_key.present? && agent.ssh_mount_path.present?
+    
+    encoded_content = Base64.strict_encode64(user.ssh_key)
+    target_dir = File.dirname(agent.ssh_mount_path)
+    
+    # Create .ssh directory
+    container.exec(["mkdir", "-p", target_dir])
+    
+    # Write SSH key
+    container.exec(["sh", "-c", "echo '#{encoded_content}' | base64 -d > #{agent.ssh_mount_path}"])
+    
+    # Set permissions
+    container.exec(["chmod", "600", agent.ssh_mount_path])
+    container.exec(["chmod", "700", target_dir])
+  rescue => e
+    Rails.logger.error "Failed to setup SSH key in container: #{e.message}"
   end
 end
