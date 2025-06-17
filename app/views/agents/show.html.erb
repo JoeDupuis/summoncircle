@@ -116,5 +116,6 @@
   <%= link_to 'Archive', agent_path(@agent), 
               data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to archive this agent?' },
               class: 'archive' %> |
+  <%= link_to 'Clone', new_agent_path(source_id: @agent.id) %> |
   <%= link_to 'Back', agents_path %>
 </div>

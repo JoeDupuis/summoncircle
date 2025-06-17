@@ -10,6 +10,15 @@ class AgentsController < ApplicationController
 
   def new
     @agent = Agent.new
+
+    if params[:source_id].present?
+      source_agent = Agent.find(params[:source_id])
+      @agent = source_agent.dup
+      @agent.name = "Copy of #{source_agent.name}"
+
+      @agent.volumes_config = source_agent.volumes_config
+      @agent.agent_specific_setting_type = source_agent.agent_specific_settings.first&.type
+    end
   end
 
   def create
