@@ -1,5 +1,9 @@
 <h1>Task <%= @task.id %></h1>
 
+<turbo-frame id="task_description">
+  <%= render "tasks/description", task: @task %>
+</turbo-frame>
+
 <p>Agent: <%= @task.agent.name %></p>
 <p>Project: <%= @task.project.name %></p>
 

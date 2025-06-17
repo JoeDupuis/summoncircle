@@ -1,0 +1,6 @@
+<div class="task-description">
+  <p>
+    <%= task.description.presence || "No description" %>
+    <%= link_to "Edit", edit_description_task_path(task), data: { turbo_frame: "task_description" }, class: "button action-button -mini" %>
+  </p>
+</div>

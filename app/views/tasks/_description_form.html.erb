@@ -1,0 +1,8 @@
+<%= form_with model: task, url: update_description_task_path(task), method: :patch, data: { turbo_frame: "task_description" } do |form| %>
+  <div class="field">
+    <%= form.text_field :description, value: task.description, class: "input" %>
+  </div>
+  <div>
+    <%= form.submit "Save", class: "button action-button -primary -mini" %>
+  </div>
+<% end %>

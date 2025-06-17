@@ -1,6 +1,6 @@
 class TasksController < ApplicationController
   before_action :set_project
-  before_action :set_task, only: [ :show, :destroy, :branches, :update_auto_push ]
+  before_action :set_task, only: [ :show, :destroy, :branches, :update_auto_push, :edit_description, :update_description ]
 
   def index
     @tasks = @project.tasks.kept.includes(:agent, :project)
@@ -83,6 +83,22 @@ class TasksController < ApplicationController
     end
   end
 
+  def edit_description
+    render partial: "tasks/description_form", locals: { task: @task }
+  end
+
+  def update_description
+    if @task.update(description_params)
+      flash.now[:notice] = "Description updated"
+      render turbo_stream: [
+        turbo_stream.replace("task_description", partial: "tasks/description", locals: { task: @task }),
+        turbo_stream.prepend("flash-messages", partial: "application/flash_messages")
+      ]
+    else
+      render partial: "tasks/description_form", status: :unprocessable_entity, locals: { task: @task }
+    end
+  end
+
   private
 
   def set_project
@@ -98,7 +114,11 @@ class TasksController < ApplicationController
   end
 
   def task_params
-    params.require(:task).permit(:agent_id, :project_id)
+    params.require(:task).permit(:agent_id, :project_id, :description)
+  end
+
+  def description_params
+    params.require(:task).permit(:description)
   end
 
   def auto_push_params

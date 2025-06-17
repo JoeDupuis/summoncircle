@@ -8,6 +8,11 @@
     <%= form.collection_select :agent_id, Agent.kept, :id, :name %>
   </div>
 
+  <div>
+    <%= form.label :description %><br>
+    <%= form.text_field :description %>
+  </div>
+
   <div data-controller="prompt">
     <%= form.label :prompt %><br>
     <%= form.text_area :prompt, data: { prompt_target: "textarea", action: "keydown->prompt#keydown" } %>
