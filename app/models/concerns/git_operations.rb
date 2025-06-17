@@ -13,7 +13,6 @@ module GitOperations
       command: "git clone #{repository_url} #{clone_target}",
       working_dir: task.workplace_mount.container_path,
       error_message: "Failed to clone repository",
-      with_credentials: true,
       skip_repo_path: true  # Clone operates from workspace root
     )
   end
@@ -36,8 +35,7 @@ module GitOperations
     run_git_command(
       task: task,
       command: push_commands,
-      error_message: "Failed to push changes",
-      with_credentials: true
+      error_message: "Failed to push changes"
     )
   end
 
@@ -97,7 +95,7 @@ module GitOperations
 
   private
 
-  def run_git_command(task:, command:, error_message:, return_logs: false, with_credentials: false, working_dir: nil, skip_repo_path: false)
+  def run_git_command(task:, command:, error_message:, return_logs: false, working_dir: nil, skip_repo_path: false)
     repo_path = task.project.repo_path.presence || ""
     working_dir ||= task.workplace_mount.container_path
     git_working_dir = if skip_repo_path
@@ -118,9 +116,7 @@ module GitOperations
       }
     }
 
-    if with_credentials
-      container_config = setup_git_credentials(container_config, task.user, task.project.repository_url)
-    end
+    container_config = setup_git_credentials(container_config, task.user, task.project.repository_url)
 
     git_container = Docker::Container.create(container_config)
     git_container.start
