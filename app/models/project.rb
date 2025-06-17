@@ -13,18 +13,6 @@ class Project < ApplicationRecord
     repository_url
   end
 
-  def repository_url_with_token(user)
-    return nil unless repository_url.present?
-    return repository_url unless user&.github_token.present?
-    return repository_url unless repository_url.include?("github.com")
-
-    uri = URI.parse(repository_url)
-    if uri.host == "github.com"
-      "https://#{user.github_token}@github.com#{uri.path}"
-    else
-      repository_url
-    end
-  end
 
   def update_secrets(secrets_hash)
     return unless secrets_hash.is_a?(Hash)
