@@ -81,7 +81,7 @@ builder:
   cache:
     type: registry
     options: mode=max
-    image: summoncircle-build-cache
+    image: joedupuis/summoncircle-build-cache
 
   # # Build image via remote server (useful for faster amd64 builds on arm64 computers)
   # remote: ssh://docker@docker-builder-server
