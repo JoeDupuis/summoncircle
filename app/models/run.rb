@@ -1,6 +1,6 @@
 class Run < ApplicationRecord
   include ActionView::RecordIdentifier
-  include GitCredentialHelper
+  include GitOperations
   belongs_to :task
   has_many :siblings, through: :task, source: :runs
   has_many :steps, -> { order(:id) }, dependent: :destroy
@@ -25,7 +25,7 @@ class Run < ApplicationRecord
 
     begin
       set_docker_host(task.agent.docker_host)
-      clone_repository if first_run? && should_clone_repository?
+      clone_repository(task) if first_run? && should_clone_repository?
       run_setup_script
 
       if task.agent.mcp_sse_endpoint.present? && first_run?
@@ -38,7 +38,7 @@ class Run < ApplicationRecord
 
       processor = task.agent.log_processor_class.new
       processor.process_container(container, self)
-      capture_repository_state
+      capture_repository_state(self)
       push_changes_if_enabled
       completed!
       broadcast_refresh_auto_push_form
@@ -120,88 +120,11 @@ class Run < ApplicationRecord
   end
 
 
-  def clone_repository
-    project = task.project
-    repo_path = project.repo_path.presence || ""
-    working_dir = task.workplace_mount.container_path
-    clone_target = repo_path.presence&.sub(/^\//, "") || "."
-    repository_url = project.repository_url
-
-    container_config = {
-      "Image" => task.agent.docker_image,
-      "Entrypoint" => [ "sh" ],
-      "Cmd" => [ "-c", "git clone #{repository_url} #{clone_target}" ],
-      "WorkingDir" => working_dir,
-      "User" => task.agent.user_id.to_s,
-      "HostConfig" => {
-        "Binds" => [ task.workplace_mount.bind_string ]
-      }
-    }
-
-    container_config = setup_git_credentials(container_config, task.user, project.repository_url)
-    git_container = Docker::Container.create(container_config)
-
-    git_container.start
-    wait_result = git_container.wait(300)
-    logs = git_container.logs(stdout: true, stderr: true)
-    clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
-    exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
-
-    if exit_code && exit_code != 0
-      raise "Failed to clone repository: #{clean_logs}"
-    end
-  rescue => e
-    raise "Git clone error: #{e.message} (#{e.class})"
-  ensure
-    git_container&.delete(force: true) if defined?(git_container)
-  end
 
   def should_clone_repository?
     task.project.repository_url.present?
   end
 
-  def capture_repository_state
-    return unless should_clone_repository?
-
-    project = task.project
-    repo_path = project.repo_path.presence || ""
-    working_dir = task.workplace_mount.container_path
-
-    git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
-
-    git_container = Docker::Container.create(
-      "Image" => task.agent.docker_image,
-      "Entrypoint" => [ "sh" ],
-      "Cmd" => [ "-c", "git add -N . && git diff HEAD --unified=10" ],
-      "WorkingDir" => git_working_dir,
-      "User" => task.agent.user_id.to_s,
-      "HostConfig" => {
-        "Binds" => [ task.workplace_mount.bind_string ]
-      }
-    )
-
-    git_container.start
-    wait_result = git_container.wait(300)
-    logs = git_container.logs(stdout: true, stderr: true)
-    uncommitted_diff = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
-
-    repo_state_step = steps.create!(
-      raw_response: "Repository state captured",
-      type: "Step::System",
-      content: "Repository state captured\n\nUncommitted diff:\n#{uncommitted_diff}"
-    )
-
-    if uncommitted_diff.present?
-      repo_state_step.repo_states.create!(
-        uncommitted_diff: uncommitted_diff,
-        repository_path: git_working_dir
-      )
-    end
-  rescue => e
-    Rails.logger.error "Failed to capture repository state: #{e.message}"
-  ensure
-    git_container&.delete(force: true) if defined?(git_container)
-  end
 
   def project_env_strings
     task.project.secrets.map { |secret| "#{secret.key}=#{secret.value}" }

@@ -1,0 +1,220 @@
+module GitOperations
+  extend ActiveSupport::Concern
+
+  def clone_repository(task = nil)
+    task ||= self.is_a?(Task) ? self : self.task
+    project = task.project
+    repo_path = project.repo_path.presence || ""
+    working_dir = task.workplace_mount.container_path
+    clone_target = repo_path.presence&.sub(/^\//, "") || "."
+    repository_url = project.repository_url
+
+    container_config = {
+      "Image" => task.agent.docker_image,
+      "Entrypoint" => [ "sh" ],
+      "Cmd" => [ "-c", "git clone #{repository_url} #{clone_target}" ],
+      "WorkingDir" => working_dir,
+      "User" => task.agent.user_id.to_s,
+      "HostConfig" => {
+        "Binds" => [ task.workplace_mount.bind_string ]
+      }
+    }
+
+    run_git_command(container_config, task.user, project.repository_url, "Failed to clone repository")
+  end
+
+  def push_changes_to_branch(commit_message = nil)
+    task = self.is_a?(Task) ? self : self.task
+    return unless task.auto_push_enabled? && task.auto_push_branch.present?
+    return unless task.project.repository_url.present?
+
+    repo_path = task.project.repo_path.presence || ""
+    working_dir = task.workplace_mount.container_path
+    git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
+
+    repository_url = task.project.repository_url
+    commit_message ||= "Manual push from SummonCircle"
+
+    push_commands = [
+      "git remote set-url origin '#{repository_url}'",
+      "git add -A",
+      "git diff --cached --quiet || git commit -m '#{commit_message}'",
+      "git push origin HEAD:#{task.auto_push_branch}"
+    ].join(" && ")
+
+    container_config = {
+      "Image" => task.agent.docker_image,
+      "Entrypoint" => [ "sh" ],
+      "Cmd" => [ "-c", push_commands ],
+      "WorkingDir" => git_working_dir,
+      "User" => task.agent.user_id.to_s,
+      "Env" => task.agent.env_strings + task.project.secrets.map { |s| "#{s.key}=#{s.value}" },
+      "HostConfig" => {
+        "Binds" => task.volume_mounts.includes(:volume).map(&:bind_string)
+      }
+    }
+
+    run_git_command(container_config, task.user, task.project.repository_url, "Failed to push changes")
+  end
+
+  def fetch_branches(task = nil)
+    task ||= self.is_a?(Task) ? self : self.task
+    return [] unless task.project.repository_url.present?
+
+    repo_path = task.project.repo_path.presence || ""
+    working_dir = task.workplace_mount.container_path
+    git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
+
+    container_config = {
+      "Image" => task.agent.docker_image,
+      "Entrypoint" => [ "sh" ],
+      "Cmd" => [ "-c", "git branch" ],
+      "WorkingDir" => git_working_dir,
+      "User" => task.agent.user_id.to_s,
+      "HostConfig" => {
+        "Binds" => [ task.workplace_mount.bind_string ]
+      }
+    }
+
+    begin
+      logs = run_git_command(container_config, nil, nil, "Failed to fetch branches", return_logs: true)
+      branches = logs.split("\n").map { |line| line.strip.gsub(/^\* /, "") }.reject(&:blank?)
+      branches.presence || []
+    rescue => e
+      Rails.logger.error "Failed to fetch branches: #{e.message}"
+      []
+    end
+  end
+
+  def capture_repository_state(run = nil)
+    run ||= self if self.is_a?(Run)
+    task = run.task
+    project = task.project
+    return nil unless project.repository_url.present?
+
+    repo_path = project.repo_path.presence || ""
+    working_dir = task.workplace_mount.container_path
+    git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
+
+    container_config = {
+      "Image" => task.agent.docker_image,
+      "Entrypoint" => [ "sh" ],
+      "Cmd" => [ "-c", "git add -N . && git diff HEAD --unified=10" ],
+      "WorkingDir" => git_working_dir,
+      "User" => task.agent.user_id.to_s,
+      "HostConfig" => {
+        "Binds" => [ task.workplace_mount.bind_string ]
+      }
+    }
+
+    begin
+      diff_output = run_git_command(container_config, nil, nil, "Failed to capture git diff", return_logs: true)
+      return nil if diff_output.blank?
+
+      repo_state_step = run.steps.create!(
+        raw_response: "Repository state captured",
+        type: "Step::System",
+        content: "Repository state captured\n\nUncommitted diff:\n#{diff_output}"
+      )
+
+      repo_state_step.repo_states.create!(
+        uncommitted_diff: diff_output,
+        repository_path: git_working_dir
+      )
+    rescue => e
+      Rails.logger.error "Failed to capture repository state: #{e.message}"
+      nil
+    end
+  end
+
+  private
+
+  def run_git_command(container_config, user, repository_url, error_message, return_logs: false)
+    container_config = setup_git_credentials(container_config, user, repository_url) if user && repository_url
+
+    git_container = Docker::Container.create(container_config)
+    git_container.start
+
+    wait_result = git_container.wait(300)
+    logs = git_container.logs(stdout: true, stderr: true)
+    clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
+    exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
+
+    if exit_code && exit_code != 0
+      raise "#{error_message}: #{clean_logs}"
+    end
+
+    return_logs ? clean_logs : nil
+  rescue => e
+    raise "Git operation error: #{e.message} (#{e.class})"
+  ensure
+    git_container&.delete(force: true) if defined?(git_container)
+  end
+
+  def setup_git_credentials(container_config, user, repository_url)
+    platform = git_platform_from_url(repository_url)
+    return container_config unless platform
+
+    platform_config = credentials_for(user, platform)
+    return container_config unless platform_config
+
+    container_config["Env"] ||= []
+    container_config["Env"] << "#{platform_config[:env_var]}=#{platform_config[:token]}"
+    container_config["Env"] << "GIT_ASKPASS=/tmp/git-askpass.sh"
+
+    container_config["Cmd"] = wrap_with_credential_setup(container_config["Cmd"], platform_config)
+    container_config
+  end
+
+  private
+
+  def git_platform_from_url(url)
+    return nil unless url.present?
+
+    case url
+    when /github\.com/
+      :github
+    else
+      nil
+    end
+  end
+
+  def credentials_for(user, platform)
+    case platform
+    when :github
+      return nil unless user&.github_token.present?
+      {
+        username: "x-access-token",
+        env_var: "GITHUB_TOKEN",
+        token: user.github_token
+      }
+    else
+      nil
+    end
+  end
+
+  def wrap_with_credential_setup(original_cmd, platform_config)
+    askpass_script = generate_askpass_script(platform_config)
+
+    setup_script = <<~BASH.strip
+      echo '#{askpass_script}' > /tmp/git-askpass.sh && \
+      chmod +x /tmp/git-askpass.sh
+    BASH
+
+    if original_cmd.is_a?(Array) && original_cmd[0] == "-c"
+      [ "-c", "#{setup_script} && #{original_cmd[1]}" ]
+    else
+      [ "-c", "#{setup_script} && #{Array(original_cmd).join(' ')}" ]
+    end
+  end
+
+  def generate_askpass_script(platform_config)
+    <<~BASH
+      #!/bin/sh
+      case "$1" in
+        Username*) echo "#{platform_config[:username]}" ;;
+        Password*) echo "$#{platform_config[:env_var]}" ;;
+      esac
+    BASH
+  end
+end
