@@ -7,6 +7,9 @@
     <% if run.completed_at %>
       | <strong>Completed:</strong> <%= run.completed_at.strftime("%Y-%m-%d %H:%M:%S") %>
     <% end %>
+    <% if run.total_cost > 0 %>
+      | <strong>Cost:</strong> $<%= "%.6f" % run.total_cost %>
+    <% end %>
   </p>
   <%= render "runs/tabs", run: run %>
 </div>
