@@ -368,13 +368,38 @@ class RunTest < ActiveSupport::TestCase
 
     run = task.runs.create!(prompt: "test", status: :pending)
 
-    # Mock git container creation for SSH clone
-    expect_git_clone_container(
-      log_output: "Cloning into '.'...",
-      cmd: [ "-c", "git clone git@github.com:test/repo.git ." ],
-      working_dir: "/workspace",
-      binds: instance_of(Array)
-    )
+    # Mock git container creation for SSH clone with wrapper script
+    git_container = mock("git_container")
+    git_container.expects(:start)
+    git_container.expects(:exec).with([ "mkdir", "-p", "/home/user/.ssh" ])
+    git_container.expects(:exec).with([ "sh", "-c", "echo 'LS0tLS1CRUdJTiBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0KdGVzdF9zc2hfa2V5Ci0tLS0tRU5EIE9QRU5TU0ggUFJJVkFURSBLRVktLS0tLQ==' | base64 -d > /home/user/.ssh/id_rsa" ])
+    git_container.expects(:exec).with([ "chmod", "600", "/home/user/.ssh/id_rsa" ])
+    git_container.expects(:exec).with([ "chmod", "700", "/home/user/.ssh" ])
+    git_container.expects(:wait).with(300).returns({ "StatusCode" => 0 })
+    git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning into '.'...")
+    git_container.expects(:delete).with(force: true)
+
+    # The actual command for SSH includes the wrapper script
+    ssh_clone_cmd = <<~BASH
+        cat > /tmp/git-ssh-wrapper.sh << 'EOF'
+#!/bin/sh
+ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$@"
+EOF
+        chmod +x /tmp/git-ssh-wrapper.sh
+        GIT_SSH=/tmp/git-ssh-wrapper.sh git clone git@github.com:test/repo.git .
+      BASH
+
+    Docker::Container.expects(:create).with(
+      has_entries(
+        "Image" => "example/image:latest",
+        "Entrypoint" => [ "sh" ],
+        "Cmd" => [ "-c", ssh_clone_cmd ],
+        "WorkingDir" => "/workspace",
+        "User" => "1000",
+        "Env" => [],
+        "HostConfig" => has_entries("Binds" => instance_of(Array))
+      )
+    ).returns(git_container)
 
     # Mock main container with SSH key mount verification
     main_container = mock("main_container")
@@ -400,7 +425,38 @@ class RunTest < ActiveSupport::TestCase
       )
     ).returns(main_container)
 
-    expect_git_diff_container
+    # Mock git diff container with SSH support
+    git_diff_container = mock("git_diff_container")
+    git_diff_container.expects(:start)
+    git_diff_container.expects(:exec).with([ "mkdir", "-p", "/home/user/.ssh" ])
+    git_diff_container.expects(:exec).with([ "sh", "-c", "echo 'LS0tLS1CRUdJTiBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0KdGVzdF9zc2hfa2V5Ci0tLS0tRU5EIE9QRU5TU0ggUFJJVkFURSBLRVktLS0tLQ==' | base64 -d > /home/user/.ssh/id_rsa" ])
+    git_diff_container.expects(:exec).with([ "chmod", "600", "/home/user/.ssh/id_rsa" ])
+    git_diff_container.expects(:exec).with([ "chmod", "700", "/home/user/.ssh" ])
+    git_diff_container.expects(:wait).with(300).returns({ "StatusCode" => 0 })
+    git_diff_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "diff --git...")
+    git_diff_container.expects(:delete).with(force: true)
+
+    # The actual command for SSH includes the wrapper script
+    ssh_diff_cmd = <<~BASH
+          cat > /tmp/git-ssh-wrapper.sh << 'EOF'
+#!/bin/sh
+ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$@"
+EOF
+          chmod +x /tmp/git-ssh-wrapper.sh
+          GIT_SSH=/tmp/git-ssh-wrapper.sh git add -N . && GIT_SSH=/tmp/git-ssh-wrapper.sh git diff HEAD --unified=10
+        BASH
+
+    Docker::Container.expects(:create).with(
+      has_entries(
+        "Image" => "example/image:latest",
+        "Entrypoint" => [ "sh" ],
+        "Cmd" => [ "-c", ssh_diff_cmd ],
+        "WorkingDir" => "/workspace",
+        "User" => "1000",
+        "Env" => [],
+        "HostConfig" => has_entries("Binds" => instance_of(Array))
+      )
+    ).returns(git_diff_container)
 
     run.execute!
 

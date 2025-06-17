@@ -263,21 +263,21 @@ EOF
   def setup_ssh_key_in_container(container, task)
     agent = task.agent
     user = task.user
-    
+
     return unless user.ssh_key.present? && agent.ssh_mount_path.present?
-    
+
     encoded_content = Base64.strict_encode64(user.ssh_key)
     target_dir = File.dirname(agent.ssh_mount_path)
-    
+
     # Create .ssh directory
-    container.exec(["mkdir", "-p", target_dir])
-    
+    container.exec([ "mkdir", "-p", target_dir ])
+
     # Write SSH key
-    container.exec(["sh", "-c", "echo '#{encoded_content}' | base64 -d > #{agent.ssh_mount_path}"])
-    
+    container.exec([ "sh", "-c", "echo '#{encoded_content}' | base64 -d > #{agent.ssh_mount_path}" ])
+
     # Set permissions
-    container.exec(["chmod", "600", agent.ssh_mount_path])
-    container.exec(["chmod", "700", target_dir])
+    container.exec([ "chmod", "600", agent.ssh_mount_path ])
+    container.exec([ "chmod", "700", target_dir ])
   rescue => e
     Rails.logger.error "Failed to setup SSH key in container: #{e.message}"
   end
