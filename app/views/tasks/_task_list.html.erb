@@ -1,7 +1,7 @@
 <ul>
   <% @tasks.each do |task| %>
     <li>
-      <%= link_to "Task ##{task.id}: #{task.description.presence || 'No description'}", task_path(task) %>
+      <%= link_to "##{task.id}: #{task.description.presence || 'No description'}", task_path(task) %>
       <% unless @project %>
         - <%= task.project.name %>
       <% end %>
