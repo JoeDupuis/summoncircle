@@ -126,4 +126,8 @@ if Rails.env.development?
   Project.find_or_create_by!(name: "Shenanigans") do |project|
     project.repository_url = "https://github.com/JoeDupuis/shenanigans"
   end
+
+  Project.find_or_create_by!(name: "SSHenanigans") do |project|
+    project.repository_url = "git@github.com:JoeDupuis/shenanigans.git"
+  end
 end

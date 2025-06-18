@@ -8,19 +8,7 @@ module GitOperations
     clone_target = repo_path.presence&.sub(/^\//, "") || "."
     repository_url = project.repository_url
 
-    command = if repository_url.match?(/\Agit@|ssh:\/\//)
-      # For SSH URLs, create a wrapper script to handle SSH configuration
-      <<~BASH
-        cat > /tmp/git-ssh-wrapper.sh << 'EOF'
-#!/bin/sh
-ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$@"
-EOF
-        chmod +x /tmp/git-ssh-wrapper.sh
-        GIT_SSH=/tmp/git-ssh-wrapper.sh git clone #{repository_url} #{clone_target}
-      BASH
-    else
-      "git clone #{repository_url} #{clone_target}"
-    end
+    command = "git clone #{repository_url} #{clone_target}"
 
     run_git_command(
       task: task,
@@ -39,35 +27,12 @@ EOF
     repository_url = task.project.repository_url
     commit_message ||= "Manual push from SummonCircle"
 
-    # Add SSH command configuration for SSH URLs
-    ssh_setup = if repository_url.match?(/\Agit@|ssh:\/\//)
-      <<~BASH
-        cat > /tmp/git-ssh-wrapper.sh << 'EOF'
-#!/bin/sh
-ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$@"
-EOF
-        chmod +x /tmp/git-ssh-wrapper.sh && export GIT_SSH=/tmp/git-ssh-wrapper.sh
-      BASH
-    else
-      ""
-    end
-
-    push_commands = if repository_url.match?(/\Agit@|ssh:\/\//)
-      [
-        ssh_setup.strip,
-        "git remote set-url origin '#{repository_url}'",
-        "git add -A",
-        "git diff --cached --quiet || git commit -m '#{commit_message}'",
-        "git push origin HEAD:#{task.auto_push_branch}"
-      ].join(" && ")
-    else
-      [
-        "git remote set-url origin '#{repository_url}'",
-        "git add -A",
-        "git diff --cached --quiet || git commit -m '#{commit_message}'",
-        "git push origin HEAD:#{task.auto_push_branch}"
-      ].join(" && ")
-    end
+    push_commands = [
+      "git remote set-url origin '#{repository_url}'",
+      "git add -A",
+      "git diff --cached --quiet || git commit -m '#{commit_message}'",
+      "git push origin HEAD:#{task.auto_push_branch}"
+    ].join(" && ")
 
     run_git_command(
       task: task,
@@ -102,19 +67,7 @@ EOF
     return nil unless project.repository_url.present?
 
     begin
-      # Add SSH configuration for SSH URLs when needed
-      command = if project.repository_url.match?(/\Agit@|ssh:\/\//)
-        <<~BASH
-          cat > /tmp/git-ssh-wrapper.sh << 'EOF'
-#!/bin/sh
-ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$@"
-EOF
-          chmod +x /tmp/git-ssh-wrapper.sh
-          GIT_SSH=/tmp/git-ssh-wrapper.sh git add -N . && GIT_SSH=/tmp/git-ssh-wrapper.sh git diff HEAD --unified=10
-        BASH
-      else
-        "git add -N . && git diff HEAD --unified=10"
-      end
+      command = "git add -N . && git diff HEAD --unified=10"
 
       diff_output = run_git_command(
         task: task,

@@ -379,21 +379,11 @@ class RunTest < ActiveSupport::TestCase
     git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning into '.'...")
     git_container.expects(:delete).with(force: true)
 
-    # The actual command for SSH includes the wrapper script
-    ssh_clone_cmd = <<~BASH
-        cat > /tmp/git-ssh-wrapper.sh << 'EOF'
-#!/bin/sh
-ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$@"
-EOF
-        chmod +x /tmp/git-ssh-wrapper.sh
-        GIT_SSH=/tmp/git-ssh-wrapper.sh git clone git@github.com:test/repo.git .
-      BASH
-
     Docker::Container.expects(:create).with(
       has_entries(
         "Image" => "example/image:latest",
         "Entrypoint" => [ "sh" ],
-        "Cmd" => [ "-c", ssh_clone_cmd ],
+        "Cmd" => [ "-c", "git clone git@github.com:test/repo.git ." ],
         "WorkingDir" => "/workspace",
         "User" => "1000",
         "Env" => [],
@@ -436,21 +426,11 @@ EOF
     git_diff_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "diff --git...")
     git_diff_container.expects(:delete).with(force: true)
 
-    # The actual command for SSH includes the wrapper script
-    ssh_diff_cmd = <<~BASH
-          cat > /tmp/git-ssh-wrapper.sh << 'EOF'
-#!/bin/sh
-ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$@"
-EOF
-          chmod +x /tmp/git-ssh-wrapper.sh
-          GIT_SSH=/tmp/git-ssh-wrapper.sh git add -N . && GIT_SSH=/tmp/git-ssh-wrapper.sh git diff HEAD --unified=10
-        BASH
-
     Docker::Container.expects(:create).with(
       has_entries(
         "Image" => "example/image:latest",
         "Entrypoint" => [ "sh" ],
-        "Cmd" => [ "-c", ssh_diff_cmd ],
+        "Cmd" => [ "-c", "git add -N . && git diff HEAD --unified=10" ],
         "WorkingDir" => "/workspace",
         "User" => "1000",
         "Env" => [],

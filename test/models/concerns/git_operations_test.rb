@@ -75,9 +75,7 @@ class GitOperationsTest < ActiveSupport::TestCase
     run = task.runs.create!(prompt: "test")
 
     Docker::Container.expects(:create).with do |config|
-      assert_match(/git-ssh-wrapper\.sh/, config["Cmd"][1])
-      assert_match(/StrictHostKeyChecking=no/, config["Cmd"][1])
-      assert_match(/git clone git@github\.com:JoeDupuis\/shenanigans\.git/, config["Cmd"][1])
+      assert_equal "git clone git@github.com:JoeDupuis/shenanigans.git .", config["Cmd"][1]
       env = config["Env"] || []
       refute_includes env, "GITHUB_TOKEN="
       refute_includes env, "GIT_ASKPASS=/tmp/git-askpass.sh"
@@ -99,8 +97,6 @@ class GitOperationsTest < ActiveSupport::TestCase
 
     Docker::Container.expects(:create).with do |config|
       assert_match(/git remote set-url origin 'git@github\.com:JoeDupuis\/shenanigans\.git'/, config["Cmd"][1])
-      assert_match(/git-ssh-wrapper\.sh/, config["Cmd"][1])
-      assert_match(/StrictHostKeyChecking=no/, config["Cmd"][1])
       assert_match(/git push/, config["Cmd"][1])
       env = config["Env"] || []
       refute_includes env, "GITHUB_TOKEN="
