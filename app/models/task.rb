@@ -11,6 +11,8 @@ class Task < ApplicationRecord
   after_create :create_volume_mounts
   before_validation :set_default_description, on: :create
 
+  validates :description, presence: true
+
   def run(prompt)
     run = runs.create!(prompt: prompt)
     RunJob.perform_later(run.id)

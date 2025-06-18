@@ -22,6 +22,11 @@ export default class extends Controller {
   save() {
     const value = this.inputTarget.value.trim()
     
+    if (value === "") {
+      this.cancel()
+      return
+    }
+    
     if (value === this.displayTarget.textContent.trim()) {
       this.cancel()
       return
