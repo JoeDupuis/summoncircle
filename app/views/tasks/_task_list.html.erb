@@ -1,12 +1,12 @@
 <ul>
   <% @tasks.each do |task| %>
     <li>
-      <%= link_to "Task ##{task.id}", task_path(task) %> -
+      <%= link_to task.description.presence || "Task ##{task.id}", task_path(task) %> -
       <%= task.agent.name %>
       <% unless @project %>
         in <%= task.project.name %>
-        (<%= task.created_at.strftime("%m/%d %H:%M") %>)
       <% end %>
+      (<%= task.created_at.strftime("%m/%d %H:%M") %>)
     </li>
   <% end %>
 </ul>
