@@ -1,15 +1,8 @@
-<div class="inline-edit" data-controller="inline-edit" 
-     data-inline-edit-url-value="<%= task_path(@task) %>"
-     data-inline-edit-attribute-value="description"
-     data-inline-edit-model-value="task">
+<div class="inline-edit">
   <h1>
-    <span data-inline-edit-target="display" data-action="click->inline-edit#startEdit" style="cursor: pointer;">
-      <%= @task.description.presence || "Task ##{@task.id}" %>
-    </span>
-    <div data-inline-edit-target="edit" class="form _hidden">
-      <input type="text" data-inline-edit-target="input" data-action="keydown->inline-edit#keydown" class="input">
-      <button data-inline-edit-target="saveButton" data-action="click->inline-edit#save" class="save">Save</button>
-    </div>
+    <%= turbo_frame_tag "task_#{@task.id}_description" do %>
+      <%= link_to @task.description.presence || "Task ##{@task.id}", edit_task_path(@task), style: "cursor: pointer; text-decoration: none; color: inherit;" %>
+    <% end %>
   </h1>
 </div>
 
