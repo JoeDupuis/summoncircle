@@ -1,4 +1,4 @@
-<div data-controller="inline-edit" 
+<div class="inline-edit" data-controller="inline-edit" 
      data-inline-edit-url-value="<%= task_path(@task) %>"
      data-inline-edit-attribute-value="description"
      data-inline-edit-model-value="task">
@@ -6,9 +6,9 @@
     <span data-inline-edit-target="display" data-action="click->inline-edit#startEdit" style="cursor: pointer;">
       <%= @task.description.presence || "Task ##{@task.id}" %>
     </span>
-    <div data-inline-edit-target="edit" class="hidden inline-edit-form">
-      <input type="text" data-inline-edit-target="input" data-action="keydown->inline-edit#keydown" class="inline-edit-input">
-      <button data-inline-edit-target="saveButton" data-action="click->inline-edit#save" class="inline-edit-save">Save</button>
+    <div data-inline-edit-target="edit" class="form hidden">
+      <input type="text" data-inline-edit-target="input" data-action="keydown->inline-edit#keydown" class="input">
+      <button data-inline-edit-target="saveButton" data-action="click->inline-edit#save" class="save">Save</button>
     </div>
   </h1>
 </div>

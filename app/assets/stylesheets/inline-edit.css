@@ -1,10 +1,10 @@
-.inline-edit-form {
+.inline-edit > .form {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.inline-edit-input {
+.inline-edit > .form > .input {
   font-size: inherit;
   font-weight: inherit;
   font-family: inherit;
@@ -17,7 +17,7 @@
   height: 2.5rem;
 }
 
-.inline-edit-save {
+.inline-edit > .form > .save {
   font-size: 0.5em;
   font-weight: normal;
   font-family: inherit;
@@ -32,27 +32,27 @@
   height: 2.5rem;
 }
 
-.inline-edit-save:hover {
+.inline-edit > .form > .save:hover {
   background-color: #0052cc;
 }
 
-.inline-edit-save:disabled {
+.inline-edit > .form > .save:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
 @media (prefers-color-scheme: dark) {
-  .inline-edit-input {
+  .inline-edit > .form > .input {
     background-color: #2d3748;
     border-color: #4a5568;
     color: #e2e8f0;
   }
   
-  .inline-edit-save {
+  .inline-edit > .form > .save {
     background-color: #2563eb;
   }
   
-  .inline-edit-save:hover {
+  .inline-edit > .form > .save:hover {
     background-color: #1d4ed8;
   }
 }
