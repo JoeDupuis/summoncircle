@@ -1,11 +1,11 @@
-.inline-edit > .form {
+.inline-edit .form {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   font-size: 0.5em;
 }
 
-.inline-edit > .form > .input {
+.inline-edit .form > .input {
   font-size: inherit;
   font-weight: inherit;
   font-family: inherit;
@@ -17,7 +17,7 @@
   box-sizing: border-box;
 }
 
-.inline-edit > .form > .save {
+.inline-edit .form > .save {
   font-size: inherit;
   font-weight: normal;
   font-family: inherit;
@@ -30,27 +30,27 @@
   box-sizing: border-box;
 }
 
-.inline-edit > .form > .save:hover {
+.inline-edit .form > .save:hover {
   background-color: #0052cc;
 }
 
-.inline-edit > .form > .save:disabled {
+.inline-edit .form > .save:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
 @media (prefers-color-scheme: dark) {
-  .inline-edit > .form > .input {
+  .inline-edit .form > .input {
     background-color: #2d3748;
     border-color: #4a5568;
     color: #e2e8f0;
   }
   
-  .inline-edit > .form > .save {
+  .inline-edit .form > .save {
     background-color: #2563eb;
   }
   
-  .inline-edit > .form > .save:hover {
+  .inline-edit .form > .save:hover {
     background-color: #1d4ed8;
   }
 }
