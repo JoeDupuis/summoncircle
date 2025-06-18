@@ -50,27 +50,6 @@ class ProjectTest < ActiveSupport::TestCase
     end
   end
 
-  test "safe_repository_url returns URL for valid URLs" do
-    project = Project.new(name: "Example")
-
-    valid_urls = [
-      "https://github.com/user/repo.git",
-      "http://github.com/user/repo.git",
-      "git@github.com:JoeDupuis/shenanigans.git",
-      "ssh://git@github.com:JoeDupuis/shenanigans.git"
-    ]
-
-    valid_urls.each do |url|
-      project.repository_url = url
-      assert_equal url, project.safe_repository_url, "Expected safe_repository_url to return #{url}"
-    end
-  end
-
-  test "safe_repository_url returns nil for invalid URLs" do
-    project = Project.new(name: "Example", repository_url: "ftp://example.com/repo.git")
-    assert_nil project.safe_repository_url
-  end
-
   test "repo_path can be nil" do
     project = Project.new(name: "Example", repository_url: "https://example.com/repo.git")
     assert project.valid?

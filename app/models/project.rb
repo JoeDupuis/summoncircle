@@ -6,14 +6,6 @@ class Project < ApplicationRecord
   validates :name, presence: true
   validate :valid_repository_url
 
-  def safe_repository_url
-    return nil unless repository_url.present?
-    return nil unless valid_git_url?(repository_url)
-
-    repository_url
-  end
-
-
   def update_secrets(secrets_hash)
     return unless secrets_hash.is_a?(Hash)
 
