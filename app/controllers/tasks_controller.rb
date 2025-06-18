@@ -49,12 +49,12 @@ class TasksController < ApplicationController
     if @task.update(task_update_params)
       respond_to do |format|
         format.html { redirect_to @task, notice: "Task was successfully updated." }
-        format.turbo_stream { render partial: "tasks/description", locals: { task: @task } }
+        format.turbo_stream { render partial: "tasks/description", locals: { task: @task }, formats: [:html] }
       end
     else
       respond_to do |format|
         format.html { render :edit, status: :unprocessable_entity }
-        format.turbo_stream { render partial: "tasks/edit_form", locals: { task: @task }, status: :unprocessable_entity }
+        format.turbo_stream { render partial: "tasks/edit_form", locals: { task: @task }, status: :unprocessable_entity, formats: [:html] }
       end
     end
   end
