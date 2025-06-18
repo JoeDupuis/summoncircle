@@ -60,7 +60,13 @@ class TasksController < ApplicationController
     else
       respond_to do |format|
         format.html { render :edit, status: :unprocessable_entity }
-        format.turbo_stream { render :edit, status: :unprocessable_entity }
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace(
+            "task_#{@task.id}_description",
+            partial: "tasks/edit_form",
+            locals: { task: @task }
+          )
+        end
       end
     end
   end
