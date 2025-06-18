@@ -22,16 +22,16 @@
   font-weight: normal;
   font-family: inherit;
   padding: 0.2rem 0.5rem;
-  background-color: #0066cc;
-  color: white;
-  border: 1px solid #0066cc;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border: 1px solid var(--color-primary);
   border-radius: 4px;
   cursor: pointer;
   box-sizing: border-box;
 }
 
 .inline-edit h1 .form > .save:hover {
-  background-color: #0052cc;
+  background-color: var(--color-primary-hover);
 }
 
 .inline-edit h1 .form > .save:disabled {
@@ -47,10 +47,10 @@
   }
   
   .inline-edit h1 .form > .save {
-    background-color: #2563eb;
+    background-color: var(--color-primary-dark);
   }
   
   .inline-edit h1 .form > .save:hover {
-    background-color: #1d4ed8;
+    background-color: var(--color-primary-dark-hover);
   }
 }
