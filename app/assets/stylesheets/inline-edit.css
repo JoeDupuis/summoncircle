@@ -2,6 +2,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  font-size: 0.5em;
 }
 
 .inline-edit > .form > .input {
@@ -17,7 +18,7 @@
 }
 
 .inline-edit > .form > .save {
-  font-size: 0.5em;
+  font-size: inherit;
   font-weight: normal;
   font-family: inherit;
   padding: 0.2rem 0.5rem;
