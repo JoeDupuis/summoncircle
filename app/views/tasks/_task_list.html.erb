@@ -7,6 +7,15 @@
         in <%= task.project.name %>
         (<%= task.created_at.strftime("%m/%d %H:%M") %>)
       <% end %>
+      <% description_text = task.description.present? ? task.description : task.project.description %>
+      <% if description_text.present? %>
+        <div class="task-description">
+          <%= truncate(description_text, length: 100) %>
+          <% unless task.description.present? %>
+            <small>(project description)</small>
+          <% end %>
+        </div>
+      <% end %>
     </li>
   <% end %>
 </ul>

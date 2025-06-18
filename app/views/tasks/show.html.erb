@@ -6,6 +6,10 @@
   <p>Total Cost: $<%= "%.6f" % @task.total_cost %></p>
 <% end %>
 
+<%= turbo_frame_tag "task_description_#{@task.id}" do %>
+  <%= render "tasks/description_display", task: @task %>
+<% end %>
+
 <div data-controller="tabs" class="codex-layout">
   <%= turbo_stream_from @task %>
   <div class="nav">

@@ -1,0 +1,12 @@
+<%= form_with model: task, url: task_path(task), method: :patch, local: false do |form| %>
+  <div>
+    <%= form.text_area :description, 
+        placeholder: task.project.description.present? ? task.project.description : "Enter task description...",
+        rows: 4,
+        style: "width: 100%; margin-top: 5px;" %>
+    <div style="margin-top: 5px;">
+      <%= form.submit "Save", class: "btn btn-primary" %>
+      <button type="button" data-action="click->display-toggle#showDisplay" class="btn btn-secondary">Cancel</button>
+    </div>
+  </div>
+<% end %>

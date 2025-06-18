@@ -63,3 +63,72 @@ body.tasks.show .log-panel {
 body.tasks.show .task-actions {
   margin: 1rem;
 }
+
+/* Task description styles */
+body.tasks.show .task-description {
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid #007bff;
+}
+
+body.tasks.show .task-description .fallback-description {
+  color: #6c757d;
+  font-style: italic;
+}
+
+body.tasks.show .task-description .no-description {
+  color: #6c757d;
+  font-style: italic;
+}
+
+body.tasks.show .task-description small {
+  color: #6c757d;
+  font-size: 0.8em;
+}
+
+body.tasks.show .task-description button {
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8em;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+body.tasks.show .task-description button:hover {
+  background-color: #f8f9fa;
+}
+
+body.tasks.show .task-description textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+body.tasks.show .task-description .btn {
+  margin-right: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+body.tasks.show .task-description .btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: #fff;
+}
+
+body.tasks.show .task-description .btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: #fff;
+}

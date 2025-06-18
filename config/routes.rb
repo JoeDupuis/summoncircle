@@ -10,7 +10,7 @@ Rails.application.routes.draw do
     end
   end
   resources :projects do
-    resources :tasks, shallow: true do
+    resources :tasks, shallow: true, except: [:edit] do
       member do
         get :branches
         patch :update_auto_push

@@ -8,3 +8,19 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+/* Task list description styles */
+.task-description {
+  margin: 0.25rem 0;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.9em;
+  color: #666;
+  background-color: #f8f9fa;
+  border-radius: 3px;
+  border-left: 2px solid #dee2e6;
+}
+
+.task-description small {
+  color: #999;
+  font-size: 0.8em;
+}

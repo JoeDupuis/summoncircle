@@ -1,6 +1,6 @@
 class TasksController < ApplicationController
   before_action :set_project
-  before_action :set_task, only: [ :show, :destroy, :branches, :update_auto_push ]
+  before_action :set_task, only: [ :show, :update, :destroy, :branches, :update_auto_push ]
 
   def index
     @tasks = @project.tasks.kept.includes(:agent, :project)
@@ -39,6 +39,18 @@ class TasksController < ApplicationController
         @agents = Agent.kept
         render "dashboard/index", status: :unprocessable_entity
       end
+    end
+  end
+
+  def update
+    if @task.update(task_params)
+      render turbo_stream: turbo_stream.replace("task_description_#{@task.id}", 
+                                                partial: "tasks/description_display", 
+                                                locals: { task: @task })
+    else
+      render turbo_stream: turbo_stream.replace("task_description_#{@task.id}", 
+                                                partial: "tasks/description_edit", 
+                                                locals: { task: @task })
     end
   end
 
@@ -98,7 +110,7 @@ class TasksController < ApplicationController
   end
 
   def task_params
-    params.require(:task).permit(:agent_id, :project_id)
+    params.require(:task).permit(:agent_id, :project_id, :description)
   end
 
   def auto_push_params

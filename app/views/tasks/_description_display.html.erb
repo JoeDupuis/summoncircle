@@ -1,0 +1,17 @@
+<div data-controller="display-toggle">
+  <strong>Description:</strong>
+  <div data-display-toggle-target="display">
+    <% if task.description.present? %>
+      <p><%= simple_format(task.description) %></p>
+    <% elsif task.project.description.present? %>
+      <p class="fallback-description"><%= simple_format(task.project.description) %></p>
+      <small>(Using project description)</small>
+    <% else %>
+      <p class="no-description">No description set</p>
+    <% end %>
+    <button data-action="click->display-toggle#showEdit" class="btn btn-sm">Edit</button>
+  </div>
+  <div data-display-toggle-target="edit" style="display: none;">
+    <%= render "tasks/description_edit", task: task %>
+  </div>
+</div>
