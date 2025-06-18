@@ -3,7 +3,7 @@ class TasksController < ApplicationController
   before_action :set_task, only: [ :show, :edit, :update, :destroy, :branches, :update_auto_push ]
 
   def index
-    @tasks = @project.tasks.kept.includes(:agent, :project)
+    @tasks = @project.tasks.kept.includes(:agent, :project).order(created_at: :desc)
   end
 
   def show
