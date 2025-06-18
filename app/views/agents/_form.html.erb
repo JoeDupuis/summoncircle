@@ -93,7 +93,7 @@
 
   <div>
     <h3>Agent-Specific Settings</h3>
-    <% current_setting = agent.agent_specific_settings.first || agent.agent_specific_settings.detect(&:new_record?) %>
+    <% current_setting = agent.agent_specific_settings.first %>
     
     <div>
       <%= form.label :agent_specific_setting_type, "Agent Type:" %><br>
