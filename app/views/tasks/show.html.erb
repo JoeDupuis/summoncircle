@@ -6,10 +6,9 @@
     <span data-inline-edit-target="display" data-action="click->inline-edit#startEdit" style="cursor: pointer;">
       <%= @task.description.presence || "Task ##{@task.id}" %>
     </span>
-    <div data-inline-edit-target="edit" class="hidden">
-      <input type="text" data-inline-edit-target="input" data-action="keydown->inline-edit#keydown" style="font-size: inherit; font-weight: inherit;">
-      <button data-inline-edit-target="saveButton" data-action="click->inline-edit#save">Save</button>
-      <button data-inline-edit-target="cancelButton" data-action="click->inline-edit#cancel">Cancel</button>
+    <div data-inline-edit-target="edit" class="hidden inline-edit-form">
+      <input type="text" data-inline-edit-target="input" data-action="keydown->inline-edit#keydown" class="inline-edit-input">
+      <button data-inline-edit-target="saveButton" data-action="click->inline-edit#save" class="inline-edit-save">Save</button>
     </div>
   </h1>
 </div>

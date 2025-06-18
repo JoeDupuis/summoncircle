@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["display", "edit", "input", "cancelButton", "saveButton"]
+  static targets = ["display", "edit", "input", "saveButton"]
   static values = { 
     url: String,
     attribute: String,
@@ -83,11 +83,9 @@ export default class extends Controller {
 
   disableButtons() {
     this.saveButtonTarget.disabled = true
-    this.cancelButtonTarget.disabled = true
   }
 
   enableButtons() {
     this.saveButtonTarget.disabled = false
-    this.cancelButtonTarget.disabled = false
   }
 }
