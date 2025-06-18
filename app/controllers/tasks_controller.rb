@@ -1,6 +1,6 @@
 class TasksController < ApplicationController
   before_action :set_project
-  before_action :set_task, only: [ :show, :destroy, :branches, :update_auto_push ]
+  before_action :set_task, only: [ :show, :edit, :update, :destroy, :branches, :update_auto_push ]
 
   def index
     @tasks = @project.tasks.kept.includes(:agent, :project)
@@ -39,6 +39,17 @@ class TasksController < ApplicationController
         @agents = Agent.kept
         render "dashboard/index", status: :unprocessable_entity
       end
+    end
+  end
+
+  def edit
+  end
+
+  def update
+    if @task.update(task_update_params)
+      redirect_to @task, notice: "Task was successfully updated."
+    else
+      render :edit, status: :unprocessable_entity
     end
   end
 
@@ -99,6 +110,10 @@ class TasksController < ApplicationController
 
   def task_params
     params.require(:task).permit(:agent_id, :project_id)
+  end
+
+  def task_update_params
+    params.require(:task).permit(:description)
   end
 
   def auto_push_params

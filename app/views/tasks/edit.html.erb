@@ -1,0 +1,6 @@
+<%= turbo_frame_tag "task_#{@task.id}_description" do %>
+  <%= form_with(model: @task, url: task_path(@task), class: "form") do |form| %>
+    <%= form.text_field :description, value: @task.description, class: "input", autofocus: true %>
+    <%= form.submit "Save", class: "save" %>
+  <% end %>
+<% end %>

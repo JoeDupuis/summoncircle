@@ -1,4 +1,8 @@
-<h1>Task <%= @task.id %></h1>
+<div class="inline-edit">
+  <h1>
+    <%= render "description", task: @task %>
+  </h1>
+</div>
 
 <p>Agent: <%= @task.agent.name %></p>
 <p>Project: <%= @task.project.name %></p>
