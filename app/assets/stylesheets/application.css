@@ -9,6 +9,6 @@
  * Consider organizing styles into separate files for maintainability.
  */
 
-.hidden {
+._hidden {
   display: none !important;
 }

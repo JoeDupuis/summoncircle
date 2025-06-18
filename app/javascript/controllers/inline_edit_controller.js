@@ -72,13 +72,13 @@ export default class extends Controller {
   }
 
   showEditMode() {
-    this.displayTarget.classList.add("hidden")
-    this.editTarget.classList.remove("hidden")
+    this.displayTarget.classList.add("_hidden")
+    this.editTarget.classList.remove("_hidden")
   }
 
   hideEditMode() {
-    this.displayTarget.classList.remove("hidden")
-    this.editTarget.classList.add("hidden")
+    this.displayTarget.classList.remove("_hidden")
+    this.editTarget.classList.add("_hidden")
   }
 
   disableButtons() {

@@ -6,7 +6,7 @@
     <span data-inline-edit-target="display" data-action="click->inline-edit#startEdit" style="cursor: pointer;">
       <%= @task.description.presence || "Task ##{@task.id}" %>
     </span>
-    <div data-inline-edit-target="edit" class="form hidden">
+    <div data-inline-edit-target="edit" class="form _hidden">
       <input type="text" data-inline-edit-target="input" data-action="keydown->inline-edit#keydown" class="input">
       <button data-inline-edit-target="saveButton" data-action="click->inline-edit#save" class="save">Save</button>
     </div>
