@@ -106,4 +106,47 @@ class AgentsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to agents_path
     assert @agent.reload.discarded?
   end
+
+  test "cloning agent with agent_specific_settings" do
+    login @user
+    
+    # Create source agent with agent specific setting
+    source_agent = Agent.create!(
+      name: "Source Agent",
+      docker_image: "test:latest",
+      workplace_path: "/workspace",
+      user_id: 1000
+    )
+    source_agent.agent_specific_settings.create!(type: "ClaudeOauthSetting")
+    
+    # Visit new agent page with source_id parameter (cloning)
+    get new_agent_url(source_id: source_agent.id)
+    assert_response :success
+    
+    # Create cloned agent
+    assert_difference("Agent.count") do
+      assert_difference("AgentSpecificSetting.count") do
+        post agents_url, params: { 
+          agent: { 
+            name: "Copy of Source Agent",
+            docker_image: "test:latest",
+            workplace_path: "/workspace",
+            agent_specific_setting_type: "ClaudeOauthSetting",
+            agent_specific_settings_attributes: {
+              "0" => {
+                type: "ClaudeOauthSetting",
+                _destroy: "false"
+              }
+            }
+          }
+        }
+      end
+    end
+    
+    cloned_agent = Agent.last
+    assert_redirected_to agent_path(cloned_agent)
+    assert_equal "Copy of Source Agent", cloned_agent.name
+    assert_equal 1, cloned_agent.agent_specific_settings.count
+    assert_equal "ClaudeOauthSetting", cloned_agent.agent_specific_settings.first.type
+  end
 end

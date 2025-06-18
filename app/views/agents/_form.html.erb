@@ -93,7 +93,7 @@
 
   <div>
     <h3>Agent-Specific Settings</h3>
-    <% current_setting = agent.agent_specific_settings.first %>
+    <% current_setting = agent.agent_specific_settings.first || agent.agent_specific_settings.detect(&:new_record?) %>
     
     <div>
       <%= form.label :agent_specific_setting_type, "Agent Type:" %><br>
@@ -105,7 +105,10 @@
     
     <% if current_setting %>
       <%= form.fields_for :agent_specific_settings, current_setting do |setting_form| %>
-        <%= setting_form.hidden_field :id %>
+        <% if current_setting.persisted? %>
+          <%= setting_form.hidden_field :id %>
+        <% end %>
+        <%= setting_form.hidden_field :type %>
         <%= setting_form.hidden_field :_destroy, value: false %>
       <% end %>
     <% end %>
