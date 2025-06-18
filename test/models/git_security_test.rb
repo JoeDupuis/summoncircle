@@ -53,6 +53,48 @@ class GitSecurityTest < ActiveSupport::TestCase
     task.push_changes_to_branch
   end
 
+  test "SSH URLs are preserved exactly as provided" do
+    task = tasks(:without_runs)
+    user = task.user
+    user.update!(ssh_key: "ssh-rsa AAAAB3NzaC1...")
+
+    project = task.project
+    project.update!(repository_url: "git@github.com:JoeDupuis/shenanigans.git")
+
+    run = task.runs.create!(prompt: "test")
+
+    Docker::Container.expects(:create).with do |config|
+      cmd = config["Cmd"][1]
+      assert_match(/git clone git@github\.com:JoeDupuis\/shenanigans\.git/, cmd)
+      refute_match(/ssh-rsa/, cmd)
+      true
+    end.returns(mock_container)
+
+    run.send(:clone_repository)
+  end
+
+  test "SSH key is not exposed in git commands" do
+    task = tasks(:without_runs)
+    user = task.user
+    ssh_key = "-----BEGIN OPENSSH PRIVATE KEY-----\nsecret_ssh_key_content\n-----END OPENSSH PRIVATE KEY-----"
+    user.update!(ssh_key: ssh_key)
+
+    project = task.project
+    project.update!(repository_url: "git@github.com:JoeDupuis/shenanigans.git")
+
+    task.update!(auto_push_enabled: true, auto_push_branch: "main")
+    task.workplace_mount
+
+    Docker::Container.expects(:create).with do |config|
+      cmd = config["Cmd"][1]
+      refute_match(/secret_ssh_key_content/, cmd)
+      refute_match(/BEGIN OPENSSH PRIVATE KEY/, cmd)
+      true
+    end.returns(mock_container)
+
+    task.push_changes_to_branch
+  end
+
 
   private
 

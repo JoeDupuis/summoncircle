@@ -355,6 +355,95 @@ class RunTest < ActiveSupport::TestCase
     assert_equal 4, run.steps.count
   end
 
+  test "execute! clones SSH repository with SSH key on first run" do
+    task = tasks(:for_repo_clone)
+    agent = task.agent
+    agent.update!(ssh_mount_path: "/home/user/.ssh/id_rsa")
+
+    user = task.user
+    user.update!(ssh_key: "-----BEGIN OPENSSH PRIVATE KEY-----\ntest_ssh_key\n-----END OPENSSH PRIVATE KEY-----")
+
+    project = task.project
+    project.update!(repository_url: "git@github.com:test/repo.git")
+
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    # Mock git container creation for SSH clone with wrapper script
+    git_container = mock("git_container")
+    git_container.expects(:start)
+    git_container.expects(:exec).with([ "mkdir", "-p", "/home/user/.ssh" ])
+    git_container.expects(:exec).with([ "sh", "-c", "echo 'LS0tLS1CRUdJTiBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0KdGVzdF9zc2hfa2V5Ci0tLS0tRU5EIE9QRU5TU0ggUFJJVkFURSBLRVktLS0tLQ==' | base64 -d > /home/user/.ssh/id_rsa" ])
+    git_container.expects(:exec).with([ "chmod", "600", "/home/user/.ssh/id_rsa" ])
+    git_container.expects(:exec).with([ "chmod", "700", "/home/user/.ssh" ])
+    git_container.expects(:wait).with(300).returns({ "StatusCode" => 0 })
+    git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "Cloning into '.'...")
+    git_container.expects(:delete).with(force: true)
+
+    Docker::Container.expects(:create).with(
+      has_entries(
+        "Image" => "example/image:latest",
+        "Entrypoint" => [ "sh" ],
+        "Cmd" => [ "-c", "git clone git@github.com:test/repo.git ." ],
+        "WorkingDir" => "/workspace",
+        "User" => "1000",
+        "Env" => [],
+        "HostConfig" => has_entries("Binds" => instance_of(Array))
+      )
+    ).returns(git_container)
+
+    # Mock main container with SSH key mount verification
+    main_container = mock("main_container")
+    main_container.expects(:start)
+    main_container.expects(:wait).returns({ "StatusCode" => 0 })
+    main_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "test")
+    main_container.expects(:delete).with(force: true)
+
+    # Expect SSH key to be copied to container
+    run.expects(:archive_file_to_container).with do |container, content, path, mode|
+      if path&.include?("/.ssh/")
+        assert_equal user.ssh_key, content
+        assert_equal 0o600, mode
+      end
+      true
+    end.at_least_once
+
+    Docker::Container.expects(:create).with(
+      has_entries(
+        "Image" => "example/image:latest",
+        "Cmd" => [ "echo", "STARTING: test" ],
+        "WorkingDir" => "/workspace"
+      )
+    ).returns(main_container)
+
+    # Mock git diff container with SSH support
+    git_diff_container = mock("git_diff_container")
+    git_diff_container.expects(:start)
+    git_diff_container.expects(:exec).with([ "mkdir", "-p", "/home/user/.ssh" ])
+    git_diff_container.expects(:exec).with([ "sh", "-c", "echo 'LS0tLS1CRUdJTiBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0KdGVzdF9zc2hfa2V5Ci0tLS0tRU5EIE9QRU5TU0ggUFJJVkFURSBLRVktLS0tLQ==' | base64 -d > /home/user/.ssh/id_rsa" ])
+    git_diff_container.expects(:exec).with([ "chmod", "600", "/home/user/.ssh/id_rsa" ])
+    git_diff_container.expects(:exec).with([ "chmod", "700", "/home/user/.ssh" ])
+    git_diff_container.expects(:wait).with(300).returns({ "StatusCode" => 0 })
+    git_diff_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "diff --git...")
+    git_diff_container.expects(:delete).with(force: true)
+
+    Docker::Container.expects(:create).with(
+      has_entries(
+        "Image" => "example/image:latest",
+        "Entrypoint" => [ "sh" ],
+        "Cmd" => [ "-c", "git add -N . && git diff HEAD --unified=10" ],
+        "WorkingDir" => "/workspace",
+        "User" => "1000",
+        "Env" => [],
+        "HostConfig" => has_entries("Binds" => instance_of(Array))
+      )
+    ).returns(git_diff_container)
+
+    run.execute!
+
+    assert run.completed?
+    assert_equal 3, run.steps.count
+  end
+
   test "execute! configures MCP on first run when endpoint present" do
     task = tasks(:with_mcp_endpoint)
     run = task.runs.create!(prompt: "test", status: :pending)
