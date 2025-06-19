@@ -10,18 +10,18 @@
       <% end %>
     </ul>
   </nav>
-  <div class="task-info">
-    <div class="inline-edit">
-      <h1>
-        <%= render "description", task: @task %>
-      </h1>
-    </div>
-    <div class="details">
-      <span>Agent: <%= @task.agent.name %></span>
-      <span>Project: <%= @task.project.name %></span>
-      <% if @task.total_cost > 0 %>
-        <span>Total Cost: $<%= "%.6f" % @task.total_cost %></span>
-      <% end %>
-    </div>
-  </div>
 </header>
+<div class="task-info">
+  <div class="inline-edit">
+    <h1>
+      <%= render "description", task: @task %>
+    </h1>
+  </div>
+  <div class="task-details">
+    <span>Agent: <%= @task.agent.name %></span>
+    <span>Project: <%= @task.project.name %></span>
+    <% if @task.total_cost > 0 %>
+      <span>Total Cost: $<%= "%.6f" % @task.total_cost %></span>
+    <% end %>
+  </div>
+</div>

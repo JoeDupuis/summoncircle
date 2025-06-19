@@ -9,17 +9,17 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.header-overlay > .task-info {
+.header-overlay .task-info {
   padding: 0.5rem 1rem;
   border-top: 1px solid var(--border);
 }
 
-.header-overlay > .task-info > h1 {
+.header-overlay .task-info h1 {
   margin: 0.5rem 0;
   font-size: 1.5rem;
 }
 
-.header-overlay > .task-info > .details {
+.header-overlay .task-details {
   display: flex;
   gap: 2rem;
   font-size: 0.9rem;
@@ -27,7 +27,7 @@
   margin-bottom: 0.5rem;
 }
 
-.header-overlay > .task-info > .details > span {
+.header-overlay .task-details span {
   white-space: nowrap;
 }
 
