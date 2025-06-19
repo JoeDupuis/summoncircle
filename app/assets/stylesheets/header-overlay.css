@@ -1,0 +1,39 @@
+.header-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  transition: transform 0.15s ease-in-out;
+  background-color: var(--bg);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header-overlay > .task-info {
+  padding: 0.5rem 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.header-overlay > .task-info > h1 {
+  margin: 0.5rem 0;
+  font-size: 1.5rem;
+}
+
+.header-overlay > .task-info > .details {
+  display: flex;
+  gap: 2rem;
+  font-size: 0.9rem;
+  color: var(--text-light);
+  margin-bottom: 0.5rem;
+}
+
+.header-overlay > .task-info > .details > span {
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .header-overlay {
+    position: relative;
+    transform: none !important;
+  }
+}

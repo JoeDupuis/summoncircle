@@ -16,7 +16,7 @@
         <%= render "description", task: @task %>
       </h1>
     </div>
-    <div class="task-details">
+    <div class="details">
       <span>Agent: <%= @task.agent.name %></span>
       <span>Project: <%= @task.project.name %></span>
       <% if @task.total_cost > 0 %>
