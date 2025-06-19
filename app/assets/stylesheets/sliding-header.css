@@ -1,0 +1,80 @@
+body.tasks.show [data-sliding-header-target="header"] {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  transition: transform 0.3s ease-in-out;
+  background-color: var(--bg);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+body.tasks.show .task-info {
+  padding: 0.5rem 1rem;
+  border-top: 1px solid var(--border);
+}
+
+body.tasks.show .task-info h1 {
+  margin: 0.5rem 0;
+  font-size: 1.5rem;
+}
+
+body.tasks.show .task-details {
+  display: flex;
+  gap: 2rem;
+  font-size: 0.9rem;
+  color: var(--text-light);
+  margin-bottom: 0.5rem;
+}
+
+body.tasks.show .task-details span {
+  white-space: nowrap;
+}
+
+@media (min-width: 769px) {
+  body.tasks.show main {
+    padding-top: 0 !important;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  body.tasks.show .codex-layout {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    gap: 20px;
+    padding: 1rem;
+    height: 100vh;
+  }
+  
+  body.tasks.show .chat-panel,
+  body.tasks.show .log-panel {
+    overflow-y: auto;
+    height: 100%;
+  }
+  
+  body.tasks.show .task-actions {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    background-color: var(--bg);
+    padding: 0.5rem;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@media (max-width: 768px) {
+  body.tasks.show [data-sliding-header-target="header"] {
+    position: relative;
+    transform: none !important;
+  }
+  
+  body.tasks.show .chat-panel,
+  body.tasks.show .log-panel {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}

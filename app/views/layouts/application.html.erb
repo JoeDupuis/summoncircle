@@ -26,13 +26,28 @@
   </head>
 
   <body class="<%= controller_name %> <%= action_name %>">
-    <%= render "nav" %>
-    <main>
-      <div id="flash-messages">
-        <%= render 'flash_messages' %>
+    <% if controller_name == 'tasks' && action_name == 'show' %>
+      <div data-controller="sliding-header">
+        <div class="sliding-header-trigger" data-sliding-header-target="trigger"></div>
+        <div data-sliding-header-target="header">
+          <%= render "tasks/nav", task: @task %>
+        </div>
+        <main>
+          <div id="flash-messages">
+            <%= render 'flash_messages' %>
+          </div>
+          <%= yield %>
+        </main>
       </div>
-      <%= yield %>
-    </main>
+    <% else %>
+      <%= render "nav" %>
+      <main>
+        <div id="flash-messages">
+          <%= render 'flash_messages' %>
+        </div>
+        <%= yield %>
+      </main>
+    <% end %>
 
     <% if Rails.env.development? %>
       <div class="branch-indicator">

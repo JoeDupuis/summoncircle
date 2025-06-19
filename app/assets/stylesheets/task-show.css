@@ -5,6 +5,8 @@ html body.tasks.show {
   padding: 0 !important;
   display: block !important;
   grid-template-columns: none !important;
+  height: 100vh;
+  overflow: hidden;
 }
 
 html body.tasks.show > * {
@@ -37,16 +39,6 @@ html body.tasks.show main {
   margin: 0 !important;
 }
 
-body.tasks.show h1,
-body.tasks.show h2,
-body.tasks.show h3,
-body.tasks.show h4,
-body.tasks.show h5,
-body.tasks.show h6,
-body.tasks.show p {
-  margin-left: 1rem;
-  margin-right: 1rem;
-}
 
 body.tasks.show .codex-layout {
   margin: 0;
@@ -62,4 +54,12 @@ body.tasks.show .log-panel {
 
 body.tasks.show .task-actions {
   margin: 1rem;
+}
+
+@media (min-width: 769px) {
+  body.tasks.show [data-controller="sliding-header"] {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
 }

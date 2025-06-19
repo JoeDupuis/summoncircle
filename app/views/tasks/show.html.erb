@@ -1,15 +1,3 @@
-<div class="inline-edit">
-  <h1>
-    <%= render "description", task: @task %>
-  </h1>
-</div>
-
-<p>Agent: <%= @task.agent.name %></p>
-<p>Project: <%= @task.project.name %></p>
-<% if @task.total_cost > 0 %>
-  <p>Total Cost: $<%= "%.6f" % @task.total_cost %></p>
-<% end %>
-
 <div data-controller="tabs" class="codex-layout">
   <%= turbo_stream_from @task %>
   <div class="nav">
