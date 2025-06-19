@@ -1,52 +1,46 @@
 <% content_for :header_wrapper do %>
-  <div data-controller="sliding-header">
-    <div class="header-overlay" data-sliding-header-target="header">
-      <%= render "nav" %>
-      <div class="task-info">
-        <div class="inline-edit">
-          <h1>
-            <%= render "description", task: @task %>
-          </h1>
-        </div>
-        <div class="task-details">
-          <span>Agent: <%= @task.agent.name %></span>
-          <span>Project: <%= @task.project.name %></span>
-          <% if @task.total_cost > 0 %>
-            <span>Total Cost: $<%= "%.6f" % @task.total_cost %></span>
-          <% end %>
-        </div>
+  <div class="header-overlay" data-sliding-header-target="header">
+    <%= render "nav" %>
+    <div class="task-info">
+      <div class="inline-edit">
+        <h1>
+          <%= render "description", task: @task %>
+        </h1>
+      </div>
+      <div class="task-details">
+        <span>Agent: <%= @task.agent.name %></span>
+        <span>Project: <%= @task.project.name %></span>
+        <% if @task.total_cost > 0 %>
+          <span>Total Cost: $<%= "%.6f" % @task.total_cost %></span>
+        <% end %>
       </div>
     </div>
-    <main>
-      <div id="flash-messages">
-        <%= render 'flash_messages' %>
-      </div>
-      <div data-controller="tabs" class="codex-layout">
-        <%= turbo_stream_from @task %>
-        <div class="nav">
-          <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="chat" class="tab chat-tab">Chat</button>
-          <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="steps" class="tab -active">Runs</button>
-        </div>
-        <div data-tabs-target="panel" data-panel-id="chat" class="chat-panel">
-          <%= render "tasks/chat_panel", task: @task, runs: @task.runs.order(:created_at) %>
-        </div>
-        <div data-tabs-target="panel" data-panel-id="steps" class="log-panel -active">
-          <% if @task.runs.any? %>
-            <%= render "tasks/runs_list", runs: @runs %>
-          <% else %>
-            <div id="runs-list">
-              <p>No runs yet.</p>
-            </div>
-          <% end %>
-        </div>
-      </div>
-
-      <div class="task-actions">
-        <%= link_to 'Archive', task_path(@task),
-                    data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to archive this task?' },
-                    class: 'archive' %> |
-        <%= link_to 'Back', project_tasks_path(@task.project) %>
-      </div>
-    </main>
   </div>
 <% end %>
+
+<div data-controller="tabs" class="codex-layout">
+  <%= turbo_stream_from @task %>
+  <div class="nav">
+    <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="chat" class="tab chat-tab">Chat</button>
+    <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="steps" class="tab -active">Runs</button>
+  </div>
+  <div data-tabs-target="panel" data-panel-id="chat" class="chat-panel">
+    <%= render "tasks/chat_panel", task: @task, runs: @task.runs.order(:created_at) %>
+  </div>
+  <div data-tabs-target="panel" data-panel-id="steps" class="log-panel -active">
+    <% if @task.runs.any? %>
+      <%= render "tasks/runs_list", runs: @runs %>
+    <% else %>
+      <div id="runs-list">
+        <p>No runs yet.</p>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<div class="task-actions">
+  <%= link_to 'Archive', task_path(@task),
+              data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to archive this task?' },
+              class: 'archive' %> |
+  <%= link_to 'Back', project_tasks_path(@task.project) %>
+</div>
