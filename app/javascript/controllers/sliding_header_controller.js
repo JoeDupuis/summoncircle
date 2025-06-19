@@ -22,7 +22,7 @@ export default class extends Controller {
       if (!this.isMobile) {
         setTimeout(() => {
           this.hideHeader()
-        }, 2000)
+        }, 500)
       }
     })
   }
@@ -60,10 +60,7 @@ export default class extends Controller {
     if (mouseY <= this.slideDistanceValue && !this.isShowing) {
       this.showHeader()
     } else if (mouseY > this.headerHeight + 50 && this.isShowing) {
-      // Add a delay before hiding to prevent flickering
-      this.mouseTimer = setTimeout(() => {
-        this.hideHeader()
-      }, 300)
+      this.hideHeader()
     }
   }
   
