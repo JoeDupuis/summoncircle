@@ -72,8 +72,19 @@ body.tasks.show .task-details span {
     transform: none !important;
   }
   
-  body.tasks.show .chat-panel,
-  body.tasks.show .log-panel {
+  body.tasks.show main {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  
+  body.tasks.show .codex-layout {
+    height: auto !important;
+    padding: 1rem !important;
+  }
+  
+  body.tasks.show .chat-panel.-active,
+  body.tasks.show .log-panel.-active {
+    height: calc(100vh - 200px);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
