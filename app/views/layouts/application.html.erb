@@ -26,20 +26,14 @@
   </head>
 
   <body class="<%= controller_name %> <%= action_name %>">
-    <div data-controller="<%= 'sliding-header' if content_for?(:header_wrapper) %>">
-      <% if content_for?(:header_wrapper) %>
-        <%= yield :header_wrapper %>
-      <% else %>
-        <%= content_for?(:nav) ? yield(:nav) : render("nav") %>
-      <% end %>
-      
-      <main>
-        <div id="flash-messages">
-          <%= render 'flash_messages' %>
-        </div>
-        <%= yield %>
-      </main>
-    </div>
+    <%= content_for?(:nav) ? yield(:nav) : render("nav") %>
+    
+    <main>
+      <div id="flash-messages">
+        <%= render 'flash_messages' %>
+      </div>
+      <%= yield %>
+    </main>
 
     <% if Rails.env.development? %>
       <div class="branch-indicator">
