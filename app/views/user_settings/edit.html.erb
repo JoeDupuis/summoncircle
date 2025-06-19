@@ -10,6 +10,12 @@
   </div>
 
   <div>
+    <%= form.check_box :allow_github_token_access %>
+    <%= form.label :allow_github_token_access, "Allow tasks to have access to my GitHub token" %><br>
+    <small>When checked, tasks can use your GitHub token for Git operations. Uncheck to prevent tasks from accessing your token.</small>
+  </div>
+
+  <div>
     <%= form.label :ssh_key, "SSH Private Key" %><br>
     <%= form.text_area :ssh_key, rows: 10, placeholder: "Paste your SSH private key here (leave blank to keep current key)", value: "" %>
     <small>Used for Git authentication. Key is encrypted and automatically mounted in containers. Never displayed or logged.</small>
