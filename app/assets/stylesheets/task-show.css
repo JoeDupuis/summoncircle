@@ -7,12 +7,6 @@ html body.tasks.show {
   grid-template-columns: none !important;
 }
 
-@media (min-width: 769px) {
-  html body.tasks.show {
-    height: 100vh;
-    overflow: hidden;
-  }
-}
 
 @media (max-width: 768px) {
   html body.tasks.show {
@@ -68,10 +62,3 @@ body.tasks.show .task-actions {
   margin: 1rem;
 }
 
-@media (min-width: 769px) {
-  body.tasks.show [data-controller="sliding-header"] {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-}

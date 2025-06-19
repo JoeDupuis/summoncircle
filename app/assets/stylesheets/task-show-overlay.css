@@ -15,7 +15,7 @@
     display: flex;
     gap: 20px;
     padding: 1rem;
-    height: 100vh;
+    height: 100%;
   }
   
   body.tasks.show .chat-panel,
