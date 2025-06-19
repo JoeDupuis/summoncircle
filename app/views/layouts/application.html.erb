@@ -26,7 +26,8 @@
   </head>
 
   <body class="<%= controller_name %> <%= action_name %>">
-    <%= render "nav" %>
+    <%= content_for?(:nav) ? yield(:nav) : render("nav") %>
+    
     <main>
       <div id="flash-messages">
         <%= render 'flash_messages' %>

@@ -7,6 +7,14 @@ html body.tasks.show {
   grid-template-columns: none !important;
 }
 
+
+@media (max-width: 768px) {
+  html body.tasks.show {
+    height: auto;
+    overflow: auto;
+  }
+}
+
 html body.tasks.show > * {
   grid-column: unset !important;
 }
@@ -37,16 +45,6 @@ html body.tasks.show main {
   margin: 0 !important;
 }
 
-body.tasks.show h1,
-body.tasks.show h2,
-body.tasks.show h3,
-body.tasks.show h4,
-body.tasks.show h5,
-body.tasks.show h6,
-body.tasks.show p {
-  margin-left: 1rem;
-  margin-right: 1rem;
-}
 
 body.tasks.show .codex-layout {
   margin: 0;
@@ -63,3 +61,4 @@ body.tasks.show .log-panel {
 body.tasks.show .task-actions {
   margin: 1rem;
 }
+

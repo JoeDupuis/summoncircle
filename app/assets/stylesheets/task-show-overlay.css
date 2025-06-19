@@ -1,0 +1,54 @@
+/* Layout adjustments specific to tasks#show when using header overlay */
+
+@media (min-width: 769px) {
+  body.tasks.show main {
+    padding-top: 0 !important;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  body.tasks.show .codex-layout {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    gap: 20px;
+    padding: 1rem;
+    height: 100%;
+  }
+  
+  body.tasks.show .chat-panel,
+  body.tasks.show .log-panel {
+    overflow-y: auto;
+    height: 100%;
+  }
+  
+  body.tasks.show .task-actions {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    background-color: var(--bg);
+    padding: 0.5rem;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@media (max-width: 768px) {
+  body.tasks.show main {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  
+  body.tasks.show .codex-layout {
+    height: auto !important;
+    padding: 1rem !important;
+  }
+  
+  body.tasks.show .chat-panel.-active,
+  body.tasks.show .log-panel.-active {
+    height: auto;
+    overflow: visible;
+  }
+}
