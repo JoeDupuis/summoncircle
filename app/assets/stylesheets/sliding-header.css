@@ -84,8 +84,7 @@ body.tasks.show .task-details span {
   
   body.tasks.show .chat-panel.-active,
   body.tasks.show .log-panel.-active {
-    height: calc(100vh - 200px);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    height: auto;
+    overflow: visible;
   }
 }
