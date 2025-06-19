@@ -10,6 +10,23 @@ This MCP tool allows AI models to update the description of a task programmatica
   - `task_id` (required, integer): ID of the task to update
   - `description` (required, string): New description for the task
 
+## Automatic Task ID Access
+
+While the tool requires an explicit `task_id` parameter, the system provides several ways for agents to access the current task ID:
+
+1. **Environment Variables**: The task ID is available as `TASK_ID` environment variable in the container
+2. **Task Info File**: A JSON file at `/tmp/summoncircle_task_info.json` contains:
+   ```json
+   {
+     "task_id": 123,
+     "run_id": 456,
+     "project_name": "my-project",
+     "agent_name": "claude"
+   }
+   ```
+
+Agents can read this information and use it when calling the MCP tool.
+
 ## Example Usage
 
 ### Successful Update
