@@ -23,16 +23,17 @@
   </div>
 <% end %>
 
-<div data-controller="tabs" class="codex-layout">
+<div data-controller="tabs resizable-divider" class="codex-layout">
   <%= turbo_stream_from @task %>
   <div class="nav">
     <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="chat" class="tab chat-tab">Chat</button>
     <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="steps" class="tab -active">Runs</button>
   </div>
-  <div data-tabs-target="panel" data-panel-id="chat" class="chat-panel">
+  <div data-tabs-target="panel" data-resizable-divider-target="leftPanel" data-panel-id="chat" class="chat-panel">
     <%= render "tasks/chat_panel", task: @task, runs: @task.runs.order(:created_at) %>
   </div>
-  <div data-tabs-target="panel" data-panel-id="steps" class="log-panel -active">
+  <div class="resize-divider" data-resizable-divider-target="divider"></div>
+  <div data-tabs-target="panel" data-resizable-divider-target="rightPanel" data-panel-id="steps" class="log-panel -active">
     <% if @task.runs.any? %>
       <%= render "tasks/runs_list", runs: @runs %>
     <% else %>

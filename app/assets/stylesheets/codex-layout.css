@@ -1,20 +1,43 @@
 .codex-layout {
   display: flex;
-  gap: 20px;
+  gap: 0;
+  position: relative;
 }
-
 
 .codex-layout > .chat-panel {
   width: 40%;
+  flex-shrink: 0;
 }
 
 .codex-layout > .log-panel {
   width: 60%;
+  flex-shrink: 0;
+}
+
+.codex-layout .resize-divider {
+  width: 4px;
+  background-color: #e0e0e0;
+  cursor: col-resize;
+  position: relative;
+  transition: background-color 0.2s ease;
+  margin: 0 8px;
+}
+
+.codex-layout .resize-divider:hover {
+  background-color: #999;
+}
+
+.codex-layout .resize-divider:active {
+  background-color: #666;
 }
 
 @media (max-width: 768px) {
   .codex-layout {
     flex-direction: column;
+  }
+
+  .codex-layout .resize-divider {
+    display: none;
   }
 
   .codex-layout > .chat-panel,
