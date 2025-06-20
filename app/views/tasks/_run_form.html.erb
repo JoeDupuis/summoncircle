@@ -1,6 +1,5 @@
 <%= form_with model: [@task, run], id: "run-form", class: "run-form", data: { controller: "prompt", action: "turbo:submit-end->prompt#clearForm" } do |form| %>
   <div class="field">
-    <%= form.label :prompt %><br>
     <%= form.text_area :prompt, required: true, rows: 4, class: "textarea", data: { prompt_target: "textarea", action: "keydown->prompt#keydown" } %>
     <% if run.errors.any? %>
       <div class="errors">
