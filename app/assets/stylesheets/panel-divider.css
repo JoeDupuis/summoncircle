@@ -1,0 +1,39 @@
+.panel-divider {
+  width: 4px;
+  margin: 0 10px;
+  cursor: col-resize;
+  background: var(--border, #e0e0e0);
+  display: block;
+  position: relative;
+  transition: background-color 0.2s ease;
+  align-self: stretch;
+  flex-shrink: 0;
+}
+
+.panel-divider:hover {
+  background: var(--border-hover, #999);
+}
+
+.panel-divider:active {
+  background: var(--border-active, #666);
+}
+
+@media (prefers-color-scheme: dark) {
+  .panel-divider {
+    background: var(--border-dark, #404040);
+  }
+  
+  .panel-divider:hover {
+    background: var(--border-hover-dark, #606060);
+  }
+  
+  .panel-divider:active {
+    background: var(--border-active-dark, #808080);
+  }
+}
+
+@media (max-width: 768px) {
+  .panel-divider {
+    display: none;
+  }
+}
