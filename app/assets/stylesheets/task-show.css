@@ -62,31 +62,7 @@ body.tasks.show .task-actions {
   margin: 1rem;
 }
 
-body.tasks.show .codex-layout .resize-divider {
-  width: 6px !important;
-  min-width: 6px !important;
-  background-color: #999;
-  cursor: col-resize;
-  position: relative;
-  transition: background-color 0.2s ease;
-  margin: 0 10px;
-  align-self: stretch;
-  flex-shrink: 0;
-}
-
-body.tasks.show .codex-layout .resize-divider:hover {
-  background-color: #999;
-}
-
-body.tasks.show .codex-layout .resize-divider:active {
-  background-color: #666;
-}
-
 @media (max-width: 768px) {
-  body.tasks.show .codex-layout .resize-divider {
-    display: none;
-  }
-  
   body.tasks.show .codex-layout > .chat-panel,
   body.tasks.show .codex-layout > .log-panel {
     width: 100% !important;
