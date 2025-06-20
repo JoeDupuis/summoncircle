@@ -32,7 +32,7 @@
   <div data-tabs-target="panel" data-resizable-divider-target="leftPanel" data-panel-id="chat" class="chat-panel">
     <%= render "tasks/chat_panel", task: @task, runs: @task.runs.order(:created_at) %>
   </div>
-  <div class="resize-divider" data-resizable-divider-target="divider"></div>
+  <div class="resize-divider" data-resizable-divider-target="divider" style="width: 6px; background-color: #999; cursor: col-resize; margin: 0 10px;"></div>
   <div data-tabs-target="panel" data-resizable-divider-target="rightPanel" data-panel-id="steps" class="log-panel -active">
     <% if @task.runs.any? %>
       <%= render "tasks/runs_list", runs: @runs %>

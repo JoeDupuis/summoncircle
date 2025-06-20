@@ -6,7 +6,9 @@ export default class extends Controller {
   connect() {
     this.isDragging = false
     this.minWidth = 200
+    this.mobileBreakpoint = 768
     this.setupEventListeners()
+    this.setupResizeObserver()
   }
 
   setupEventListeners() {
@@ -15,12 +17,33 @@ export default class extends Controller {
     document.addEventListener("mouseup", this.stopDrag.bind(this))
   }
 
+  setupResizeObserver() {
+    this.resizeObserver = new ResizeObserver(entries => {
+      for (let entry of entries) {
+        if (entry.contentRect.width <= this.mobileBreakpoint) {
+          this.resetPanelWidths()
+        }
+      }
+    })
+    this.resizeObserver.observe(this.element)
+  }
+
   disconnect() {
     document.removeEventListener("mousemove", this.drag.bind(this))
     document.removeEventListener("mouseup", this.stopDrag.bind(this))
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect()
+    }
+  }
+
+  resetPanelWidths() {
+    this.leftPanelTarget.style.width = ""
+    this.rightPanelTarget.style.width = ""
   }
 
   startDrag(e) {
+    if (window.innerWidth <= this.mobileBreakpoint) return
+    
     this.isDragging = true
     e.preventDefault()
     document.body.style.cursor = "col-resize"
@@ -28,7 +51,7 @@ export default class extends Controller {
   }
 
   drag(e) {
-    if (!this.isDragging) return
+    if (!this.isDragging || window.innerWidth <= this.mobileBreakpoint) return
 
     const containerRect = this.element.getBoundingClientRect()
     const containerWidth = containerRect.width
