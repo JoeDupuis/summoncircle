@@ -15,6 +15,9 @@
             <span>Total Cost: $<%= "%.6f" % @task.total_cost %></span>
           <% end %>
         </div>
+        <% if Current.user&.github_token.present? %>
+          <%= render "tasks/auto_push_form", task: @task %>
+        <% end %>
       </div>
     </div>
   </div>

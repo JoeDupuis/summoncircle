@@ -31,6 +31,15 @@
   white-space: nowrap;
 }
 
+.header-overlay #auto_push_form {
+  margin-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.header-overlay .auto-push {
+  margin-top: 0;
+}
+
 @media (max-width: 768px) {
   .header-overlay {
     position: relative;
