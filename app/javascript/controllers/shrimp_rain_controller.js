@@ -15,6 +15,7 @@ export default class extends Controller {
     container.style.height = '100%'
     container.style.pointerEvents = 'none'
     container.style.zIndex = '9999'
+    container.style.overflow = 'hidden'
     
     for (let i = 0; i < shrimpCount; i++) {
       const shrimp = this.createShrimp()
@@ -24,9 +25,14 @@ export default class extends Controller {
     
     document.body.appendChild(container)
     
+    // Calculate max animation time: max delay + max duration
+    const maxDelay = (shrimpCount - 1) * 50
+    const maxDuration = 3 * 1000
+    const totalTime = maxDelay + maxDuration + 500 // Add buffer
+    
     setTimeout(() => {
       container.remove()
-    }, 3000)
+    }, totalTime)
   }
 
   createShrimp() {
@@ -53,12 +59,13 @@ export default class extends Controller {
       },
       { 
         transform: `translateY(${window.innerHeight + 100}px) translateX(${horizontalMovement}px) rotate(${rotation}deg)`,
-        opacity: 0.3
+        opacity: 0
       }
     ], {
       duration: duration * 1000,
       easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-      delay: index * 50
+      delay: index * 50,
+      fill: 'forwards'
     })
   }
 }
