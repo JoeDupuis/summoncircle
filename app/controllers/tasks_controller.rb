@@ -114,7 +114,12 @@ class TasksController < ApplicationController
   end
 
   def task_params
-    params.require(:task).permit(:agent_id, :project_id)
+    permitted = params.require(:task).permit(:agent_id, :project_id, :target_branch)
+    # If target_branch is the placeholder, set it to empty string
+    if permitted[:target_branch] == "*default*"
+      permitted[:target_branch] = ""
+    end
+    permitted
   end
 
   def task_update_params
