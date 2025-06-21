@@ -1,4 +1,4 @@
-<div id="chat-messages">
+<div id="chat-messages" data-controller="auto-scroll">
   <% if runs.any? %>
     <% runs.each do |run| %>
       <%= render "runs/chat_item", run: run %>

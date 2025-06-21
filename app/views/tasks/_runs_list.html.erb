@@ -1,4 +1,4 @@
-<div id="runs-list">
+<div id="runs-list" data-controller="auto-scroll">
   <% runs.each do |run| %>
     <%= render "tasks/run", run: run %>
   <% end %>
