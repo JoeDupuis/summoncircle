@@ -29,8 +29,6 @@ class BuildDockerContainerJob < ApplicationJob
       env_vars << "GITHUB_TOKEN=#{task.user.github_token}"
     end
 
-    # Find an available port starting from a high number to avoid conflicts
-    host_port = find_available_port(starting_from: 8000)
     container_port = task.project.dev_container_port || 3000
 
     container_config = {
@@ -43,9 +41,7 @@ class BuildDockerContainerJob < ApplicationJob
       },
       "HostConfig" => {
         "Binds" => binds,
-        "PortBindings" => {
-          "#{container_port}/tcp" => [ { "HostPort" => host_port.to_s } ]
-        }
+        "PublishAllPorts" => true
       }
     }
 
@@ -66,8 +62,7 @@ class BuildDockerContainerJob < ApplicationJob
       container_id: container.id,
       container_name: container_name,
       container_status: container_info["State"]["Status"],
-      docker_image_id: image.id,
-      container_host_port: host_port
+      docker_image_id: image.id
     )
 
     broadcast_docker_status(task)
@@ -117,25 +112,6 @@ class BuildDockerContainerJob < ApplicationJob
     tar_stream
   end
 
-  def find_available_port(starting_from: 8000)
-    require "socket"
-    port = starting_from
-    max_attempts = 1000
-
-    max_attempts.times do
-      begin
-        # Try to bind to the port to check if it's available
-        server = TCPServer.new("127.0.0.1", port)
-        server.close
-        return port
-      rescue Errno::EADDRINUSE
-        # Port is in use, try the next one
-        port += 1
-      end
-    end
-
-    raise "Could not find an available port after #{max_attempts} attempts"
-  end
 
   def broadcast_docker_status(task)
     Turbo::StreamsChannel.broadcast_replace_to(

@@ -3,8 +3,18 @@
     <div class="container-info">
       <span class="container-status">
         Container: <%= task.container_name %> (<%= task.container_status %>)
-        <% if task.container_host_port.present? %>
-          | Port: <%= link_to "http://localhost:#{task.container_host_port}", "http://localhost:#{task.container_host_port}", target: "_blank", class: "port-link" %>
+        <% if task.project.dev_container_port.present? && task.container_id.present? %>
+          <% begin %>
+            <% container = Docker::Container.get(task.container_id) %>
+            <% port_mapping = container.json["NetworkSettings"]["Ports"]["#{task.project.dev_container_port}/tcp"] %>
+            <% if port_mapping && port_mapping.first %>
+              | Port: <%= link_to "localhost:#{port_mapping.first['HostPort']}", "http://localhost:#{port_mapping.first['HostPort']}", target: "_blank" %>
+            <% else %>
+              | Port: <%= task.project.dev_container_port %> (not mapped)
+            <% end %>
+          <% rescue => e %>
+            | Port: <%= task.project.dev_container_port %>
+          <% end %>
         <% end %>
       </span>
       <%= link_to "Stop", stop_container_task_path(task), 
