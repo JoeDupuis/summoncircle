@@ -35,14 +35,14 @@ class RepositoryDownloadsController < ApplicationController
 
   def determine_repo_path
     project = @task.project
-    volume_mount = @task.volume_mounts.joins(:volume).find_by(volume: { mount_point: "/workplace" })
 
-    if volume_mount && File.exist?(volume_mount.host_path)
-      volume_mount.host_path
-    elsif project.repo_path.present?
+    # For now, just use the project's repo_path or a temp directory
+    # TODO: Implement proper Docker volume inspection to get the actual task workspace
+    if project.repo_path.present?
       project.repo_path
     elsif project.repository_url.present?
-      Rails.root.join("tmp", "repos", project.id.to_s).to_s
+      # This is a placeholder - in reality, we'd need to extract from Docker volume
+      Rails.root.join("tmp", "repos", "task-#{@task.id}").to_s
     end
   end
 
