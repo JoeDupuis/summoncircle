@@ -13,7 +13,6 @@ Rails.application.routes.draw do
     resources :project_branches, only: %i[index]
     resources :tasks, shallow: true do
       member do
-        get :branches
         patch :update_auto_push
       end
       resources :runs, only: %i[create]

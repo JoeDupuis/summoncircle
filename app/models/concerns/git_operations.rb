@@ -71,49 +71,7 @@ module GitOperations
     )
   end
 
-  def fetch_branches(task = nil)
-    task ||= self.is_a?(Task) ? self : self.task
-    return [] unless task.project.repository_url.present?
 
-    begin
-      logs = run_git_command(
-        task: task,
-        command: "git ls-remote --heads origin",
-        error_message: "Failed to fetch branches",
-        return_logs: true
-      )
-      branches = logs.lines.map do |line|
-        line.split("\t").last.sub("refs/heads/", "") if line.include?("refs/heads/")
-      end.compact.reject(&:blank?)
-      branches.presence || []
-    rescue => e
-      Rails.logger.error "Failed to fetch branches: #{e.message}"
-      []
-    end
-  end
-
-  def fetch_default_branch(task = nil)
-    task ||= self.is_a?(Task) ? self : self.task
-    return nil unless task.project.repository_url.present?
-
-    begin
-      logs = run_git_command(
-        task: task,
-        command: "git ls-remote --symref origin HEAD",
-        error_message: "Failed to fetch default branch",
-        return_logs: true
-      )
-
-      if logs.include?("refs/heads/")
-        logs.lines.first.split("\t").first.sub("ref: refs/heads/", "")
-      else
-        "main"
-      end
-    rescue => e
-      Rails.logger.error "Failed to fetch default branch: #{e.message}"
-      "main"
-    end
-  end
 
   def capture_repository_state(run = nil)
     run ||= self if self.is_a?(Run)
