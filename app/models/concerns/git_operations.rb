@@ -78,34 +78,18 @@ module GitOperations
     return [] unless task.project.repository_url.present?
 
     begin
-      # First get local branches
-      local_logs = run_git_command(
+      logs = run_git_command(
         task: task,
         command: "git branch",
-        error_message: "Failed to fetch local branches",
+        error_message: "Failed to fetch branches",
         return_logs: true
       )
       
-      # Then get remote branches
-      remote_logs = run_git_command(
-        task: task,
-        command: "git branch -r",
-        error_message: "Failed to fetch remote branches",
-        return_logs: true
-      )
-      
-      local_branches = local_logs.lines.map do |line|
+      branches = logs.lines.map do |line|
         # Remove the * for current branch and any whitespace
         line.strip.sub(/^\*\s*/, "")
       end.reject(&:blank?)
       
-      remote_branches = remote_logs.lines.map do |line|
-        # Remove origin/ prefix
-        line.strip.sub(/^origin\//, "")
-      end.reject { |b| b.include?("HEAD") || b.blank? }
-      
-      # Combine and dedupe, putting local branches first
-      branches = (local_branches + remote_branches).uniq
       branches.presence || []
     rescue => e
       Rails.logger.error "Failed to fetch branches: #{e.message}"
