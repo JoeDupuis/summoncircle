@@ -35,6 +35,12 @@
   </div>
 
   <div>
+    <%= form.label :dev_container_port, "Container Port" %><br>
+    <%= form.number_field :dev_container_port, placeholder: "3000" %>
+    <small class="form-help">Port to expose from the development container (default: 3000)</small>
+  </div>
+
+  <div>
     <%= form.submit %>
   </div>
 <% end %>

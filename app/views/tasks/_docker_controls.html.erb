@@ -1,7 +1,12 @@
 <div id="docker_controls" class="docker-controls">
   <% if task.container_id.present? %>
     <div class="container-info">
-      <span class="container-status">Container: <%= task.container_name %> (<%= task.container_status %>)</span>
+      <span class="container-status">
+        Container: <%= task.container_name %> (<%= task.container_status %>)
+        <% if task.container_host_port.present? %>
+          | Port: <%= link_to "http://localhost:#{task.container_host_port}", "http://localhost:#{task.container_host_port}", target: "_blank", class: "port-link" %>
+        <% end %>
+      </span>
       <%= link_to "Stop", stop_container_task_path(task), 
           data: { turbo_method: :post },
           class: "button action-button -mini -danger" %>

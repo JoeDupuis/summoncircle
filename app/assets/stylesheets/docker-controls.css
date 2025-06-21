@@ -27,3 +27,13 @@
 .docker-controls .button.-danger:hover {
   background-color: var(--danger-hover);
 }
+
+.docker-controls .port-link {
+  color: var(--primary);
+  text-decoration: none;
+  font-family: monospace;
+}
+
+.docker-controls .port-link:hover {
+  text-decoration: underline;
+}

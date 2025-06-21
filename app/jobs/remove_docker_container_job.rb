@@ -22,7 +22,8 @@ class RemoveDockerContainerJob < ApplicationJob
       container_id: nil,
       container_name: nil,
       container_status: nil,
-      docker_image_id: nil
+      docker_image_id: nil,
+      container_host_port: nil
     )
 
     broadcast_docker_status(task)
@@ -31,7 +32,8 @@ class RemoveDockerContainerJob < ApplicationJob
       container_id: nil,
       container_name: nil,
       container_status: nil,
-      docker_image_id: nil
+      docker_image_id: nil,
+      container_host_port: nil
     )
     broadcast_docker_status(task)
   rescue => e

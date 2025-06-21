@@ -29,16 +29,26 @@ class BuildDockerContainerJob < ApplicationJob
       env_vars << "GITHUB_TOKEN=#{task.user.github_token}"
     end
 
+    # Find an available port starting from a high number to avoid conflicts
+    host_port = find_available_port(starting_from: 8000)
+    container_port = task.project.dev_container_port || 3000
+
     container_config = {
       "name" => container_name,
       "Image" => image_name,
       "WorkingDir" => task.agent.workplace_path,
       "Env" => env_vars,
+      "ExposedPorts" => {
+        "#{container_port}/tcp" => {}
+      },
       "HostConfig" => {
-        "Binds" => binds
+        "Binds" => binds,
+        "PortBindings" => {
+          "#{container_port}/tcp" => [ { "HostPort" => host_port.to_s } ]
+        }
       }
     }
-    
+
     # Only set User if agent.user_id is greater than 0 (non-root)
     # Some containers like nginx need to start as root
     if task.agent.user_id && task.agent.user_id > 0
@@ -46,7 +56,7 @@ class BuildDockerContainerJob < ApplicationJob
       # The user can specify USER in their Dockerfile if needed
       Rails.logger.info "Dev container will run with default user from Dockerfile"
     end
-    
+
     container = Docker::Container.create(container_config)
 
     container.start
@@ -56,7 +66,8 @@ class BuildDockerContainerJob < ApplicationJob
       container_id: container.id,
       container_name: container_name,
       container_status: container_info["State"]["Status"],
-      docker_image_id: image.id
+      docker_image_id: image.id,
+      container_host_port: host_port
     )
 
     broadcast_docker_status(task)
@@ -104,6 +115,26 @@ class BuildDockerContainerJob < ApplicationJob
     end
     tar_stream.rewind
     tar_stream
+  end
+
+  def find_available_port(starting_from: 8000)
+    require "socket"
+    port = starting_from
+    max_attempts = 1000
+
+    max_attempts.times do
+      begin
+        # Try to bind to the port to check if it's available
+        server = TCPServer.new("127.0.0.1", port)
+        server.close
+        return port
+      rescue Errno::EADDRINUSE
+        # Port is in use, try the next one
+        port += 1
+      end
+    end
+
+    raise "Could not find an available port after #{max_attempts} attempts"
   end
 
   def broadcast_docker_status(task)
