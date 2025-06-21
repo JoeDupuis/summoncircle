@@ -25,10 +25,9 @@ export default class extends Controller {
     
     document.body.appendChild(container)
     
-    // Calculate max animation time: max delay + max duration
-    const maxDelay = (shrimpCount - 1) * 20 // Tighter burst
-    const maxDuration = 3 * 1000 // Back to original max duration
-    const totalTime = Math.min(maxDelay + maxDuration, 2000) // Cap at 2 seconds
+    const maxDelay = (shrimpCount - 1) * 20
+    const maxDuration = 3 * 1000
+    const totalTime = Math.min(maxDelay + maxDuration, 2000)
     
     setTimeout(() => {
       container.remove()
@@ -49,10 +48,10 @@ export default class extends Controller {
   }
 
   animateShrimp(shrimp, index) {
-    const duration = Math.random() * 2 + 1 // Back to original 1-3 seconds
+    const duration = Math.random() * 2 + 1
     const horizontalMovement = (Math.random() - 0.5) * 200
     const rotation = (Math.random() - 0.5) * 720
-    const delay = index * 20 // Keep shorter delay for tighter burst
+    const delay = index * 20
     
     shrimp.animate([
       { 
