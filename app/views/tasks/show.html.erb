@@ -19,6 +19,9 @@
             <span>Total Cost: $<%= "%.6f" % @task.total_cost %></span>
           <% end %>
         </div>
+        <div class="task-actions-header">
+          <%= link_to 'Download Repository', task_repository_download_path(@task), class: 'button' %>
+        </div>
         <% if Current.user&.github_token.present? %>
           <%= render "tasks/auto_push_form", task: @task %>
         <% end %>
@@ -49,7 +52,6 @@
 </div>
 
 <div class="task-actions">
-  <%= link_to 'Download Repository', task_repository_download_path(@task), class: 'button' %> |
   <%= link_to 'Archive', task_path(@task),
               data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to archive this task?' },
               class: 'archive' %> |
