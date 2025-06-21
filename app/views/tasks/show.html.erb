@@ -1,3 +1,7 @@
+<% if flash[:shrimp_mode] %>
+  <div data-controller="shrimp-rain"></div>
+<% end %>
+
 <% content_for :nav do %>
   <div data-controller="sliding-header">
     <div class="header-overlay" data-sliding-header-target="header">

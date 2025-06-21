@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_18_004105) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_21_025720) do
   create_table "agent_specific_settings", force: :cascade do |t|
     t.integer "agent_id", null: false
     t.string "type", null: false
@@ -141,6 +141,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_18_004105) do
     t.text "instructions"
     t.text "ssh_key"
     t.text "git_config"
+    t.boolean "shrimp_mode", default: true, null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
