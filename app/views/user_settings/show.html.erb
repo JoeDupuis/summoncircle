@@ -42,6 +42,10 @@
   <% end %>
 </div>
 
+<div>
+  <strong>Shrimp Mode 🍤:</strong> <%= @user.shrimp_mode? ? "Enabled" : "Disabled" %>
+</div>
+
 <p>
   <%= link_to 'Edit Settings', edit_user_settings_path, class: 'button' %>
 </p>

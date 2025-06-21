@@ -9,6 +9,9 @@ class Task < ApplicationRecord
   has_many :volume_mounts, dependent: :destroy
 
   after_create :create_volume_mounts
+  before_validation :set_default_description, on: :create
+
+  validates :description, presence: true
 
   def run(prompt)
     run = runs.create!(prompt: prompt)
@@ -47,5 +50,9 @@ class Task < ApplicationRecord
       volume_mounts.find_or_create_by!(volume: volume)
     end
     workplace_mount # Create workplace mount
+  end
+
+  def set_default_description
+    self.description ||= "#{agent.name} in #{project.name}" if agent && project
   end
 end

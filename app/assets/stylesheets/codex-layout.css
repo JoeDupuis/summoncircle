@@ -1,21 +1,27 @@
 .codex-layout {
   display: flex;
-  gap: 20px;
+  gap: 0;
+  position: relative;
+  height: calc(100vh - 200px);
+  align-items: stretch;
 }
-
 
 .codex-layout > .chat-panel {
   width: 40%;
+  flex-shrink: 0;
 }
 
 .codex-layout > .log-panel {
   width: 60%;
+  flex-shrink: 0;
 }
+
 
 @media (max-width: 768px) {
   .codex-layout {
     flex-direction: column;
   }
+
 
   .codex-layout > .chat-panel,
   .codex-layout > .log-panel {
@@ -37,7 +43,6 @@
 @media (min-width: 769px) {
   .codex-layout > .log-panel {
     overflow-y: auto;
-    max-height: 100vh;
   }
   .chat-tab {
     display: none;

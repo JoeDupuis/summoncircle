@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_18_000000) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_21_025720) do
   create_table "agent_specific_settings", force: :cascade do |t|
     t.integer "agent_id", null: false
     t.string "type", null: false
@@ -124,6 +124,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_18_000000) do
     t.integer "user_id", null: false
     t.boolean "auto_push_enabled", default: false, null: false
     t.string "auto_push_branch"
+    t.string "description"
     t.index ["agent_id"], name: "index_tasks_on_agent_id"
     t.index ["discarded_at"], name: "index_tasks_on_discarded_at"
     t.index ["project_id"], name: "index_tasks_on_project_id"
@@ -141,6 +142,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_18_000000) do
     t.text "ssh_key"
     t.text "git_config"
     t.boolean "allow_github_token_access", default: true, null: false
+    t.boolean "shrimp_mode", default: true, null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 

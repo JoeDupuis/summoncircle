@@ -1,9 +1,9 @@
 class TasksController < ApplicationController
   before_action :set_project
-  before_action :set_task, only: [ :show, :destroy, :branches, :update_auto_push ]
+  before_action :set_task, only: [ :show, :edit, :update, :destroy, :branches, :update_auto_push ]
 
   def index
-    @tasks = @project.tasks.kept.includes(:agent, :project)
+    @tasks = @project.tasks.kept.includes(:agent, :project).order(created_at: :desc)
   end
 
   def show
@@ -29,6 +29,11 @@ class TasksController < ApplicationController
       cookies[:preferred_project_id] = { value: @task.project_id, expires: 1.year.from_now }
       @task.update!(started_at: Time.current)
       @task.run(params[:task][:prompt])
+
+      if Current.user.shrimp_mode?
+        flash[:shrimp_mode] = true
+      end
+
       redirect_to task_path(@task), notice: "Task was successfully launched."
     else
       if @project.present?
@@ -39,6 +44,17 @@ class TasksController < ApplicationController
         @agents = Agent.kept
         render "dashboard/index", status: :unprocessable_entity
       end
+    end
+  end
+
+  def edit
+  end
+
+  def update
+    if @task.update(task_update_params)
+      redirect_to @task, notice: "Task was successfully updated."
+    else
+      render :edit, status: :unprocessable_entity
     end
   end
 
@@ -99,6 +115,10 @@ class TasksController < ApplicationController
 
   def task_params
     params.require(:task).permit(:agent_id, :project_id)
+  end
+
+  def task_update_params
+    params.require(:task).permit(:description)
   end
 
   def auto_push_params

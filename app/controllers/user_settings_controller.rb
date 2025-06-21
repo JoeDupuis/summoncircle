@@ -29,6 +29,6 @@ class UserSettingsController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:github_token, :ssh_key, :instructions, :git_config, :allow_github_token_access)
+    params.require(:user).permit(:github_token, :ssh_key, :instructions, :git_config, :allow_github_token_access, :shrimp_mode)
   end
 end

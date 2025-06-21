@@ -1,21 +1,43 @@
-<h1>Task <%= @task.id %></h1>
-
-<p>Agent: <%= @task.agent.name %></p>
-<p>Project: <%= @task.project.name %></p>
-<% if @task.total_cost > 0 %>
-  <p>Total Cost: $<%= "%.6f" % @task.total_cost %></p>
+<% if flash[:shrimp_mode] %>
+  <div data-controller="shrimp-rain"></div>
 <% end %>
 
-<div data-controller="tabs" class="codex-layout">
+<% content_for :nav do %>
+  <div data-controller="sliding-header">
+    <div class="header-overlay" data-sliding-header-target="header">
+      <%= render "nav" %>
+      <div class="task-info">
+        <div class="inline-edit">
+          <h1>
+            <%= render "description", task: @task %>
+          </h1>
+        </div>
+        <div class="task-details">
+          <span>Agent: <%= @task.agent.name %></span>
+          <span>Project: <%= @task.project.name %></span>
+          <% if @task.total_cost > 0 %>
+            <span>Total Cost: $<%= "%.6f" % @task.total_cost %></span>
+          <% end %>
+        </div>
+        <% if Current.user&.github_token.present? %>
+          <%= render "tasks/auto_push_form", task: @task %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<div data-controller="tabs resizable-panels" class="codex-layout">
   <%= turbo_stream_from @task %>
   <div class="nav">
     <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="chat" class="tab chat-tab">Chat</button>
     <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="steps" class="tab -active">Runs</button>
   </div>
-  <div data-tabs-target="panel" data-panel-id="chat" class="chat-panel">
+  <div data-tabs-target="panel" data-resizable-panels-target="chat" data-panel-id="chat" class="chat-panel">
     <%= render "tasks/chat_panel", task: @task, runs: @task.runs.order(:created_at) %>
   </div>
-  <div data-tabs-target="panel" data-panel-id="steps" class="log-panel -active">
+  <div class="panel-divider" data-resizable-panels-target="divider" data-action="mousedown->resizable-panels#startResize"></div>
+  <div data-tabs-target="panel" data-resizable-panels-target="log" data-panel-id="steps" class="log-panel -active">
     <% if @task.runs.any? %>
       <%= render "tasks/runs_list", runs: @runs %>
     <% else %>

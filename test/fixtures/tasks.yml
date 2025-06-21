@@ -4,6 +4,7 @@ one: # Has existing runs (see runs.yml)
   project: one
   agent: one
   user: one
+  description: "Test task one"
   status: MyString
   started_at: 2025-05-24 19:14:19
   archived_at: 2025-05-24 19:14:19
@@ -12,6 +13,7 @@ two:
   project: two
   agent: two
   user: two
+  description: "Test task two"
   status: MyString
   started_at: 2025-05-24 19:14:19
   archived_at: 2025-05-24 19:14:19
@@ -20,6 +22,7 @@ task_with_runs: # Has existing runs - see runs.yml for run fixtures (existing_ru
   project: one
   agent: one
   user: one
+  description: "Task with existing runs"
   status: active
   started_at: 2025-05-24 19:14:19
 
@@ -27,6 +30,7 @@ without_runs: # No runs - used for testing first run behavior
   project: one
   agent: one
   user: one
+  description: "Task without runs"
   status: active
   started_at: 2025-05-24 19:14:19
 
@@ -34,6 +38,7 @@ with_docker_host:
   project: without_repo
   agent: with_docker_host
   user: one
+  description: "Task with docker host"
   status: active
   started_at: 2025-05-24 19:14:19
 
@@ -41,6 +46,7 @@ with_text_processor:
   project: one
   agent: with_text_processor
   user: one
+  description: "Task with text processor"
   status: active
   started_at: 2025-05-24 19:14:19
 
@@ -48,6 +54,7 @@ with_claude_json_processor:
   project: one
   agent: with_claude_json_processor
   user: one
+  description: "Task with Claude JSON processor"
   status: active
   started_at: 2025-05-24 19:14:19
 
@@ -55,6 +62,7 @@ with_claude_streaming_json_processor:
   project: one
   agent: with_claude_streaming_json_processor
   user: one
+  description: "Task with Claude streaming JSON processor"
   status: active
   started_at: 2025-05-24 19:14:19
 
@@ -62,6 +70,7 @@ with_env_vars:
   project: one
   agent: with_env_vars
   user: one
+  description: "Task with environment variables"
   status: active
   started_at: 2025-05-24 19:14:19
 
@@ -69,6 +78,7 @@ for_repo_clone:
   project: with_repo
   agent: one
   user: one
+  description: "Task for repository clone"
   status: active
   started_at: 2025-05-24 19:14:19
 
@@ -76,6 +86,7 @@ for_repo_clone_with_path:
   project: with_repo_and_path
   agent: one
   user: one
+  description: "Task for repository clone with path"
   status: active
   started_at: 2025-05-24 19:14:19
 
@@ -83,6 +94,7 @@ for_skip_git_clone:
   project: without_repo
   agent: one
   user: one
+  description: "Task for skipping git clone"
   status: active
   started_at: 2025-05-24 19:14:19
 
@@ -90,6 +102,7 @@ with_mcp_endpoint:
   project: one
   agent: with_mcp_endpoint
   user: one
+  description: "Task with MCP endpoint"
   status: active
   started_at: 2025-05-24 19:14:19
 
@@ -97,6 +110,7 @@ with_mcp_endpoint_full_url:
   project: one
   agent: with_mcp_endpoint_full_url
   user: one
+  description: "Task with MCP endpoint full URL"
   status: active
   started_at: 2025-05-24 19:14:19
 
@@ -104,5 +118,6 @@ with_mcp_endpoint_has_runs:
   project: one
   agent: with_mcp_endpoint
   user: one
+  description: "Task with MCP endpoint has runs"
   status: active
   started_at: 2025-05-24 19:14:19
