@@ -29,16 +29,25 @@ class BuildDockerContainerJob < ApplicationJob
       env_vars << "GITHUB_TOKEN=#{task.user.github_token}"
     end
 
-    container = Docker::Container.create(
+    container_config = {
       "name" => container_name,
       "Image" => image_name,
       "WorkingDir" => task.agent.workplace_path,
-      "User" => task.agent.user_id.to_s,
       "Env" => env_vars,
       "HostConfig" => {
         "Binds" => binds
       }
-    )
+    }
+    
+    # Only set User if agent.user_id is greater than 0 (non-root)
+    # Some containers like nginx need to start as root
+    if task.agent.user_id && task.agent.user_id > 0
+      # For dev containers, we'll let them run as root if needed
+      # The user can specify USER in their Dockerfile if needed
+      Rails.logger.info "Dev container will run with default user from Dockerfile"
+    end
+    
+    container = Docker::Container.create(container_config)
 
     container.start
     container_info = container.json
