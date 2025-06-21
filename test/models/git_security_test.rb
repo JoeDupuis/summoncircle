@@ -63,6 +63,7 @@ class GitSecurityTest < ActiveSupport::TestCase
 
     run = task.runs.create!(prompt: "test")
 
+    # Expect clone command
     Docker::Container.expects(:create).with do |config|
       cmd = config["Cmd"][1]
       assert_match(/git clone git@github\.com:JoeDupuis\/shenanigans\.git/, cmd)
@@ -103,6 +104,15 @@ class GitSecurityTest < ActiveSupport::TestCase
     container.expects(:start)
     container.expects(:wait).returns({ "StatusCode" => 0 })
     container.expects(:logs).returns("Success")
+    container.expects(:delete)
+    container
+  end
+
+  def mock_container_with_output(output)
+    container = mock("container")
+    container.expects(:start)
+    container.expects(:wait).returns({ "StatusCode" => 0 })
+    container.expects(:logs).returns(output)
     container.expects(:delete)
     container
   end

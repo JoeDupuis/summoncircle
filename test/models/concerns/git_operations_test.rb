@@ -117,4 +117,13 @@ class GitOperationsTest < ActiveSupport::TestCase
     container.expects(:delete)
     container
   end
+
+  def mock_container_with_output(output)
+    container = mock("container")
+    container.expects(:start)
+    container.expects(:wait).returns({ "StatusCode" => 0 })
+    container.expects(:logs).returns(output)
+    container.expects(:delete)
+    container
+  end
 end
