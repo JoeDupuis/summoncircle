@@ -10,8 +10,8 @@ Rails.application.routes.draw do
     end
   end
   resources :projects do
-    resource :repository_download, only: [ :show ]
     resources :tasks, shallow: true do
+      resource :repository_download, only: [ :show ]
       member do
         get :branches
         patch :update_auto_push

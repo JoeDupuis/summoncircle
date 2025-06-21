@@ -1,22 +1,23 @@
 class RepositoryDownloadsController < ApplicationController
-  before_action :set_project
+  before_action :set_task
 
   def show
-    if @project.repository_url.blank? && @project.repo_path.blank?
-      redirect_to @project, alert: "No repository configured for this project"
+    project = @task.project
+    if project.repository_url.blank? && project.repo_path.blank?
+      redirect_to @task, alert: "No repository configured for this project"
       return
     end
 
     repo_path = determine_repo_path
     unless File.exist?(repo_path)
-      redirect_to @project, alert: "Repository not found at configured path"
+      redirect_to @task, alert: "Repository not found at configured path"
       return
     end
 
     archive_path = create_repository_archive(repo_path)
 
     send_file archive_path,
-              filename: "#{@project.name.parameterize}-repository.zip",
+              filename: "#{@task.description.parameterize}-#{project.name.parameterize}-repository.zip",
               type: "application/zip",
               disposition: "attachment"
   ensure
@@ -25,15 +26,20 @@ class RepositoryDownloadsController < ApplicationController
 
   private
 
-  def set_project
-    @project = Current.user.projects.find(params[:project_id])
+  def set_task
+    @task = Current.user.tasks.find(params[:task_id])
   end
 
   def determine_repo_path
-    if @project.repo_path.present?
-      @project.repo_path
-    elsif @project.repository_url.present?
-      Rails.root.join("tmp", "repos", @project.id.to_s).to_s
+    project = @task.project
+    volume_mount = @task.volume_mounts.joins(:volume).find_by(volume: { mount_point: "/workplace" })
+
+    if volume_mount && File.exist?(volume_mount.host_path)
+      volume_mount.host_path
+    elsif project.repo_path.present?
+      project.repo_path
+    elsif project.repository_url.present?
+      Rails.root.join("tmp", "repos", project.id.to_s).to_s
     end
   end
 

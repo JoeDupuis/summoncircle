@@ -49,6 +49,7 @@
 </div>
 
 <div class="task-actions">
+  <%= link_to 'Download Repository', task_repository_download_path(@task), class: 'button' %> |
   <%= link_to 'Archive', task_path(@task),
               data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to archive this task?' },
               class: 'archive' %> |
