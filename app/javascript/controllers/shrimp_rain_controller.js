@@ -26,9 +26,9 @@ export default class extends Controller {
     document.body.appendChild(container)
     
     // Calculate max animation time: max delay + max duration
-    const maxDelay = (shrimpCount - 1) * 20 // Updated to match new delay
-    const maxDuration = 1.3 * 1000 // Updated to match new max duration
-    const totalTime = maxDelay + maxDuration + 100 // Small buffer
+    const maxDelay = (shrimpCount - 1) * 20 // Tighter burst
+    const maxDuration = 3 * 1000 // Back to original max duration
+    const totalTime = Math.min(maxDelay + maxDuration, 2000) // Cap at 2 seconds
     
     setTimeout(() => {
       container.remove()
@@ -49,19 +49,31 @@ export default class extends Controller {
   }
 
   animateShrimp(shrimp, index) {
-    const duration = Math.random() * 0.5 + 0.8 // 0.8 to 1.3 seconds
+    const duration = Math.random() * 2 + 1 // Back to original 1-3 seconds
     const horizontalMovement = (Math.random() - 0.5) * 200
     const rotation = (Math.random() - 0.5) * 720
-    const delay = index * 20 // Reduced from 50ms to 20ms
+    const delay = index * 20 // Keep shorter delay for tighter burst
     
     shrimp.animate([
       { 
         transform: `translateY(0) translateX(0) rotate(${shrimp.style.transform.match(/\d+/)[0]}deg)`,
-        opacity: 1
+        opacity: 1,
+        offset: 0
+      },
+      { 
+        transform: `translateY(${window.innerHeight * 0.3}px) translateX(${horizontalMovement * 0.3}px) rotate(${rotation * 0.3}deg)`,
+        opacity: 1,
+        offset: 0.3
+      },
+      { 
+        transform: `translateY(${window.innerHeight * 0.6}px) translateX(${horizontalMovement * 0.6}px) rotate(${rotation * 0.6}deg)`,
+        opacity: 0.5,
+        offset: 0.6
       },
       { 
         transform: `translateY(${window.innerHeight + 100}px) translateX(${horizontalMovement}px) rotate(${rotation}deg)`,
-        opacity: 0
+        opacity: 0,
+        offset: 1
       }
     ], {
       duration: duration * 1000,
