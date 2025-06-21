@@ -1,5 +1,12 @@
+.run-form {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+}
+
 .run-form > .field {
-  margin-bottom: 10px;
+  flex: 1;
+  margin-bottom: 0;
 }
 
 .run-form > .field > .textarea {
@@ -17,5 +24,5 @@
 }
 
 .run-form > .actions {
-  margin-top: 10px;
+  margin-top: 0;
 }
