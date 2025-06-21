@@ -131,7 +131,6 @@ module GitOperations
         error_message: "Failed to capture git diff",
         return_logs: true
       )
-      return nil if diff_output.blank?
 
       target_branch_diff = nil
       if task.target_branch.present?
@@ -148,14 +147,21 @@ module GitOperations
         end
       end
 
+      # Return early only if both diffs are empty
+      return nil if diff_output.blank? && target_branch_diff.blank?
+
       repo_path = project.repo_path.presence || ""
       working_dir = task.workplace_mount.container_path
       git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
 
+      content_parts = ["Repository state captured"]
+      content_parts << "\nUncommitted diff:\n#{diff_output}" if diff_output.present?
+      content_parts << "\nTarget branch diff available" if target_branch_diff.present?
+      
       repo_state_step = run.steps.create!(
         raw_response: "Repository state captured",
         type: "Step::System",
-        content: "Repository state captured\n\nUncommitted diff:\n#{diff_output}"
+        content: content_parts.join("\n")
       )
 
       repo_state_step.repo_states.create!(

@@ -14,11 +14,19 @@ export default class extends Controller {
     this.currentDiffType = 'uncommitted'
     // Ensure the shadow root is available
     this.ensureShadowRoot()
-    if (this.hasUncommittedDiffValue && this.uncommittedDiffValue.trim()) {
-      this.render()
-    } else if (this.hasDiffTextValue && this.diffTextValue.trim()) {
-      // Backward compatibility
-      this.uncommittedDiffValue = this.diffTextValue
+    
+    // If there's only a target branch diff and no uncommitted diff, switch to target branch view
+    if (this.hasTargetBranchValue && this.targetBranchDiffValue && !this.uncommittedDiffValue.trim()) {
+      this.currentDiffType = 'target-branch'
+      if (this.hasDiffSelectTarget) {
+        this.diffSelectTarget.value = 'target-branch'
+      }
+    }
+    
+    // Render if we have any diff
+    if ((this.hasUncommittedDiffValue && this.uncommittedDiffValue.trim()) ||
+        (this.hasTargetBranchValue && this.targetBranchDiffValue.trim()) ||
+        (this.hasDiffTextValue && this.diffTextValue.trim())) {
       this.render()
     }
   }
