@@ -1,0 +1,21 @@
+<div id="docker_controls" class="docker-controls">
+  <% if task.container_id.present? %>
+    <div class="container-info">
+      <span class="container-status">Container: <%= task.container_name %> (<%= task.container_status %>)</span>
+      <%= link_to "Stop", stop_container_task_path(task), 
+          data: { turbo_method: :post },
+          class: "button action-button -mini -danger" %>
+      <%= link_to "Restart", restart_container_task_path(task), 
+          data: { turbo_method: :post },
+          class: "button action-button -mini" %>
+      <%= link_to "Remove", remove_container_task_path(task), 
+          data: { turbo_method: :delete, turbo_confirm: "Remove container?" },
+          class: "button action-button -mini -danger" %>
+    </div>
+  <% else %>
+    <%= link_to "Build & Run Container", build_and_run_container_task_path(task), 
+        data: { turbo_method: :post },
+        class: "button action-button -primary -mini",
+        title: "Build and run a development container with the project's Dockerfile" %>
+  <% end %>
+</div>
