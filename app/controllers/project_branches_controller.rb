@@ -1,4 +1,6 @@
 class ProjectBranchesController < ApplicationController
+  require "open3"
+
   before_action :set_project
 
   def index
@@ -23,9 +25,8 @@ class ProjectBranchesController < ApplicationController
   private
 
   def fetch_remote_branches(repository_url)
-    command = build_git_command("git ls-remote --heads #{repository_url}", repository_url)
-    output = `#{command} 2>&1`
-    return [] unless $?.success?
+    output, status = execute_git_command([ "git", "ls-remote", "--heads", repository_url ], repository_url)
+    return [] unless status.success?
 
     output.split("\n").map do |line|
       line.split("\t").last.sub("refs/heads/", "") if line.include?("refs/heads/")
@@ -33,9 +34,8 @@ class ProjectBranchesController < ApplicationController
   end
 
   def fetch_default_branch(repository_url)
-    command = build_git_command("git ls-remote --symref #{repository_url} HEAD", repository_url)
-    output = `#{command} 2>&1`
-    return "main" unless $?.success?
+    output, status = execute_git_command([ "git", "ls-remote", "--symref", repository_url, "HEAD" ], repository_url)
+    return "main" unless status.success?
 
     if output.include?("refs/heads/")
       output.split("\n").first.split("\t").first.sub("ref: refs/heads/", "")
@@ -44,7 +44,10 @@ class ProjectBranchesController < ApplicationController
     end
   end
 
-  def build_git_command(base_command, repository_url)
+  def execute_git_command(command_array, repository_url)
+    env = {}
+    askpass_script = nil
+
     # Check if it's a GitHub HTTPS URL and we have a token
     if repository_url.include?("github.com") && repository_url.start_with?("https://") && Current.user&.github_token.present?
       # Create a temporary askpass script
@@ -59,11 +62,17 @@ class ProjectBranchesController < ApplicationController
       askpass_script.close
       File.chmod(0700, askpass_script.path)
 
-      # Set up environment for git command
-      "GIT_ASKPASS=#{askpass_script.path} #{base_command}"
-    else
-      base_command
+      env["GIT_ASKPASS"] = askpass_script.path
     end
+
+    # Execute command with Open3 to avoid shell injection
+    stdout, stderr, status = Open3.capture3(env, *command_array)
+    output = stdout + stderr
+
+    [ output, status ]
+  ensure
+    # Clean up temp file if created
+    askpass_script&.unlink
   end
 
   def set_project
