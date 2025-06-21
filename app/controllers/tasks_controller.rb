@@ -1,6 +1,6 @@
 class TasksController < ApplicationController
   before_action :set_project
-  before_action :set_task, only: [ :show, :edit, :update, :destroy, :update_auto_push ]
+  before_action :set_task, only: [ :show, :edit, :update, :destroy, :branches, :update_auto_push ]
 
   def index
     @tasks = @project.tasks.kept.includes(:agent, :project).order(created_at: :desc)
@@ -63,6 +63,17 @@ class TasksController < ApplicationController
     redirect_to project_tasks_path(@task.project), notice: "Task was successfully archived."
   end
 
+  def branches
+    @branches = @task.fetch_branches
+    Rails.logger.info "Fetched branches from controller: #{@branches.inspect}"
+    render turbo_stream: turbo_stream.replace("auto_push_form",
+                                              partial: "tasks/auto_push_form",
+                                              locals: { task: @task })
+  rescue => e
+    Rails.logger.error "Branch fetch error: #{e.message}"
+    flash.now[:alert] = "Failed to fetch branches: #{e.message}"
+    render turbo_stream: turbo_stream.prepend("flash-messages", partial: "application/flash_messages")
+  end
 
   def update_auto_push
     auto_push_enabled = params[:task][:auto_push_branch].present?

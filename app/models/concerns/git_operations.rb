@@ -73,6 +73,28 @@ module GitOperations
 
 
 
+  def fetch_branches(task = nil)
+    task ||= self.is_a?(Task) ? self : self.task
+    return [] unless task.project.repository_url.present?
+
+    begin
+      logs = run_git_command(
+        task: task,
+        command: "git branch -r",
+        error_message: "Failed to fetch branches",
+        return_logs: true
+      )
+      branches = logs.lines.map do |line|
+        # Remove origin/ prefix and any whitespace
+        line.strip.sub(/^origin\//, "")
+      end.reject { |b| b.include?("HEAD") || b.blank? }
+      branches.presence || []
+    rescue => e
+      Rails.logger.error "Failed to fetch branches: #{e.message}"
+      []
+    end
+  end
+
   def capture_repository_state(run = nil)
     run ||= self if self.is_a?(Run)
     task = run.task

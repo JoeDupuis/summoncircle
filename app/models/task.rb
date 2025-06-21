@@ -25,6 +25,9 @@ class Task < ApplicationRecord
     end
   end
 
+  def branches
+    @branches ||= fetch_branches(self)
+  end
 
   def total_cost
     runs.joins(:steps).where.not(steps: { cost_usd: nil }).sum("steps.cost_usd")

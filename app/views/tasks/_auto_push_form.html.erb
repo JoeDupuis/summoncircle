@@ -1,11 +1,16 @@
-<div id="auto_push_form" data-controller="auto-push-branch-select" data-auto-push-branch-select-project-id-value="<%= task.project_id %>">
+<div id="auto_push_form">
   <%= form_with model: task, url: update_auto_push_task_path(task), method: :patch, class: "auto-push", data: { turbo_frame: "_top" } do |form| %>
     <%= form.label :auto_push_branch, "Auto Push:", class: "label" %>
     <div class="selector">
-      <%= form.select :auto_push_branch, [], { selected: task.auto_push_branch }, 
-          { data: { auto_push_branch_select_target: "select" }, class: "select" } %>
-      <span data-auto-push-branch-select-target="loading" style="display: none;">Loading branches...</span>
+      <%= form.select :auto_push_branch, 
+          options_for_select(task.branches, task.auto_push_branch),
+          { include_blank: "Select branch..." },
+          { class: "select" } %>
     </div>
+    <%= link_to "↻", branches_task_path(task), 
+        data: { turbo_method: :get },
+        class: "button action-button -mini",
+        title: "Refresh branches" %>
     <%= form.submit "Save", class: "button action-button -primary -mini" %>
   <% end %>
 </div>
