@@ -121,7 +121,6 @@ class Run < ApplicationRecord
     env_vars = agent.env_strings + project_env_strings + user_env_strings
 
     Docker::Container.create(
-      "name" => "task-#{task.id}-agent-run-#{id}",
       "Image" => agent.docker_image,
       "Cmd" => command,
       "Env" => env_vars,
