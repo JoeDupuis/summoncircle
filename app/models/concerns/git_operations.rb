@@ -83,7 +83,7 @@ module GitOperations
         error_message: "Failed to fetch branches",
         return_logs: true
       )
-      branches = logs.split("\n").map do |line|
+      branches = logs.lines.map do |line|
         line.split("\t").last.sub("refs/heads/", "") if line.include?("refs/heads/")
       end.compact.reject(&:blank?)
       branches.presence || []
@@ -106,7 +106,7 @@ module GitOperations
       )
 
       if logs.include?("refs/heads/")
-        logs.split("\n").first.split("\t").first.sub("ref: refs/heads/", "")
+        logs.lines.first.split("\t").first.sub("ref: refs/heads/", "")
       else
         "main"
       end

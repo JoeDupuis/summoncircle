@@ -28,7 +28,7 @@ class ProjectBranchesController < ApplicationController
     output, status = execute_git_command([ "git", "ls-remote", "--heads", repository_url ], repository_url)
     return [] unless status.success?
 
-    output.split("\n").map do |line|
+    output.lines.map do |line|
       line.split("\t").last.sub("refs/heads/", "") if line.include?("refs/heads/")
     end.compact
   end
@@ -38,7 +38,7 @@ class ProjectBranchesController < ApplicationController
     return "main" unless status.success?
 
     if output.include?("refs/heads/")
-      output.split("\n").first.split("\t").first.sub("ref: refs/heads/", "")
+      output.lines.first.split("\t").first.sub("ref: refs/heads/", "")
     else
       "main"
     end
