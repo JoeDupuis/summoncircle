@@ -224,7 +224,7 @@ class RunTest < ActiveSupport::TestCase
 
     assert run.failed?
     assert_equal 1, run.steps.count
-    assert_includes run.steps.first.raw_response, "Failed to clone repository"
+    assert_includes run.steps.first.raw_response, "Git operation error"
   end
 
   test "execute! skips git clone on subsequent runs" do
@@ -563,6 +563,73 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.failed?
+  end
+
+  test "execute! fails with helpful error when SSH repository but no SSH key configured" do
+    task = tasks(:for_repo_clone)
+    task.user.update!(ssh_key: nil)
+    task.project.update!(repository_url: "git@github.com:test/repo.git")
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    run.execute!
+
+    assert run.failed?
+    assert_equal 1, run.steps.count
+    assert_includes run.steps.first.raw_response, "SSH authentication required"
+    assert_includes run.steps.first.raw_response, "no SSH key is configured"
+    assert_includes run.steps.first.raw_response, "Please add an SSH key in your user settings"
+  end
+
+  test "execute! fails with helpful error when SSH repository but agent lacks SSH mount path" do
+    task = tasks(:for_repo_clone)
+    task.user.update!(ssh_key: "test_key")
+    task.agent.update!(ssh_mount_path: nil)
+    task.project.update!(repository_url: "git@github.com:test/repo.git")
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    run.execute!
+
+    assert run.failed?
+    assert_equal 1, run.steps.count
+    assert_includes run.steps.first.raw_response, "SSH configuration incomplete"
+    assert_includes run.steps.first.raw_response, "Please configure the agent's SSH mount path"
+  end
+
+  test "execute! provides helpful SSH authentication error when git clone fails with permission denied" do
+    task = tasks(:for_repo_clone)
+    task.user.update!(ssh_key: "test_key")
+    task.agent.update!(ssh_mount_path: "/home/user/.ssh/id_rsa")
+    task.project.update!(repository_url: "git@github.com:test/repo.git")
+    run = task.runs.create!(prompt: "test", status: :pending)
+
+    # Mock git container creation and execution with SSH failure
+    git_container = mock("git_container")
+    git_container.expects(:start)
+    git_container.expects(:exec).with([ "mkdir", "-p", "/home/user/.ssh" ])
+    git_container.expects(:exec).with([ "sh", "-c", "echo 'dGVzdF9rZXk=' | base64 -d > /home/user/.ssh/id_rsa" ])
+    git_container.expects(:exec).with([ "chmod", "600", "/home/user/.ssh/id_rsa" ])
+    git_container.expects(:exec).with([ "chmod", "700", "/home/user/.ssh" ])
+    git_container.expects(:wait).with(300).returns({ "StatusCode" => 128 })
+    git_container.expects(:logs).with(stdout: true, stderr: true).returns(
+      DOCKER_LOG_HEADER + "git@github.com: Permission denied (publickey).\nfatal: Could not read from remote repository."
+    )
+    git_container.expects(:delete).with(force: true)
+
+    Docker::Container.expects(:create).with(
+      has_entries(
+        "Image" => "example/image:latest",
+        "Entrypoint" => [ "sh" ],
+        "Cmd" => [ "-c", "git clone git@github.com:test/repo.git ." ]
+      )
+    ).returns(git_container)
+
+    run.execute!
+
+    assert run.failed?
+    assert_equal 1, run.steps.count
+    assert_includes run.steps.first.raw_response, "SSH authentication failed"
+    assert_includes run.steps.first.raw_response, "SSH key may not have access to this repository"
+    assert_includes run.steps.first.raw_response, "deploy keys"
   end
 
   private

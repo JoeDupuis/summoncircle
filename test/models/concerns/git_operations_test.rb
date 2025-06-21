@@ -78,6 +78,9 @@ class GitOperationsTest < ActiveSupport::TestCase
     user = task.user
     user.update!(ssh_key: "ssh-rsa AAAAB3NzaC1...")
 
+    agent = task.agent
+    agent.update!(ssh_mount_path: "/home/user/.ssh/id_rsa")
+
     project = task.project
     project.update!(repository_url: "git@github.com:JoeDupuis/shenanigans.git")
 
@@ -97,6 +100,9 @@ class GitOperationsTest < ActiveSupport::TestCase
     task = tasks(:without_runs)
     user = task.user
     user.update!(ssh_key: "ssh-rsa AAAAB3NzaC1...")
+
+    agent = task.agent
+    agent.update!(ssh_mount_path: "/home/user/.ssh/id_rsa")
 
     project = task.project
     project.update!(repository_url: "git@github.com:JoeDupuis/shenanigans.git")
@@ -120,6 +126,7 @@ class GitOperationsTest < ActiveSupport::TestCase
   def mock_container
     container = mock("container")
     container.expects(:start)
+    container.expects(:exec).with(anything).at_least(0).at_most(4)
     container.expects(:wait).returns({ "StatusCode" => 0 })
     container.expects(:logs).returns("Success")
     container.expects(:delete)

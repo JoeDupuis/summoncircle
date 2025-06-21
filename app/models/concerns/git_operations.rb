@@ -9,7 +9,7 @@ module GitOperations
     repository_url = project.repository_url
 
     Rails.logger.info "Clone repository - URL: #{repository_url.inspect}, Branch: #{task.target_branch.inspect}"
-    raise "Repository URL is missing" if repository_url.blank?
+    validate_ssh_setup!(task, repository_url)
 
     if task.target_branch.present?
       command = "git clone -b '#{task.target_branch}' '#{repository_url}' '#{clone_target}'"
@@ -61,6 +61,8 @@ module GitOperations
 
     repository_url = task.project.repository_url
     commit_message ||= "Manual push from SummonCircle"
+
+    validate_ssh_setup!(task, repository_url)
 
     push_commands = [
       "git remote set-url origin '#{repository_url}'",
@@ -196,7 +198,8 @@ module GitOperations
     exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
 
     if exit_code && exit_code != 0
-      raise "#{error_message}: #{clean_logs}"
+      enhanced_error = enhance_git_error_message(clean_logs, task, command)
+      raise enhanced_error
     end
 
     return_logs ? clean_logs : nil
@@ -293,5 +296,39 @@ module GitOperations
     container.exec([ "chmod", "700", target_dir ])
   rescue => e
     Rails.logger.error "Failed to setup SSH key in container: #{e.message}"
+  end
+
+  def validate_ssh_setup!(task, repository_url)
+    return unless repository_url&.match?(/\Agit@|ssh:\/\//)
+
+    user = task.user
+    agent = task.agent
+
+    if user.ssh_key.blank?
+      raise "SSH authentication required: The repository uses SSH authentication but no SSH key is configured. Please add an SSH key in your user settings."
+    end
+
+    if agent.ssh_mount_path.blank?
+      raise "SSH configuration incomplete: The agent does not have an SSH mount path configured. Please configure the agent's SSH mount path."
+    end
+  end
+
+  def enhance_git_error_message(original_error, task, command)
+    if original_error.include?("Permission denied (publickey)") || original_error.include?("Could not read from remote repository")
+      user = task.user
+      agent = task.agent
+
+      if task.project.repository_url&.match?(/\Agit@|ssh:\/\//)
+        if user.ssh_key.blank?
+          return "SSH authentication failed: No SSH key configured for your user account. Please add an SSH key in your user settings to access this repository."
+        elsif agent.ssh_mount_path.blank?
+          return "SSH authentication failed: Agent is missing SSH mount path configuration. Please configure the agent's SSH mount path."
+        else
+          return "SSH authentication failed: The SSH key may not have access to this repository. Please ensure your SSH key is added to the repository's deploy keys or your GitHub/GitLab account."
+        end
+      end
+    end
+
+    "#{original_error}"
   end
 end
