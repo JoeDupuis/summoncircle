@@ -27,7 +27,10 @@ class RepositoryDownloadsController < ApplicationController
   private
 
   def set_task
-    @task = Current.user.tasks.find(params[:task_id])
+    @task = Task.find(params[:task_id])
+    unless @task.user == Current.user
+      raise ActiveRecord::RecordNotFound
+    end
   end
 
   def determine_repo_path
