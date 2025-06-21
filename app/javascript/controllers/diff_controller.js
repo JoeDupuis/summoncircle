@@ -3,7 +3,6 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ["output", "viewToggle", "diffSelect", "shadowContent"]
   static values = {
-    diffText: String,
     uncommittedDiff: String,
     targetBranchDiff: String,
     hasTargetBranch: Boolean
@@ -25,16 +24,7 @@ export default class extends Controller {
     
     // Render if we have any diff
     if ((this.hasUncommittedDiffValue && this.uncommittedDiffValue.trim()) ||
-        (this.hasTargetBranchValue && this.targetBranchDiffValue.trim()) ||
-        (this.hasDiffTextValue && this.diffTextValue.trim())) {
-      this.render()
-    }
-  }
-
-  diffTextValueChanged() {
-    if (this.diffTextValue.trim()) {
-      // Backward compatibility
-      this.uncommittedDiffValue = this.diffTextValue
+        (this.hasTargetBranchValue && this.targetBranchDiffValue.trim())) {
       this.render()
     }
   }
@@ -93,9 +83,6 @@ export default class extends Controller {
       diffText = this.targetBranchDiffValue
     } else if (this.hasUncommittedDiffValue) {
       diffText = this.uncommittedDiffValue
-    } else if (this.hasDiffTextValue) {
-      // Backward compatibility
-      diffText = this.diffTextValue
     }
 
     // Create Diff2HtmlUI instance targeting the shadow DOM container
