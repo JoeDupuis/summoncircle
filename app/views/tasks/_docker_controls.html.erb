@@ -1,34 +1,68 @@
 <div id="docker_controls" class="docker-controls">
-  <% if task.container_id.present? %>
+  <% 
+    # Verify container state from Docker directly
+    container_exists = false
+    container_status = nil
+    port_info = nil
+    
+    if task.container_id.present?
+      begin
+        container = Docker::Container.get(task.container_id)
+        container_json = container.json
+        container_exists = true
+        container_status = container_json["State"]["Status"]
+        
+        # Update task if status differs
+        if task.container_status != container_status
+          task.update_column(:container_status, container_status)
+        end
+        
+        # Get port mapping
+        if task.project.dev_container_port.present?
+          port_mapping = container_json["NetworkSettings"]["Ports"]["#{task.project.dev_container_port}/tcp"]
+          if port_mapping && port_mapping.first
+            port_info = port_mapping.first['HostPort']
+          end
+        end
+      rescue Docker::Error::NotFoundError
+        # Container doesn't exist in Docker, clear task data
+        task.update_columns(
+          container_id: nil,
+          container_name: nil,
+          container_status: nil,
+          docker_image_id: nil
+        )
+      rescue => e
+        Rails.logger.warn "Failed to verify container state: #{e.message}"
+      end
+    end
+  %>
+  
+  <% if task.container_status == "rebuilding" %>
     <div class="container-info">
       <span class="container-status">
-        Container: <%= task.container_name %> (<%= task.container_status %>)
-        <% if task.project.dev_container_port.present? && task.container_id.present? %>
-          <% begin %>
-            <% container = Docker::Container.get(task.container_id) %>
-            <% port_mapping = container.json["NetworkSettings"]["Ports"]["#{task.project.dev_container_port}/tcp"] %>
-            <% if port_mapping && port_mapping.first %>
-              | Port: <%= link_to "localhost:#{port_mapping.first['HostPort']}", "http://localhost:#{port_mapping.first['HostPort']}", target: "_blank" %>
-            <% else %>
-              | Port: <%= task.project.dev_container_port %> (not mapped)
-            <% end %>
-          <% rescue => e %>
-            | Port: <%= task.project.dev_container_port %>
-          <% end %>
+        Container: Rebuilding...
+      </span>
+    </div>
+  <% elsif container_exists %>
+    <div class="container-info">
+      <span class="container-status">
+        Container: <%= task.container_name %> (<%= container_status %>)
+        <% if port_info %>
+          | Port: <%= link_to "localhost:#{port_info}", "http://localhost:#{port_info}", target: "_blank" %>
+        <% elsif task.project.dev_container_port.present? %>
+          | Port: <%= task.project.dev_container_port %> (not mapped)
         <% end %>
       </span>
-      <%= link_to "Stop", stop_container_task_path(task), 
-          data: { turbo_method: :post },
-          class: "button action-button -mini -danger" %>
-      <%= link_to "Restart", restart_container_task_path(task), 
-          data: { turbo_method: :post },
+      <%= link_to "Rebuild", task_container_path(task), 
+          data: { turbo_method: :post, turbo_confirm: "Rebuild container?" },
           class: "button action-button -mini" %>
-      <%= link_to "Remove", remove_container_task_path(task), 
+      <%= link_to "Remove", task_container_path(task), 
           data: { turbo_method: :delete, turbo_confirm: "Remove container?" },
           class: "button action-button -mini -danger" %>
     </div>
   <% else %>
-    <%= link_to "Build & Run Container", build_and_run_container_task_path(task), 
+    <%= link_to "Build & Run Container", task_container_path(task), 
         data: { turbo_method: :post },
         class: "button action-button -primary -mini",
         title: "Build and run a development container with the project's Dockerfile" %>

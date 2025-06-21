@@ -7,7 +7,13 @@ class RemoveDockerContainerJob < ApplicationJob
     set_docker_host(task.agent.docker_host)
 
     container = Docker::Container.get(task.container_id)
-    container.stop rescue nil
+
+    begin
+      container.stop(t: 5)
+    rescue => e
+      Rails.logger.warn "Failed to stop container gracefully: #{e.message}"
+    end
+
     container.delete(force: true)
 
     if task.docker_image_id.present?
@@ -15,6 +21,9 @@ class RemoveDockerContainerJob < ApplicationJob
         image = Docker::Image.get(task.docker_image_id)
         image.remove(force: true)
       rescue Docker::Error::NotFoundError
+        Rails.logger.info "Image already removed: #{task.docker_image_id}"
+      rescue => e
+        Rails.logger.warn "Failed to remove image #{task.docker_image_id}: #{e.message}, continuing anyway"
       end
     end
 

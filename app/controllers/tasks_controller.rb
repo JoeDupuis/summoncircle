@@ -1,7 +1,6 @@
 class TasksController < ApplicationController
   before_action :set_project
-  before_action :set_task, only: [ :show, :edit, :update, :destroy, :branches, :update_auto_push,
-                                   :build_and_run_container, :stop_container, :restart_container, :remove_container ]
+  before_action :set_task, only: [ :show, :edit, :update, :destroy, :branches, :update_auto_push ]
 
   def index
     @tasks = @project.tasks.kept.includes(:agent, :project).order(created_at: :desc)
@@ -100,29 +99,6 @@ class TasksController < ApplicationController
     end
   end
 
-  def build_and_run_container
-    BuildDockerContainerJob.perform_later(@task)
-    flash[:notice] = "Building container for task. This may take a few minutes..."
-    redirect_to @task
-  end
-
-  def stop_container
-    StopDockerContainerJob.perform_later(@task)
-    flash[:notice] = "Stopping container..."
-    redirect_to @task
-  end
-
-  def restart_container
-    RestartDockerContainerJob.perform_later(@task)
-    flash[:notice] = "Restarting container..."
-    redirect_to @task
-  end
-
-  def remove_container
-    RemoveDockerContainerJob.perform_later(@task)
-    flash[:notice] = "Removing container..."
-    redirect_to @task
-  end
 
   private
 
