@@ -141,6 +141,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_21_025720) do
     t.text "instructions"
     t.text "ssh_key"
     t.text "git_config"
+    t.boolean "allow_github_token_access", default: true, null: false
     t.boolean "shrimp_mode", default: true, null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end

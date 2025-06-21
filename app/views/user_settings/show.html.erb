@@ -18,6 +18,11 @@
 </div>
 
 <div>
+  <strong>Allow tasks to access GitHub token:</strong> 
+  <%= @user.allow_github_token_access ? "Yes" : "No" %>
+</div>
+
+<div>
   <strong>Global Agent Instructions:</strong>
   <% if @user.instructions.present? %>
     <pre class="instructions-preview"><%= @user.instructions %></pre>
