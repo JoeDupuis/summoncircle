@@ -135,14 +135,10 @@ module GitOperations
       working_dir = task.workplace_mount.container_path
       git_working_dir = File.join([ working_dir, repo_path.presence&.sub(/^\//, "") ].compact)
 
-      content_parts = [ "Repository state captured" ]
-      content_parts << "\nUncommitted diff:\n#{diff_output}" if diff_output.present?
-      content_parts << "\nTarget branch diff available" if target_branch_diff.present?
-
       repo_state_step = run.steps.create!(
         raw_response: "Repository state captured",
         type: "Step::System",
-        content: content_parts.join("\n")
+        content: "Repository state captured"
       )
 
       repo_state_step.repo_states.create!(
