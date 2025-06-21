@@ -10,6 +10,7 @@ Rails.application.routes.draw do
     end
   end
   resources :projects do
+    resource :repository_download, only: [ :show ]
     resources :tasks, shallow: true do
       member do
         get :branches
