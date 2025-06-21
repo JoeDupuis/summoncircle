@@ -3,6 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ["select", "loading"]
   static values = { projectId: Number }
+  static classes = ["hidden"]
   
   connect() {
     // Set a default value immediately
@@ -75,14 +76,14 @@ export default class extends Controller {
   }
   
   showLoading() {
-    if (this.hasLoadingTarget) {
-      this.loadingTarget.style.display = "inline"
+    if (this.hasLoadingTarget && this.hasHiddenClass) {
+      this.loadingTarget.classList.remove(this.hiddenClass)
     }
   }
   
   hideLoading() {
-    if (this.hasLoadingTarget) {
-      this.loadingTarget.style.display = "none"
+    if (this.hasLoadingTarget && this.hasHiddenClass) {
+      this.loadingTarget.classList.add(this.hiddenClass)
     }
   }
 }
