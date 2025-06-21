@@ -177,7 +177,7 @@ class RunTest < ActiveSupport::TestCase
       working_dir: "/workspace",
       binds: instance_of(Array)
     )
-    
+
     # Expect branch detection after clone
     expect_branch_detection_container(
       working_dir: "/workspace",
@@ -205,7 +205,7 @@ class RunTest < ActiveSupport::TestCase
       working_dir: "/workspace",
       binds: instance_of(Array)
     )
-    
+
     # Expect branch detection after clone
     expect_branch_detection_container(
       working_dir: "/workspace/myapp",
@@ -404,7 +404,7 @@ class RunTest < ActiveSupport::TestCase
         "HostConfig" => has_entries("Binds" => instance_of(Array))
       )
     ).returns(git_container)
-    
+
     # Mock branch detection container (also gets SSH setup)
     branch_container = mock("branch_container")
     branch_container.expects(:start)
@@ -415,7 +415,7 @@ class RunTest < ActiveSupport::TestCase
     branch_container.expects(:wait).returns({ "StatusCode" => 0 })
     branch_container.expects(:logs).returns(DOCKER_LOG_HEADER + "main")
     branch_container.expects(:delete).with(force: true)
-    
+
     Docker::Container.expects(:create).with(
       has_entries(
         "Image" => "example/image:latest",
@@ -472,7 +472,7 @@ class RunTest < ActiveSupport::TestCase
         "HostConfig" => has_entries("Binds" => instance_of(Array))
       )
     ).returns(git_diff_container)
-    
+
     # Mock target branch diff container with SSH support
     target_diff_container = mock("target_diff_container")
     target_diff_container.expects(:start)
@@ -711,14 +711,14 @@ class RunTest < ActiveSupport::TestCase
     git_container.expects(:delete).with(force: true)
     git_container
   end
-  
+
   def expect_clone_and_branch_detection(clone_cmd: nil, working_dir: "/workspace", env: [], binds: nil, project: nil)
     # If clone_cmd is not provided, generate it based on project
     if clone_cmd.nil? && project
       clone_cmd = "git clone '#{project.repository_url}' '.'"
     end
     clone_cmd ||= "git clone 'https://github.com/test/repo.git' '.'"
-    
+
     # Expect clone
     git_container = mock_git_container(log_output: "Cloning into '.'...")
     expectations = {
@@ -730,9 +730,9 @@ class RunTest < ActiveSupport::TestCase
       "Env" => env
     }
     expectations["HostConfig"] = has_entries("Binds" => binds) if binds
-    
+
     Docker::Container.expects(:create).with(has_entries(expectations)).returns(git_container)
-    
+
     # Expect branch detection
     branch_container = mock_git_container(log_output: "main", status_code: 0)
     branch_expectations = {
@@ -744,7 +744,7 @@ class RunTest < ActiveSupport::TestCase
       "Env" => env
     }
     branch_expectations["HostConfig"] = has_entries("Binds" => binds) if binds
-    
+
     Docker::Container.expects(:create).with(has_entries(branch_expectations)).returns(branch_container)
   end
 
@@ -768,7 +768,7 @@ class RunTest < ActiveSupport::TestCase
 
   def expect_branch_detection_container(working_dir: "/workspace/myapp", branch: "main", image: "example/image:latest", user: "1000", binds: nil)
     branch_container = mock_git_container(log_output: branch, status_code: 0)
-    
+
     expectations = {
       "Image" => image,
       "Entrypoint" => [ "sh" ],
@@ -776,7 +776,7 @@ class RunTest < ActiveSupport::TestCase
       "WorkingDir" => working_dir,
       "User" => user
     }
-    
+
     expectations["HostConfig"] = has_entries("Binds" => binds) if binds
 
     Docker::Container.expects(:create).with(
@@ -816,7 +816,7 @@ class RunTest < ActiveSupport::TestCase
         "User" => "1000"
       )
     ).returns(git_diff_container)
-    
+
     # Expect target branch diff if task has target_branch set
     if expect_target_branch_diff
       target_diff_container = mock("target_diff_container")
