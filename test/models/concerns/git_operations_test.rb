@@ -23,7 +23,7 @@ class GitOperationsTest < ActiveSupport::TestCase
     end.returns(mock_container).then.returns(mock_container_with_output("main"))
 
     run.clone_repository
-    
+
     # Verify target_branch was set
     task.reload
     assert_equal "main", task.target_branch
@@ -67,7 +67,7 @@ class GitOperationsTest < ActiveSupport::TestCase
     end.returns(mock_container).then.returns(mock_container_with_output("main"))
 
     run.clone_repository
-    
+
     # Verify target_branch was set
     task.reload
     assert_equal "main", task.target_branch
@@ -90,7 +90,7 @@ class GitOperationsTest < ActiveSupport::TestCase
     Docker::Container.expects(:create).twice.returns(mock_container).then.returns(mock_container_with_output("main"))
 
     run.clone_repository
-    
+
     # Verify target_branch was set
     task.reload
     assert_equal "main", task.target_branch
@@ -126,7 +126,7 @@ class GitOperationsTest < ActiveSupport::TestCase
   def mock_container
     container = mock("container")
     container.expects(:start)
-    container.expects(:exec).with(anything).at_least(0).at_most(4)
+    container.expects(:exec).with(anything).at_least(0).at_most(8)
     container.expects(:wait).returns({ "StatusCode" => 0 })
     container.expects(:logs).returns("Success")
     container.expects(:delete)
