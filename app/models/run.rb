@@ -146,11 +146,11 @@ class Run < ApplicationRecord
   def user_env_strings
     user = task.user
     env_strings = []
-    
+
     if user&.github_token.present? && user.allow_github_token_access
       env_strings << "GITHUB_TOKEN=#{user.github_token}"
     end
-    
+
     env_strings
   end
 
