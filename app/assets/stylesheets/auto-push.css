@@ -24,3 +24,32 @@
   padding: 4px 8px;
   font-size: 14px;
 }
+
+@media (max-width: 768px) {
+  .auto-push {
+    flex-wrap: wrap;
+    gap: 12px;
+    width: 100%;
+  }
+  
+  .auto-push > .label {
+    width: 100%;
+  }
+  
+  .auto-push > .selector {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .auto-push .select {
+    width: 100%;
+  }
+  
+  .auto-push > .button {
+    flex-shrink: 0;
+  }
+  
+  .auto-push > .button[type="submit"] {
+    width: auto;
+  }
+}
