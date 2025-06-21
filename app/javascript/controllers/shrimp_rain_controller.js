@@ -39,11 +39,12 @@ export default class extends Controller {
     const shrimp = document.createElement('div')
     shrimp.innerText = '🍤'
     shrimp.style.position = 'absolute'
-    shrimp.style.fontSize = Math.random() * 30 + 20 + 'px'
+    const fontSize = Math.random() * 30 + 20
+    shrimp.style.fontSize = fontSize + 'px'
     shrimp.style.userSelect = 'none'
     shrimp.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)'
     shrimp.style.left = Math.random() * 100 + '%'
-    shrimp.style.top = '-50px'
+    shrimp.style.top = -(fontSize + 20) + 'px'
     return shrimp
   }
 
