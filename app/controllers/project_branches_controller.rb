@@ -29,7 +29,7 @@ class ProjectBranchesController < ApplicationController
     return [] unless status.success?
 
     output.lines.map do |line|
-      line.split("\t").last.sub("refs/heads/", "") if line.include?("refs/heads/")
+      line.split("\t").last.sub("refs/heads/", "").strip if line.include?("refs/heads/")
     end.compact
   end
 
@@ -38,7 +38,7 @@ class ProjectBranchesController < ApplicationController
     return "main" unless status.success?
 
     if output.include?("refs/heads/")
-      output.lines.first.split("\t").first.sub("ref: refs/heads/", "")
+      output.lines.first.split("\t").first.sub("ref: refs/heads/", "").strip
     else
       "main"
     end

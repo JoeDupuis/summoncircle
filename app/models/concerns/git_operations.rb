@@ -8,12 +8,17 @@ module GitOperations
     clone_target = repo_path.presence&.sub(/^\//, "") || "."
     repository_url = project.repository_url
 
+    Rails.logger.info "Clone repository - URL: #{repository_url.inspect}, Branch: #{task.target_branch.inspect}"
+    raise "Repository URL is missing" if repository_url.blank?
+
     if task.target_branch.present?
-      command = "git clone -b #{task.target_branch} #{repository_url} #{clone_target}"
+      command = "git clone -b '#{task.target_branch}' '#{repository_url}' '#{clone_target}'"
     else
       # Clone without specifying branch, then detect and save the default branch
-      command = "git clone #{repository_url} #{clone_target}"
+      command = "git clone '#{repository_url}' '#{clone_target}'"
     end
+
+    Rails.logger.info "Clone command: #{command}"
 
     run_git_command(
       task: task,
@@ -84,12 +89,12 @@ module GitOperations
         error_message: "Failed to fetch branches",
         return_logs: true
       )
-      
+
       branches = logs.lines.map do |line|
         # Remove the * for current branch and any whitespace
         line.strip.sub(/^\*\s*/, "")
       end.reject(&:blank?)
-      
+
       branches.presence || []
     rescue => e
       Rails.logger.error "Failed to fetch branches: #{e.message}"

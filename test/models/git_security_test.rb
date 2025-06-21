@@ -17,11 +17,11 @@ class GitSecurityTest < ActiveSupport::TestCase
 
     # Set up ordered expectations
     sequence = sequence("docker_commands")
-    
+
     # Expect clone command first
     Docker::Container.expects(:create).in_sequence(sequence).with do |config|
       assert_equal "https://github.com/user/repo.git", project.repository_url
-      assert_match(/git clone https:\/\/github.com\/user\/repo.git/, config["Cmd"][1])
+      assert_match(/git clone 'https:\/\/github.com\/user\/repo.git' '\.'/, config["Cmd"][1])
       refute_match(/secret_token_123/, config["Cmd"][1])
       assert_includes config["Env"], "GITHUB_TOKEN=secret_token_123"
       assert_includes config["Env"], "GIT_ASKPASS=/tmp/git-askpass.sh"
@@ -32,7 +32,9 @@ class GitSecurityTest < ActiveSupport::TestCase
     Docker::Container.expects(:create).in_sequence(sequence).with do |config|
       assert_includes config["Env"], "GITHUB_TOKEN=secret_token_123"
       assert_includes config["Env"], "GIT_ASKPASS=/tmp/git-askpass.sh"
+      # Command will be wrapped with askpass script setup
       assert_match(/git branch --show-current/, config["Cmd"][1])
+      assert_match(/git-askpass\.sh/, config["Cmd"][1])
       true
     end.returns(mock_container_with_output("main"))
 
@@ -77,11 +79,11 @@ class GitSecurityTest < ActiveSupport::TestCase
 
     # Set up ordered expectations
     sequence = sequence("docker_commands")
-    
+
     # Expect clone command first
     Docker::Container.expects(:create).in_sequence(sequence).with do |config|
       cmd = config["Cmd"][1]
-      assert_match(/git clone git@github\.com:JoeDupuis\/shenanigans\.git/, cmd)
+      assert_match(/git clone 'git@github\.com:JoeDupuis\/shenanigans\.git' '\.'/, cmd)
       refute_match(/ssh-rsa/, cmd)
       true
     end.returns(mock_container)

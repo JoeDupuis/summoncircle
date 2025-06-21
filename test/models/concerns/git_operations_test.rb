@@ -17,12 +17,12 @@ class GitOperationsTest < ActiveSupport::TestCase
 
     # Set up ordered expectations
     sequence = sequence("docker_commands")
-    
+
     # Expect clone command first
     Docker::Container.expects(:create).in_sequence(sequence).with do |config|
       assert_includes config["Env"], "GITHUB_TOKEN=test_token_123"
       assert_includes config["Env"], "GIT_ASKPASS=/tmp/git-askpass.sh"
-      assert_match(/git clone https:\/\/github.com\/test\/repo.git/, config["Cmd"][1])
+      assert_match(/git clone 'https:\/\/github.com\/test\/repo.git' '\.'/, config["Cmd"][1])
       true
     end.returns(mock_container)
 
@@ -30,7 +30,9 @@ class GitOperationsTest < ActiveSupport::TestCase
     Docker::Container.expects(:create).in_sequence(sequence).with do |config|
       assert_includes config["Env"], "GITHUB_TOKEN=test_token_123"
       assert_includes config["Env"], "GIT_ASKPASS=/tmp/git-askpass.sh"
+      # Command will be wrapped with askpass script setup
       assert_match(/git branch --show-current/, config["Cmd"][1])
+      assert_match(/git-askpass\.sh/, config["Cmd"][1])
       true
     end.returns(mock_container_with_output("main"))
 
@@ -68,9 +70,10 @@ class GitOperationsTest < ActiveSupport::TestCase
 
     # Set up ordered expectations
     sequence = sequence("docker_commands")
-    
+
     # Expect clone command first
     Docker::Container.expects(:create).in_sequence(sequence).with do |config|
+      assert_equal "git clone 'https://gitlab.com/test/repo.git' '.'", config["Cmd"][1]
       env = config["Env"] || []
       refute_includes env, "GITHUB_TOKEN=test_token_123"
       refute_includes env, "GIT_ASKPASS=/tmp/git-askpass.sh"
@@ -101,10 +104,10 @@ class GitOperationsTest < ActiveSupport::TestCase
 
     # Set up ordered expectations
     sequence = sequence("docker_commands")
-    
+
     # Expect clone command first
     Docker::Container.expects(:create).in_sequence(sequence).with do |config|
-      assert_equal "git clone git@github.com:JoeDupuis/shenanigans.git .", config["Cmd"][1]
+      assert_equal "git clone 'git@github.com:JoeDupuis/shenanigans.git' '.'", config["Cmd"][1]
       env = config["Env"] || []
       refute_includes env, "GITHUB_TOKEN="
       refute_includes env, "GIT_ASKPASS=/tmp/git-askpass.sh"
