@@ -11,7 +11,7 @@
   </div>
   <div class="content">
     <div data-tabs-target="panel" data-panel-id="steps" class="panel -active">
-      <div class="output">
+      <div class="output" data-controller="auto-scroll">
         <%= render run.steps %>
         <% if run.status == 'running' %>
           <div class="run-spinner">
@@ -22,7 +22,7 @@
       </div>
     </div>
     <div data-tabs-target="panel" data-panel-id="raw" class="panel">
-      <div class="output">
+      <div class="output" data-controller="auto-scroll">
         <% run.steps.each do |step| %>
           <div class="step-raw">
             <% begin %>
@@ -43,7 +43,7 @@
     </div>
     <% repo_states.each_with_index do |repo_state, index| %>
       <div data-tabs-target="panel" data-panel-id="diff-<%= index %>" class="panel">
-        <div class="output">
+        <div class="output" data-controller="auto-scroll">
           <%= render "runs/diff_panel", repo_state: repo_state %>
         </div>
       </div>
