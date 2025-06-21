@@ -29,6 +29,7 @@ class TasksController < ApplicationController
       cookies[:preferred_project_id] = { value: @task.project_id, expires: 1.year.from_now }
       @task.update!(started_at: Time.current)
       @task.run(params[:task][:prompt])
+      flash[:shrimp_explosion] = true
       redirect_to task_path(@task), notice: "Task was successfully launched."
     else
       if @project.present?

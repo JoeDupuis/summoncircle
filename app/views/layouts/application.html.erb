@@ -25,7 +25,7 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/diff2html/bundles/js/diff2html-ui.min.js"></script>
   </head>
 
-  <body class="<%= controller_name %> <%= action_name %>">
+  <body class="<%= controller_name %> <%= action_name %>" data-controller="shrimp" data-shrimp-enabled-value="<%= Current.user&.shrimp_mode? %>" data-shrimp-trigger-value="<%= flash[:shrimp_explosion].present? %>">
     <%= content_for?(:nav) ? yield(:nav) : render("nav") %>
     
     <main>

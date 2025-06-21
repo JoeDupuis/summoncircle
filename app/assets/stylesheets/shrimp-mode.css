@@ -1,0 +1,15 @@
+.shrimp {
+  position: fixed;
+  top: -2rem;
+  font-size: 2rem;
+  pointer-events: none;
+  z-index: 1000;
+  animation: shrimp-fall 1.2s linear forwards;
+}
+
+@keyframes shrimp-fall {
+  to {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}

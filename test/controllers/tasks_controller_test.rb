@@ -37,6 +37,12 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to task_path(Task.last)
   end
 
+  test "create sets shrimp explosion flash" do
+    login @user
+    post project_tasks_url(@project), params: { task: { agent_id: @agent.id, prompt: "hi" } }
+    assert flash[:shrimp_explosion]
+  end
+
   test "show requires authentication" do
     get task_url(@task)
     assert_redirected_to new_session_path

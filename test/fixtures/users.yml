@@ -4,8 +4,10 @@ one:
   email_address: one@example.com
   password_digest: <%= password_digest %>
   role: admin
+  shrimp_mode: true
 
 two:
   email_address: two@example.com
   password_digest: <%= password_digest %>
   role: standard
+  shrimp_mode: true
