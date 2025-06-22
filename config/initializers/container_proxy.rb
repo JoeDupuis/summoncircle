@@ -24,18 +24,18 @@ class ContainerProxy
   def handle_proxy_request(env)
     request = Rack::Request.new(env)
     host = env["HTTP_HOST"] || ""
-    
+
     if (match = host.match(/^task-(\d+)\./))
       task_id = match[1]
       path = env["PATH_INFO"] || "/"
-      
+
       task = Task.find_by(id: task_id)
-      
+
       if task && task.container_id.present?
         begin
           container = Docker::Container.get(task.container_id)
           container_info = container.json
-          
+
           if ENV["CONTAINER_PROXY_TARGET_CONTAINERS"].present?
             # Proxy directly to container's internal IP and port
             host = container_info["NetworkSettings"]["IPAddress"]
@@ -44,7 +44,7 @@ class ContainerProxy
             # Proxy to localhost and the mapped host port (default)
             host = "localhost"
             port = nil
-            
+
             if task.project.dev_container_port.present?
               port_mapping = container_info["NetworkSettings"]["Ports"]["#{task.project.dev_container_port}/tcp"]
               if port_mapping && port_mapping.first
@@ -52,13 +52,13 @@ class ContainerProxy
               end
             end
           end
-          
+
           if host.present? && port.present?
             # Update the host for the proxy but keep the original path
             env["HTTP_HOST"] = "#{host}:#{port}"
             env["SERVER_NAME"] = host
             env["SERVER_PORT"] = port.to_s
-            
+
             # Create a new proxy instance with the backend
             proxy = Rack::Proxy.new(backend: "http://#{host}:#{port}", streaming: false)
             proxy.call(env)
