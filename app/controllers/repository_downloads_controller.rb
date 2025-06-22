@@ -16,7 +16,7 @@ class RepositoryDownloadsController < ApplicationController
 
     # Read file content and send it
     tar_data = File.binread(archive_path)
-    
+
     send_data tar_data,
               filename: "#{@task.description.parameterize}-#{project.name.parameterize}-repository.tar",
               type: "application/x-tar",
