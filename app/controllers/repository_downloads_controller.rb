@@ -14,15 +14,15 @@ class RepositoryDownloadsController < ApplicationController
       return
     end
 
+    # Use Rails' send_file with remove option
     send_file archive_path,
               filename: "#{@task.description.parameterize}-#{project.name.parameterize}-repository.tar",
               type: "application/x-tar",
-              disposition: "attachment"
-  ensure
-    # Clean up the temporary file
-    if archive_path && File.exist?(archive_path)
-      File.delete(archive_path)
-    end
+              disposition: "attachment",
+              x_sendfile: false
+    
+    # Note: Cannot use :remove option with send_file as it's not supported
+    # The file will need to be cleaned up by a background job or cron task
   end
 
   private
@@ -36,6 +36,9 @@ class RepositoryDownloadsController < ApplicationController
   end
 
   def extract_repository_as_tar
+    # Clean up old tar files (older than 1 hour)
+    cleanup_old_tar_files
+    
     workplace_mount = @task.workplace_mount
     unless workplace_mount
       return nil
@@ -110,6 +113,15 @@ class RepositoryDownloadsController < ApplicationController
       # Clean up temporary container
       if container
         container.delete(force: true) rescue nil
+      end
+    end
+  end
+
+  def cleanup_old_tar_files
+    # Clean up tar files older than 1 hour
+    Dir.glob(Rails.root.join("tmp", "*.tar")).each do |file|
+      if File.mtime(file) < 1.hour.ago
+        File.delete(file) rescue nil
       end
     end
   end
