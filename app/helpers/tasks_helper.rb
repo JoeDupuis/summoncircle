@@ -64,6 +64,16 @@ module TasksHelper
   end
 
   def task_proxy_path(task, path = "/")
+    # If CONTAINER_DIRECT_LINKS is set, bypass proxy and use direct localhost URLs
+    if ENV["CONTAINER_DIRECT_LINKS"].present?
+      container_info = container_status_info(task)
+      if container_info.port_info.present?
+        return "http://localhost:#{container_info.port_info}#{path}"
+      else
+        return "#" # No port available
+      end
+    end
+    
     request = controller.request
     
     # Use CONTAINER_PROXY_BASE_URL if set, otherwise build from current request

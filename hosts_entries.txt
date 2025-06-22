@@ -1,5 +1,0 @@
-# Task subdomains for proxy
-127.0.0.1 task-1.localhost task-2.localhost task-3.localhost task-4.localhost task-5.localhost
-127.0.0.1 task-6.localhost task-7.localhost task-8.localhost task-9.localhost task-10.localhost
-127.0.0.1 task-11.localhost task-12.localhost task-13.localhost task-14.localhost task-15.localhost
-127.0.0.1 task-16.localhost task-17.localhost task-18.localhost task-19.localhost task-20.localhost
