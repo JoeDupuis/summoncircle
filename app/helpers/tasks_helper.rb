@@ -1,3 +1,5 @@
+require "ostruct"
+
 module TasksHelper
   def container_status_info(task)
     return OpenStruct.new(
