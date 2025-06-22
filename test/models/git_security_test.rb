@@ -127,6 +127,7 @@ class GitSecurityTest < ActiveSupport::TestCase
   def mock_container_with_output(output)
     container = mock("container")
     container.expects(:start)
+    container.expects(:exec).with(anything).at_least(0).at_most(8)
     container.expects(:wait).returns({ "StatusCode" => 0 })
     container.expects(:logs).returns(output)
     container.expects(:delete)
