@@ -144,10 +144,30 @@ module GitOperations
         content: "Repository state captured"
       )
 
+      # Capture git apply diff (all changes including untracked files)
+      git_apply_diff = nil
+      begin
+        git_apply_command = if task.target_branch.present?
+          "git fetch origin #{task.target_branch} && git add -N . && git diff origin/#{task.target_branch}...HEAD --unified=10"
+        else
+          "git add -N . && git diff HEAD --unified=10"
+        end
+
+        git_apply_diff = run_git_command(
+          task: task,
+          command: git_apply_command,
+          error_message: "Failed to capture git apply diff",
+          return_logs: true
+        )
+      rescue => e
+        Rails.logger.error "Failed to capture git apply diff: #{e.message}"
+      end
+
       repo_state_step.repo_states.create!(
         uncommitted_diff: diff_output,
         target_branch_diff: target_branch_diff,
-        repository_path: git_working_dir
+        repository_path: git_working_dir,
+        git_apply_diff: git_apply_diff
       )
     rescue => e
       Rails.logger.error "Failed to capture repository state: #{e.message}"

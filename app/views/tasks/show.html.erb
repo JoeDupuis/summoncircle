@@ -21,6 +21,9 @@
         </div>
         <div class="task-actions-header">
           <%= link_to 'Download Repository', task_repository_download_path(@task), class: 'button', data: { turbo: false } %>
+          <button class="button" data-controller="copy-git-apply" data-copy-git-apply-task-id-value="<%= @task.id %>" data-copy-git-apply-repository-diff-url-value="<%= task_repository_diff_path(@task) %>" data-action="click->copy-git-apply#copy">
+            Copy Git Apply Command
+          </button>
         </div>
         <% if Current.user&.github_token.present? %>
           <%= render "tasks/auto_push_form", task: @task %>
