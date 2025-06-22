@@ -19,12 +19,17 @@ class RepositoryDownloadsController < ApplicationController
 
     Rails.logger.info "Sending file: #{archive_path}, size: #{File.size(archive_path)} bytes"
 
-    send_file archive_path,
+    # Read the file content before sending
+    data = File.read(archive_path)
+    
+    # Delete the file immediately after reading
+    File.delete(archive_path) if archive_path && File.exist?(archive_path)
+    
+    # Send the data
+    send_data data,
               filename: "#{@task.description.parameterize}-#{project.name.parameterize}-repository.tar",
               type: "application/x-tar",
               disposition: "attachment"
-  ensure
-    File.delete(archive_path) if archive_path && File.exist?(archive_path)
   end
 
   private
