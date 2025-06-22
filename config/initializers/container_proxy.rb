@@ -17,15 +17,17 @@ class ContainerProxy
   private
 
   def proxy_request?(env)
-    env["PATH_INFO"].start_with?("/tasks/") && env["PATH_INFO"].include?("/proxy")
+    host = env["HTTP_HOST"] || ""
+    host.match?(/^task-\d+\./)
   end
 
   def handle_proxy_request(env)
     request = Rack::Request.new(env)
+    host = env["HTTP_HOST"] || ""
     
-    if (match = request.path.match(%r{^/tasks/(\d+)/proxy(/.*)?$}))
+    if (match = host.match(/^task-(\d+)\./))
       task_id = match[1]
-      path = match[2] || "/"
+      path = env["PATH_INFO"] || "/"
       
       task = Task.find_by(id: task_id)
       
@@ -52,10 +54,7 @@ class ContainerProxy
           end
           
           if host.present? && port.present?
-            # Rewrite the request for the proxy
-            env["PATH_INFO"] = path
-            env["REQUEST_PATH"] = path
-            env["REQUEST_URI"] = "http://#{host}:#{port}#{path}"
+            # Update the host for the proxy but keep the original path
             env["HTTP_HOST"] = "#{host}:#{port}"
             env["SERVER_NAME"] = host
             env["SERVER_PORT"] = port.to_s
@@ -73,7 +72,7 @@ class ContainerProxy
         [ 404, { "Content-Type" => "text/plain" }, [ "Task or container not found" ] ]
       end
     else
-      [ 404, { "Content-Type" => "text/plain" }, [ "Invalid proxy path" ] ]
+      [ 404, { "Content-Type" => "text/plain" }, [ "Invalid subdomain" ] ]
     end
   rescue => e
     Rails.logger.error "Container proxy error: #{e.message}"

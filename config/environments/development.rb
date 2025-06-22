@@ -75,4 +75,5 @@ Rails.application.configure do
 
   # Allow Docker containers to connect
   config.hosts << "host.docker.internal"
+  config.hosts << /^task-\d+\./
 end

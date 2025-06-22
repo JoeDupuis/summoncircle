@@ -64,6 +64,16 @@ module TasksHelper
   end
 
   def task_proxy_path(task, path = "/")
-    "/tasks/#{task.id}/proxy#{path}"
+    request = controller.request
+    host_parts = request.host_with_port.split(".")
+    
+    # Replace the first part with task-{id} subdomain
+    if host_parts.first.match?(/^task-\d+$/)
+      host_parts[0] = "task-#{task.id}"
+    else
+      host_parts.unshift("task-#{task.id}")
+    end
+    
+    "#{request.protocol}#{host_parts.join(".")}#{path}"
   end
 end
