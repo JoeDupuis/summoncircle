@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["header"]
+  static targets = ["header", "pullTab"]
   static values = { 
     slideDistance: { type: Number, default: 60 },
     mobileBreakpoint: { type: Number, default: 768 }
