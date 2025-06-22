@@ -2,104 +2,118 @@ class RepositoryDownloadsController < ApplicationController
   before_action :set_task
 
   def show
-    Rails.logger.info "Repository download show action started for task #{@task.id}"
     project = @task.project
     if project.repository_url.blank? && project.repo_path.blank?
-      Rails.logger.info "No repository configured - redirecting"
       redirect_to @task, alert: "No repository configured for this project"
       return
     end
 
-    repo_path = determine_repo_path
-    Rails.logger.info "Determined repo_path: #{repo_path.inspect}"
-
-    unless repo_path && File.exist?(repo_path)
-      Rails.logger.info "Repository not available - path doesn't exist: #{repo_path.inspect}"
+    archive_path = extract_repository_as_tar
+    unless archive_path
       redirect_to @task, alert: "Repository not available for download"
       return
     end
 
-    archive_path = create_repository_archive(repo_path)
+    # Read file content and send it
+    tar_data = File.binread(archive_path)
 
-    Rails.logger.info "Sending file: #{archive_path}, size: #{File.size(archive_path)} bytes"
-
-    data = File.read(archive_path)
-    send_data data,
-              filename: "#{@task.description.parameterize}-#{project.name.parameterize}-repository.zip",
-              type: "application/zip",
+    send_data tar_data,
+              filename: "#{@task.description.parameterize}-#{project.name.parameterize}-repository.tar",
+              type: "application/x-tar",
               disposition: "attachment"
   ensure
-    File.delete(archive_path) if archive_path && File.exist?(archive_path)
-    # Clean up extracted workspace
-    workspace_dir = Rails.root.join("tmp", "task-#{@task.id}-workspace")
-    FileUtils.rm_rf(workspace_dir) if File.exist?(workspace_dir)
+    # Clean up the temporary file
+    if archive_path && File.exist?(archive_path)
+      File.delete(archive_path)
+    end
   end
 
   private
 
   def set_task
     @task = Task.find(params[:task_id])
-    Rails.logger.info "Repository download: task_id=#{params[:task_id]}, task.user_id=#{@task.user_id}, current_user_id=#{Current.user&.id}"
     unless @task.user == Current.user
       redirect_to @task, alert: "You don't have permission to download this repository"
       false
     end
   end
 
-  def determine_repo_path
-    project = @task.project
-
-    # Try to extract from Docker volume first
-    if extract_from_docker_volume
-      Rails.root.join("tmp", "task-#{@task.id}-workspace").to_s
-    elsif project.repo_path.present?
-      project.repo_path
-    elsif project.repository_url.present?
-      Rails.root.join("tmp", "repos", "task-#{@task.id}").to_s
-    end
-  end
-
-  def extract_from_docker_volume
+  def extract_repository_as_tar
     workplace_mount = @task.workplace_mount
-    return false unless workplace_mount
+    unless workplace_mount
+      return nil
+    end
 
     volume_name = workplace_mount.volume_name
-    return false unless volume_name
+    unless volume_name
+      return nil
+    end
 
-    # Create extraction directory
-    extract_dir = Rails.root.join("tmp", "task-#{@task.id}-workspace")
-    FileUtils.rm_rf(extract_dir)
-    FileUtils.mkdir_p(extract_dir)
+    # Account for project's repo_path within the volume
+    project = @task.project
+    source_path = if project.repo_path.present?
+      repo_subpath = project.repo_path.sub(/^\//, "")
+      "/workspace/#{repo_subpath}"
+    else
+      "/workspace"
+    end
 
-    # Use Docker to copy files from volume to local directory
-    # Create a temporary container with the volume mounted to copy files out
-    temp_container = "extract-#{SecureRandom.hex(8)}"
+    # Create a temporary tar file
+    tar_file = Rails.root.join("tmp", "#{SecureRandom.hex(8)}.tar")
 
+    # Create a temporary container to extract files from the volume
+    container = nil
     begin
-      # Create container with volume mounted
-      system("docker", "create", "--name", temp_container, "-v", "#{volume_name}:/source", "alpine", "true")
+      container = Docker::Container.create(
+        "Image" => "alpine",
+        "Cmd" => [ "tail", "-f", "/dev/null" ],
+        "HostConfig" => {
+          "Binds" => [ "#{volume_name}:/workspace" ]
+        }
+      )
 
-      # Copy files from volume to host
-      system("docker", "cp", "#{temp_container}:/source/.", extract_dir.to_s)
+      container.start
 
-      # Check if extraction was successful
-      File.exist?(extract_dir) && !Dir.empty?(extract_dir)
+      # First, check if the path exists in the container
+      begin
+        # Check if the specific path exists
+        path_check = container.exec([ "test", "-e", source_path ])
+        if path_check[2] != 0
+          return nil
+        end
+      rescue => e
+        # Path check failed
+      end
+
+      # Extract tar file from the source path
+
+      begin
+        File.open(tar_file, "wb") do |f|
+          container.archive_out(source_path) do |chunk|
+            f.write(chunk)
+          end
+        end
+      rescue Docker::Error::NotFoundError => e
+        return nil
+      rescue => e
+        raise
+      end
+
+      # Return the tar file path if successful
+      if File.exist?(tar_file) && File.size(tar_file) > 0
+        tar_file.to_s
+      else
+        FileUtils.rm(tar_file) if File.exist?(tar_file)
+        nil
+      end
     rescue => e
-      Rails.logger.error "Failed to extract Docker volume: #{e.message}"
-      false
+      FileUtils.rm(tar_file) if File.exist?(tar_file)
+      nil
     ensure
       # Clean up temporary container
-      system("docker", "rm", temp_container) if temp_container
+      if container
+        container.delete(force: true) rescue nil
+      end
     end
-  end
-
-  def create_repository_archive(repo_path)
-    archive_path = Rails.root.join("tmp", "#{SecureRandom.hex(8)}.zip")
-
-    Dir.chdir(File.dirname(repo_path)) do
-      system("zip", "-r", archive_path.to_s, File.basename(repo_path))
-    end
-
-    archive_path.to_s
   end
 end
