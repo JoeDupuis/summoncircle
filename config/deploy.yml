@@ -44,6 +44,10 @@ env:
     
     # Docker daemon URL for agent containers
     DOCKER_URL: tcp://172.18.0.1:2375
+    
+    # Enable proxy links and target containers directly when running in container
+    CONTAINER_PROXY_LINKS: "1"
+    CONTAINER_PROXY_TARGET_CONTAINERS: "1"
 
     # Set number of processes dedicated to Solid Queue (default: 1)
     # JOB_CONCURRENCY: 3
