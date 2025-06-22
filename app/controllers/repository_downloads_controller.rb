@@ -85,16 +85,16 @@ class RepositoryDownloadsController < ApplicationController
     # Use Docker to copy files from volume to local directory
     # Create a temporary container with the volume mounted to copy files out
     temp_container = "extract-#{SecureRandom.hex(8)}"
-    
+
     # Add Docker host if configured
-    docker_args = ["docker"]
+    docker_args = [ "docker" ]
     if ENV["DOCKER_URL"].present?
-      docker_args += ["-H", ENV["DOCKER_URL"]]
+      docker_args += [ "-H", ENV["DOCKER_URL"] ]
     end
 
     begin
       Rails.logger.info "Creating temporary container: #{temp_container}"
-      
+
       # Create container with volume mounted
       create_result = system(*docker_args, "create", "--name", temp_container, "-v", "#{volume_name}:/source", "alpine", "true")
       Rails.logger.info "Docker create result: #{create_result}"
@@ -108,7 +108,7 @@ class RepositoryDownloadsController < ApplicationController
       else
         "/source/."
       end
-      
+
       Rails.logger.info "Copying files from #{source_path} in volume to #{extract_dir}"
       copy_result = system(*docker_args, "cp", "#{temp_container}:#{source_path}", extract_dir.to_s)
       Rails.logger.info "Docker cp result: #{copy_result}"
