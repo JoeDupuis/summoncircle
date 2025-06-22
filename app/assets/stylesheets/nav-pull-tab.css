@@ -1,0 +1,38 @@
+.nav-pull-tab {
+  position: absolute;
+  bottom: -19px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 24px;
+  background-color: var(--bg);
+  border-radius: 0 0 10px 10px;
+  cursor: pointer;
+  z-index: 999;
+  transition: height 0.15s ease-in-out;
+  box-shadow: 0 6px 8px -2px rgba(0, 0, 0, 0.15);
+}
+
+.nav-pull-tab::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 3px;
+  background-color: var(--text-light);
+  border-radius: 2px;
+  opacity: 0.4;
+}
+
+.nav-pull-tab:hover {
+  height: 29px;
+  box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+  .nav-pull-tab {
+    display: none;
+  }
+}
