@@ -1,3 +1,5 @@
+require "open3"
+
 class RepositoryDownloadsController < ApplicationController
   before_action :set_task
 
@@ -82,36 +84,50 @@ class RepositoryDownloadsController < ApplicationController
     FileUtils.rm_rf(extract_dir)
     FileUtils.mkdir_p(extract_dir)
 
-    # Use Docker to copy files from volume to local directory
-    # Create a temporary container with the volume mounted to copy files out
-    temp_container = "extract-#{SecureRandom.hex(8)}"
-
-    # Add Docker host if configured
-    docker_args = [ "docker" ]
-    if ENV["DOCKER_URL"].present?
-      docker_args += [ "-H", ENV["DOCKER_URL"] ]
+    # Account for project's repo_path within the volume
+    project = @task.project
+    source_path = if project.repo_path.present?
+      repo_subpath = project.repo_path.sub(/^\//, "")
+      "/workspace/#{repo_subpath}"
+    else
+      "/workspace"
     end
 
+    # Create a temporary container to extract files from the volume
+    container = nil
     begin
-      Rails.logger.info "Creating temporary container: #{temp_container}"
+      Rails.logger.info "Creating temporary container to extract from volume"
+      container = Docker::Container.create(
+        "Image" => "alpine",
+        "Cmd" => [ "sh", "-c", "sleep 1" ],
+        "HostConfig" => {
+          "Binds" => [ "#{volume_name}:/workspace" ]
+        }
+      )
 
-      # Create container with volume mounted
-      create_result = system(*docker_args, "create", "--name", temp_container, "-v", "#{volume_name}:/source", "alpine", "true")
-      Rails.logger.info "Docker create result: #{create_result}"
+      Rails.logger.info "Starting container"
+      container.start
 
-      # Copy files from volume to host
-      # Account for project's repo_path within the volume
-      project = @task.project
-      source_path = if project.repo_path.present?
-        repo_subpath = project.repo_path.sub(/^\//, "")
-        "/source/#{repo_subpath}/."
-      else
-        "/source/."
+      # Create a tar file from the source path
+      tar_file = extract_dir.join("workspace.tar")
+      Rails.logger.info "Extracting #{source_path} from container to #{tar_file}"
+
+      File.open(tar_file, "wb") do |f|
+        container.archive_out(source_path) do |chunk|
+          f.write(chunk)
+        end
       end
 
-      Rails.logger.info "Copying files from #{source_path} in volume to #{extract_dir}"
-      copy_result = system(*docker_args, "cp", "#{temp_container}:#{source_path}", extract_dir.to_s)
-      Rails.logger.info "Docker cp result: #{copy_result}"
+      # Extract the tar file
+      Rails.logger.info "Extracting tar file to #{extract_dir}"
+      stdout, stderr, status = Open3.capture3("tar", "-xf", tar_file.to_s, "-C", extract_dir.to_s, "--strip-components=1")
+      unless status.success?
+        Rails.logger.error "Failed to extract tar file: #{stderr}"
+        return false
+      end
+
+      # Clean up tar file
+      FileUtils.rm(tar_file)
 
       # Check if extraction was successful
       success = File.exist?(extract_dir) && !Dir.empty?(extract_dir)
@@ -123,9 +139,9 @@ class RepositoryDownloadsController < ApplicationController
       false
     ensure
       # Clean up temporary container
-      if temp_container
-        Rails.logger.info "Cleaning up temporary container: #{temp_container}"
-        system(*docker_args, "rm", temp_container)
+      if container
+        Rails.logger.info "Cleaning up temporary container"
+        container.delete(force: true) rescue nil
       end
     end
   end
