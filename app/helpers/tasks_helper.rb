@@ -62,4 +62,48 @@ module TasksHelper
       )
     end
   end
+
+  def task_proxy_path(task, path = nil)
+    # Use proxy links only if CONTAINER_PROXY_LINKS is explicitly set
+    use_proxy_links = ENV["CONTAINER_PROXY_LINKS"].present?
+
+    unless use_proxy_links
+      container_info = container_status_info(task)
+      if container_info.port_info.present?
+        base = "http://localhost:#{container_info.port_info}"
+        return path ? "#{base}#{path}" : base
+      else
+        return "#" # No port available
+      end
+    end
+
+    request = controller.request
+
+    # Use CONTAINER_PROXY_BASE_URL if set, otherwise build from current request
+    if ENV["CONTAINER_PROXY_BASE_URL"].present?
+      base_url = ENV["CONTAINER_PROXY_BASE_URL"]
+      # Ensure protocol is included
+      base_url = "http://#{base_url}" unless base_url.match?(/^https?:\/\//)
+      # Add task subdomain
+      uri = URI.parse(base_url)
+      host_parts = uri.host.split(".")
+      host_parts.unshift("task-#{task.id}")
+      uri.host = host_parts.join(".")
+      base = uri.to_s
+      path ? "#{base}#{path}" : base
+    else
+      # Build from current request
+      host_parts = request.host_with_port.split(".")
+
+      # Replace the first part with task-{id} subdomain
+      if host_parts.first.match?(/^task-\d+$/)
+        host_parts[0] = "task-#{task.id}"
+      else
+        host_parts.unshift("task-#{task.id}")
+      end
+
+      base = "#{request.protocol}#{host_parts.join(".")}"
+      path ? "#{base}#{path}" : base
+    end
+  end
 end
