@@ -2,15 +2,19 @@ class RepositoryDownloadsController < ApplicationController
   before_action :set_task
 
   def show
+    Rails.logger.info "Repository download show action started for task #{@task.id}"
     project = @task.project
     if project.repository_url.blank? && project.repo_path.blank?
+      Rails.logger.info "No repository configured - redirecting"
       redirect_to @task, alert: "No repository configured for this project"
       return
     end
 
     repo_path = determine_repo_path
+    Rails.logger.info "Determined repo_path: #{repo_path.inspect}"
 
     unless repo_path && File.exist?(repo_path)
+      Rails.logger.info "Repository not available - path doesn't exist: #{repo_path.inspect}"
       redirect_to @task, alert: "Repository not available for download"
       return
     end
@@ -35,8 +39,10 @@ class RepositoryDownloadsController < ApplicationController
 
   def set_task
     @task = Task.find(params[:task_id])
+    Rails.logger.info "Repository download: task_id=#{params[:task_id]}, task.user_id=#{@task.user_id}, current_user_id=#{Current.user&.id}"
     unless @task.user == Current.user
-      raise ActiveRecord::RecordNotFound
+      redirect_to @task, alert: "You don't have permission to download this repository"
+      false
     end
   end
 
