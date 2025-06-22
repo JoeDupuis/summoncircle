@@ -96,5 +96,4 @@ class RepositoryDownloadsController < ApplicationController
 
     archive_path.to_s
   end
-
 end
