@@ -44,6 +44,7 @@ gem "docker-api"
 gem "discard"
 gem "redcarpet"
 gem "fast-mcp"
+gem "rubyzip"
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 # gem "image_processing", "~> 1.2"

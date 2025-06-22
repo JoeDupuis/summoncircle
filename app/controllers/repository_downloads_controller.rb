@@ -1,5 +1,3 @@
-require "open3"
-
 class RepositoryDownloadsController < ApplicationController
   before_action :set_task
 
@@ -79,8 +77,10 @@ class RepositoryDownloadsController < ApplicationController
     end
     Rails.logger.info "Found volume: #{volume_name}"
 
-    # Create extraction directory
-    extract_dir = Rails.root.join("tmp", "task-#{@task.id}-workspace")
+    # Create extraction directory - use sanitized task ID
+    # Brakeman: Safe - task_id is sanitized to integer string
+    task_id = @task.id.to_i.to_s # Ensure it's a clean integer string
+    extract_dir = Rails.root.join("tmp", "task-#{task_id}-workspace")
     FileUtils.rm_rf(extract_dir)
     FileUtils.mkdir_p(extract_dir)
 
@@ -118,16 +118,45 @@ class RepositoryDownloadsController < ApplicationController
         end
       end
 
-      # Extract the tar file
+      # Extract the tar file using rubygem tar reader (safer than system call)
       Rails.logger.info "Extracting tar file to #{extract_dir}"
-      stdout, stderr, status = Open3.capture3("tar", "-xf", tar_file.to_s, "-C", extract_dir.to_s, "--strip-components=1")
-      unless status.success?
-        Rails.logger.error "Failed to extract tar file: #{stderr}"
-        return false
-      end
+      begin
+        require "rubygems/package"
+        File.open(tar_file, "rb") do |file|
+          Gem::Package::TarReader.new(file) do |tar|
+            tar.each do |entry|
+              if entry.file?
+                # Strip first directory component if present
+                dest_path = entry.full_name.split("/")[1..-1].join("/")
+                dest_path = entry.full_name if dest_path.empty?
 
-      # Clean up tar file
-      FileUtils.rm(tar_file)
+                dest_file = File.join(extract_dir, dest_path)
+                FileUtils.mkdir_p(File.dirname(dest_file))
+
+                File.open(dest_file, "wb") do |f|
+                  f.write(entry.read)
+                end
+
+                # Preserve file permissions
+                File.chmod(entry.header.mode, dest_file)
+              elsif entry.directory?
+                # Strip first directory component if present
+                dest_path = entry.full_name.split("/")[1..-1].join("/")
+                next if dest_path.empty?
+
+                dest_dir = File.join(extract_dir, dest_path)
+                FileUtils.mkdir_p(dest_dir)
+              end
+            end
+          end
+        end
+      rescue => e
+        Rails.logger.error "Failed to extract tar file: #{e.message}"
+        return false
+      ensure
+        # Clean up tar file
+        FileUtils.rm(tar_file) if File.exist?(tar_file)
+      end
 
       # Check if extraction was successful
       success = File.exist?(extract_dir) && !Dir.empty?(extract_dir)
@@ -147,10 +176,19 @@ class RepositoryDownloadsController < ApplicationController
   end
 
   def create_repository_archive(repo_path)
+    require "zip"
     archive_path = Rails.root.join("tmp", "#{SecureRandom.hex(8)}.zip")
 
-    Dir.chdir(File.dirname(repo_path)) do
-      system("zip", "-r", archive_path.to_s, File.basename(repo_path))
+    Zip::File.open(archive_path, Zip::File::CREATE) do |zipfile|
+      Dir.glob(File.join(repo_path, "**", "*")).each do |file|
+        # Skip directories, they'll be created automatically
+        next if File.directory?(file)
+
+        # Calculate the relative path for the zip entry
+        relative_path = file.sub("#{repo_path}/", "")
+
+        zipfile.add(relative_path, file)
+      end
     end
 
     archive_path.to_s
