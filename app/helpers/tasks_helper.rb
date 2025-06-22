@@ -65,15 +65,30 @@ module TasksHelper
 
   def task_proxy_path(task, path = "/")
     request = controller.request
-    host_parts = request.host_with_port.split(".")
     
-    # Replace the first part with task-{id} subdomain
-    if host_parts.first.match?(/^task-\d+$/)
-      host_parts[0] = "task-#{task.id}"
-    else
+    # Use CONTAINER_PROXY_BASE_URL if set, otherwise build from current request
+    if ENV["CONTAINER_PROXY_BASE_URL"].present?
+      base_url = ENV["CONTAINER_PROXY_BASE_URL"]
+      # Ensure protocol is included
+      base_url = "http://#{base_url}" unless base_url.match?(/^https?:\/\//)
+      # Add task subdomain
+      uri = URI.parse(base_url)
+      host_parts = uri.host.split(".")
       host_parts.unshift("task-#{task.id}")
+      uri.host = host_parts.join(".")
+      "#{uri}#{path}"
+    else
+      # Build from current request
+      host_parts = request.host_with_port.split(".")
+      
+      # Replace the first part with task-{id} subdomain
+      if host_parts.first.match?(/^task-\d+$/)
+        host_parts[0] = "task-#{task.id}"
+      else
+        host_parts.unshift("task-#{task.id}")
+      end
+      
+      "#{request.protocol}#{host_parts.join(".")}#{path}"
     end
-    
-    "#{request.protocol}#{host_parts.join(".")}#{path}"
   end
 end
