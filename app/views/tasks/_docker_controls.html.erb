@@ -1,11 +1,11 @@
 <div id="docker_controls" class="docker-controls">
   <% 
-    # Verify container state from Docker directly
+    # Only verify container state if not in building/rebuilding state
     container_exists = false
-    container_status = nil
+    container_status = task.container_status
     port_info = nil
     
-    if task.container_id.present?
+    if task.container_id.present? && !%w[building rebuilding].include?(task.container_status)
       begin
         container = Docker::Container.get(task.container_id)
         container_json = container.json
@@ -35,6 +35,9 @@
       rescue => e
         Rails.logger.warn "Failed to verify container state: #{e.message}"
       end
+    elsif %w[building rebuilding].include?(task.container_status)
+      # Don't verify Docker state during building/rebuilding - trust the status
+      container_exists = false
     end
   %>
   
