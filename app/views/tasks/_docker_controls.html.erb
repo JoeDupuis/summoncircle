@@ -24,7 +24,8 @@
       <span class="container-status">
         Container: <%= task.container_name %> (<%= container_info.status %>)
         <% if container_info.port_info %>
-          | Port: <%= link_to "localhost:#{container_info.port_info}", task_proxy_path(task), target: "_blank" %>
+          <% proxy_url = task_proxy_path(task) %>
+          | Port: <%= link_to proxy_url.sub(/^https?:\/\//, ''), proxy_url, target: "_blank" %>
         <% elsif task.project.dev_container_port.present? %>
           | Port: <%= task.project.dev_container_port %> (not mapped)
         <% end %>
