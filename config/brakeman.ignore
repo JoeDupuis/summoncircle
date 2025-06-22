@@ -1,0 +1,74 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "3c732f9d548bf2791a179e60bdab4452550ff3c2183eee59a2cf4bc5f1e67668",
+      "check_name": "FileAccess",
+      "message": "Model attribute used in file name",
+      "file": "app/controllers/repository_downloads_controller.rb",
+      "line": 65,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "FileUtils.rm_rf(Rails.root.join(\"tmp\", \"task-#{Task.find(params[:task_id]).id}-workspace\"))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "RepositoryDownloadsController",
+        "method": "extract_from_docker_volume"
+      },
+      "user_input": "Task.find(params[:task_id])",
+      "confidence": "Weak",
+      "cwe_id": [
+        22
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "82dcba98bf8c79399f31aa34d4643e5fb51f278f22ea2b5606f9ef55dd2bfc6e",
+      "check_name": "FileAccess",
+      "message": "Model attribute used in file name",
+      "file": "app/controllers/repository_downloads_controller.rb",
+      "line": 66,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "FileUtils.mkdir_p(Rails.root.join(\"tmp\", \"task-#{Task.find(params[:task_id]).id}-workspace\"))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "RepositoryDownloadsController",
+        "method": "extract_from_docker_volume"
+      },
+      "user_input": "Task.find(params[:task_id])",
+      "confidence": "Weak",
+      "cwe_id": [
+        22
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "f08fe8df1fd6069281c470265a08984acc86ff3f7dbde5471d524e327a5bf3f7",
+      "check_name": "FileAccess",
+      "message": "Model attribute used in file name",
+      "file": "app/controllers/repository_downloads_controller.rb",
+      "line": 31,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "FileUtils.rm_rf(Rails.root.join(\"tmp\", \"task-#{Task.find(params[:task_id]).id}-workspace\"))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "RepositoryDownloadsController",
+        "method": "show"
+      },
+      "user_input": "Task.find(params[:task_id])",
+      "confidence": "Weak",
+      "cwe_id": [
+        22
+      ],
+      "note": ""
+    }
+  ],
+  "brakeman_version": "7.0.2"
+}
