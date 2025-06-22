@@ -1,45 +1,5 @@
 <div id="docker_controls" class="docker-controls">
-  <% 
-    # Only verify container state if not in building/rebuilding state
-    container_exists = false
-    container_status = task.container_status
-    port_info = nil
-    
-    if task.container_id.present? && !%w[building rebuilding].include?(task.container_status)
-      begin
-        container = Docker::Container.get(task.container_id)
-        container_json = container.json
-        container_exists = true
-        container_status = container_json["State"]["Status"]
-        
-        # Update task if status differs
-        if task.container_status != container_status
-          task.update_column(:container_status, container_status)
-        end
-        
-        # Get port mapping
-        if task.project.dev_container_port.present?
-          port_mapping = container_json["NetworkSettings"]["Ports"]["#{task.project.dev_container_port}/tcp"]
-          if port_mapping && port_mapping.first
-            port_info = port_mapping.first['HostPort']
-          end
-        end
-      rescue Docker::Error::NotFoundError
-        # Container doesn't exist in Docker, clear task data
-        task.update_columns(
-          container_id: nil,
-          container_name: nil,
-          container_status: nil,
-          docker_image_id: nil
-        )
-      rescue => e
-        Rails.logger.warn "Failed to verify container state: #{e.message}"
-      end
-    elsif %w[building rebuilding].include?(task.container_status)
-      # Don't verify Docker state during building/rebuilding - trust the status
-      container_exists = false
-    end
-  %>
+  <% container_info = container_status_info(task) %>
   
   <% if task.container_status == "rebuilding" %>
     <div class="container-info">
@@ -53,12 +13,12 @@
         Container: Building...
       </span>
     </div>
-  <% elsif container_exists %>
+  <% elsif container_info.exists %>
     <div class="container-info">
       <span class="container-status">
-        Container: <%= task.container_name %> (<%= container_status %>)
-        <% if port_info %>
-          | Port: <%= link_to "localhost:#{port_info}", "http://localhost:#{port_info}", target: "_blank" %>
+        Container: <%= task.container_name %> (<%= container_info.status %>)
+        <% if container_info.port_info %>
+          | Port: <%= link_to "localhost:#{container_info.port_info}", "http://localhost:#{container_info.port_info}", target: "_blank" %>
         <% elsif task.project.dev_container_port.present? %>
           | Port: <%= task.project.dev_container_port %> (not mapped)
         <% end %>
