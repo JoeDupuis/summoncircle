@@ -36,12 +36,12 @@ class ContainerProxy
           container = Docker::Container.get(task.container_id)
           container_info = container.json
           
-          if ENV["CONTAINER_PROXY_MODE"].present?
-            # When running inside a container, use the container's internal IP and port
+          if ENV["CONTAINER_PROXY_TARGET_CONTAINERS"].present?
+            # Proxy directly to container's internal IP and port
             host = container_info["NetworkSettings"]["IPAddress"]
             port = task.project.dev_container_port
           else
-            # When running on host, use localhost and the mapped host port
+            # Proxy to localhost and the mapped host port (default)
             host = "localhost"
             port = nil
             
