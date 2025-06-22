@@ -17,7 +17,10 @@ class RepositoryDownloadsController < ApplicationController
       create_placeholder_archive
     end
 
-    send_file archive_path,
+    Rails.logger.info "Sending file: #{archive_path}, size: #{File.size(archive_path)} bytes"
+
+    data = File.read(archive_path)
+    send_data data,
               filename: "#{@task.description.parameterize}-#{project.name.parameterize}-repository.zip",
               type: "application/zip",
               disposition: "attachment"
@@ -88,7 +91,7 @@ class RepositoryDownloadsController < ApplicationController
     archive_path = Rails.root.join("tmp", "#{SecureRandom.hex(8)}.zip")
 
     Dir.chdir(File.dirname(repo_path)) do
-      system("zip", "-r", archive_path.to_s, File.basename(repo_path), "-x", "*.git*")
+      system("zip", "-r", archive_path.to_s, File.basename(repo_path))
     end
 
     archive_path.to_s
