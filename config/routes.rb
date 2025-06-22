@@ -17,6 +17,7 @@ Rails.application.routes.draw do
         patch :update_auto_push
       end
       resources :runs, only: %i[create]
+      resource :repository_download, only: [ :show ]
     end
   end
 
