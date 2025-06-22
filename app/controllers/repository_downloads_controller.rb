@@ -80,13 +80,45 @@ class RepositoryDownloadsController < ApplicationController
       Rails.logger.info "Starting container"
       container.start
 
+      # First, check if the path exists in the container
+      Rails.logger.info "Checking if path exists in container: #{source_path}"
+      begin
+        # Try to list the directory to see what's there
+        check_result = container.exec(["ls", "-la", "/workspace"])
+        Rails.logger.info "Contents of /workspace: #{check_result[0].join("\n")}"
+        
+        # Check if the specific path exists
+        path_check = container.exec(["test", "-e", source_path])
+        if path_check[2] != 0
+          Rails.logger.error "Path does not exist in container: #{source_path}"
+          Rails.logger.info "Checking parent directory..."
+          parent_check = container.exec(["ls", "-la", File.dirname(source_path)])
+          Rails.logger.info "Parent directory contents: #{parent_check[0].join("\n")}"
+          return nil
+        end
+      rescue => e
+        Rails.logger.error "Error checking path existence: #{e.message}"
+      end
+
       # Extract tar file from the source path
       Rails.logger.info "Extracting #{source_path} from container to #{tar_file}"
 
-      File.open(tar_file, "wb") do |f|
-        container.archive_out(source_path) do |chunk|
-          f.write(chunk)
+      bytes_written = 0
+      begin
+        File.open(tar_file, "wb") do |f|
+          container.archive_out(source_path) do |chunk|
+            bytes_written += chunk.bytesize
+            Rails.logger.info "Writing chunk: #{chunk.bytesize} bytes (total: #{bytes_written})"
+            f.write(chunk)
+          end
         end
+        Rails.logger.info "Total bytes written to tar: #{bytes_written}"
+      rescue Docker::Error::NotFoundError => e
+        Rails.logger.error "Path not found in container: #{source_path} - #{e.message}"
+        return nil
+      rescue => e
+        Rails.logger.error "Error during archive_out: #{e.class} - #{e.message}"
+        raise
       end
 
       # Return the tar file path if successful
