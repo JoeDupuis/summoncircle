@@ -27,15 +27,16 @@ class BuildDockerContainerJob < ApplicationJob
       copy_container.start
 
       # Copy the entire workspace to temp directory
-      File.open(temp_dir.join("workspace.tar"), "wb") do |f|
+      tar_file = temp_dir.join("workspace.tar")
+      File.open(tar_file, "wb") do |f|
         copy_container.archive_out("/workspace") do |chunk|
           f.write(chunk)
         end
       end
 
-      # Extract the tar file
-      system("tar -xf #{temp_dir.join('workspace.tar')} -C #{temp_dir}")
-      FileUtils.rm(temp_dir.join("workspace.tar"))
+      # Extract the tar file safely
+      system(["tar", "-xf", tar_file.to_s, "-C", temp_dir.to_s])
+      FileUtils.rm(tar_file)
 
       # Now build from the extracted directory
       workspace_dir = temp_dir.join("workspace")
