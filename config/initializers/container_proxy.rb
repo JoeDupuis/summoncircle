@@ -35,12 +35,21 @@ class ContainerProxy
           container_info = container.json
           
           if ENV["CONTAINER_PROXY_MODE"].present?
+            # When running inside a container, use the container's internal IP and port
             host = container_info["NetworkSettings"]["IPAddress"]
+            port = task.project.dev_container_port
           else
+            # When running on host, use localhost and the mapped host port
             host = "localhost"
+            port = nil
+            
+            if task.project.dev_container_port.present?
+              port_mapping = container_info["NetworkSettings"]["Ports"]["#{task.project.dev_container_port}/tcp"]
+              if port_mapping && port_mapping.first
+                port = port_mapping.first["HostPort"]
+              end
+            end
           end
-          
-          port = task.project.dev_container_port
           
           if host.present? && port.present?
             # Rewrite the request for the proxy
