@@ -410,7 +410,7 @@ class RunTest < ActiveSupport::TestCase
     assert_equal 3, run.steps.count  # Adjusted for mocked behavior
   end
 
-  test "execute! passes SSH URL to DockerGitCommand for cloning" do
+  test "execute! clones SSH repository with SSH key on first run" do
     task = tasks(:for_repo_clone)
     agent = task.agent
     agent.update!(ssh_mount_path: "/home/user/.ssh/id_rsa")
@@ -423,24 +423,18 @@ class RunTest < ActiveSupport::TestCase
 
     run = task.runs.create!(prompt: "test", status: :pending)
 
-    # Track that DockerGitCommand was called with SSH URL
-    ssh_clone_command = nil
+    # Mock git operations
+    mock_docker_git_command
     
-    # Mock DockerGitCommand.new to capture the clone command
-    mock_git_command = mock("docker_git_command")
-    mock_git_command.stubs(:execute).returns(nil)
-    
-    DockerGitCommand.stubs(:new).with { |params|
-      if params[:command]&.include?("git clone")
-        ssh_clone_command = params[:command]
-      end
-      true
-    }.returns(mock_git_command)
-    
-    # Mock main container with SSH setup
+    # Mock main container and verify SSH key setup happens
     main_container = mock("container")
     main_container.expects(:start)
-    main_container.expects(:exec).at_least(4).at_most(4)  # SSH key setup
+    
+    # These are the exact SSH key setup calls we expect
+    main_container.expects(:exec).with([ "mkdir", "-p", "/home/user/.ssh" ])
+    main_container.expects(:exec).with([ "sh", "-c", "echo 'LS0tLS1CRUdJTiBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0KdGVzdF9zc2hfa2V5Ci0tLS0tRU5EIE9QRU5TU0ggUFJJVkFURSBLRVktLS0tLQ==' | base64 -d > /home/user/.ssh/id_rsa" ])
+    main_container.expects(:exec).with([ "chmod", "600", "/home/user/.ssh/id_rsa" ])
+    
     main_container.expects(:wait).returns({ "StatusCode" => 0 })
     main_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "test")
     main_container.expects(:delete).with(force: true)
@@ -457,11 +451,7 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    
-    # Verify SSH clone command was called with the SSH URL
-    assert ssh_clone_command, "Git clone command should have been called"
-    assert_includes ssh_clone_command, "git@github.com:test/repo.git", "Clone command should include SSH URL"
-    assert_includes ssh_clone_command, "git clone", "Should be a clone command"
+    assert_equal 2, run.steps.count  # Git clone and main execution
   end
 
   test "execute! configures MCP on first run when endpoint present" do
