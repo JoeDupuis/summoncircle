@@ -29,9 +29,9 @@
   </div>
 
   <div>
-    <%= form.label :dev_dockerfile, "Development Dockerfile" %><br>
-    <%= form.text_area :dev_dockerfile, rows: 10, placeholder: "# Optional: Custom Dockerfile for development containers" %>
-    <small class="form-help">Define a custom Dockerfile for development containers spawned from tasks</small>
+    <%= form.label :dev_dockerfile_path, "Development Dockerfile Path" %><br>
+    <%= form.text_field :dev_dockerfile_path, placeholder: "docker/dev.Dockerfile" %>
+    <small class="form-help">Path to Dockerfile relative to repository root (e.g., docker/dev.Dockerfile, Dockerfile.dev)</small>
   </div>
 
   <div>

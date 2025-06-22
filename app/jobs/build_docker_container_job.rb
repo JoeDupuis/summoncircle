@@ -2,21 +2,55 @@ class BuildDockerContainerJob < ApplicationJob
   queue_as :default
 
   def perform(task)
-    return unless task.project.dev_dockerfile.present?
+    return unless task.project.dev_dockerfile_path.present?
 
     set_docker_host(task.agent.docker_host)
-
-    dockerfile_content = task.project.dev_dockerfile
-    temp_dir = Rails.root.join("tmp", "docker-build-#{task.id}")
-    FileUtils.mkdir_p(temp_dir)
-    temp_dockerfile = temp_dir.join("Dockerfile")
-    File.write(temp_dockerfile, dockerfile_content)
 
     image_name = "summoncircle/task-#{task.id}-dev"
     container_name = "task-#{task.id}-dev-container"
 
-    tar_stream = create_tar_stream(temp_dir)
-    image = Docker::Image.build_from_tar(tar_stream, t: image_name)
+    # Extract files from the workspace volume to build
+    temp_dir = Rails.root.join("tmp", "docker-build-#{task.id}")
+    FileUtils.mkdir_p(temp_dir)
+
+    # Create a temporary container to copy files from the volume
+    volume_name = task.workplace_mount.volume_name
+    copy_container = Docker::Container.create(
+      "Image" => "alpine",
+      "Cmd" => [ "sh", "-c", "sleep 1" ],
+      "HostConfig" => {
+        "Binds" => [ "#{volume_name}:/workspace" ]
+      }
+    )
+
+    begin
+      copy_container.start
+
+      # Copy the entire workspace to temp directory
+      File.open(temp_dir.join("workspace.tar"), "wb") do |f|
+        copy_container.archive_out("/workspace") do |chunk|
+          f.write(chunk)
+        end
+      end
+
+      # Extract the tar file
+      system("tar -xf #{temp_dir.join('workspace.tar')} -C #{temp_dir}")
+      FileUtils.rm(temp_dir.join("workspace.tar"))
+
+      # Now build from the extracted directory
+      workspace_dir = temp_dir.join("workspace")
+      dockerfile_path = workspace_dir.join(task.project.dev_dockerfile_path)
+
+      unless File.exist?(dockerfile_path)
+        raise "Dockerfile not found at: #{task.project.dev_dockerfile_path}"
+      end
+
+      # Build context is the workspace root (where repo is cloned)
+      tar_stream = create_tar_stream_from_directory(workspace_dir, task.project.dev_dockerfile_path)
+      image = Docker::Image.build_from_tar(tar_stream, t: image_name, dockerfile: task.project.dev_dockerfile_path)
+    ensure
+      copy_container.delete(force: true) rescue nil
+    end
 
     binds = task.volume_mounts.includes(:volume).map(&:bind_string)
     env_vars = []
@@ -96,15 +130,24 @@ class BuildDockerContainerJob < ApplicationJob
     Docker.options = @original_docker_options if @original_docker_options
   end
 
-  def create_tar_stream(dir)
+  def create_tar_stream_from_directory(dir, dockerfile_name = "Dockerfile")
     tar_stream = StringIO.new
     Gem::Package::TarWriter.new(tar_stream) do |tar|
+      # Add all files from the directory
       Dir[File.join(dir, "**", "*")].each do |file|
         next if File.directory?(file)
 
         relative_path = Pathname.new(file).relative_path_from(dir).to_s
-        tar.add_file(relative_path, 0644) do |tf|
-          tf.write(File.read(file))
+
+        # Skip files that shouldn't be in build context
+        next if relative_path.start_with?(".git/")
+        next if relative_path.include?("/.git/")
+
+        stat = File.stat(file)
+        mode = stat.mode
+
+        tar.add_file(relative_path, mode) do |tf|
+          File.open(file, "rb") { |f| tf.write(f.read) }
         end
       end
     end

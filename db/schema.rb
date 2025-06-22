@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_21_183801) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_22_000000) do
   create_table "agent_specific_settings", force: :cascade do |t|
     t.integer "agent_id", null: false
     t.string "type", null: false
@@ -49,7 +49,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_21_183801) do
     t.datetime "updated_at", null: false
     t.datetime "discarded_at"
     t.string "repo_path"
-    t.text "dev_dockerfile"
+    t.text "dev_dockerfile_path"
     t.integer "dev_container_port", default: 3000
     t.index ["discarded_at"], name: "index_projects_on_discarded_at"
   end
