@@ -19,7 +19,10 @@ class RepositoryDownloadsController < ApplicationController
 
     Rails.logger.info "Sending file: #{archive_path}, size: #{File.size(archive_path)} bytes"
 
-    send_file archive_path,
+    # Read the file into memory before sending
+    tar_data = File.read(archive_path, mode: "rb")
+
+    send_data tar_data,
               filename: "#{@task.description.parameterize}-#{project.name.parameterize}-repository.tar",
               type: "application/x-tar",
               disposition: "attachment"
@@ -88,15 +91,15 @@ class RepositoryDownloadsController < ApplicationController
       Rails.logger.info "Checking if path exists in container: #{source_path}"
       begin
         # Try to list the directory to see what's there
-        check_result = container.exec(["ls", "-la", "/workspace"])
+        check_result = container.exec([ "ls", "-la", "/workspace" ])
         Rails.logger.info "Contents of /workspace: #{check_result[0].join("\n")}"
-        
+
         # Check if the specific path exists
-        path_check = container.exec(["test", "-e", source_path])
+        path_check = container.exec([ "test", "-e", source_path ])
         if path_check[2] != 0
           Rails.logger.error "Path does not exist in container: #{source_path}"
           Rails.logger.info "Checking parent directory..."
-          parent_check = container.exec(["ls", "-la", File.dirname(source_path)])
+          parent_check = container.exec([ "ls", "-la", File.dirname(source_path) ])
           Rails.logger.info "Parent directory contents: #{parent_check[0].join("\n")}"
           return nil
         end
