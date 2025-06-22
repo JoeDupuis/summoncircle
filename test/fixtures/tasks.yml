@@ -25,6 +25,7 @@ task_with_runs: # Has existing runs - see runs.yml for run fixtures (existing_ru
   description: "Task with existing runs"
   status: active
   started_at: 2025-05-24 19:14:19
+  target_branch: main
 
 without_runs: # No runs - used for testing first run behavior
   project: one
