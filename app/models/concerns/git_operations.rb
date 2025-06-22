@@ -8,7 +8,6 @@ module GitOperations
     clone_target = repo_path.presence&.sub(/^\//, "") || "."
     repository_url = project.repository_url
 
-    Rails.logger.info "Clone repository - URL: #{repository_url.inspect}, Branch: #{task.target_branch.inspect}"
     validate_ssh_setup!(task, repository_url)
 
     if task.target_branch.present?
@@ -17,8 +16,6 @@ module GitOperations
       # Clone without specifying branch, then detect and save the default branch
       command = "git clone '#{repository_url}' '#{clone_target}'"
     end
-
-    Rails.logger.info "Clone command: #{command}"
 
     run_git_command(
       task: task,
@@ -47,7 +44,6 @@ module GitOperations
       default_branch = logs.strip
       if default_branch.present?
         task.update_column(:target_branch, default_branch)
-        Rails.logger.info "Set target_branch to detected default: #{default_branch}"
       end
     rescue => e
       Rails.logger.error "Failed to detect default branch: #{e.message}"
