@@ -66,7 +66,7 @@ class RepositoryDownloadsController < ApplicationController
     begin
       container = Docker::Container.create(
         "Image" => "alpine",
-        "Cmd" => [ "sh", "-c", "sleep 1" ],
+        "Cmd" => [ "tail", "-f", "/dev/null" ],
         "HostConfig" => {
           "Binds" => [ "#{volume_name}:/workspace" ]
         }
