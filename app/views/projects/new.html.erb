@@ -29,6 +29,18 @@
   </div>
 
   <div>
+    <%= form.label :dev_dockerfile_path, "Development Dockerfile Path" %><br>
+    <%= form.text_field :dev_dockerfile_path, placeholder: "docker/dev.Dockerfile" %>
+    <small class="form-help">Path to Dockerfile relative to repository root (e.g., docker/dev.Dockerfile, Dockerfile.dev)</small>
+  </div>
+
+  <div>
+    <%= form.label :dev_container_port, "Container Port" %><br>
+    <%= form.number_field :dev_container_port, placeholder: "3000" %>
+    <small class="form-help">Container port to publish. Docker will assign an available host port automatically (default: 3000)</small>
+  </div>
+
+  <div>
     <%= form.submit %>
   </div>
 <% end %>

@@ -17,6 +17,7 @@ Rails.application.routes.draw do
         get :branches
         patch :update_auto_push
       end
+      resource :container, only: %i[create destroy]
       resources :runs, only: %i[create]
     end
   end

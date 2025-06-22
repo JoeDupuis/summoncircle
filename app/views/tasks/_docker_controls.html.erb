@@ -1,0 +1,45 @@
+<div id="docker_controls" class="docker-controls">
+  <% container_info = container_status_info(task) %>
+  
+  <% if task.container_status == "rebuilding" %>
+    <div class="container-info">
+      <span class="container-status">
+        Container: Rebuilding...
+      </span>
+    </div>
+  <% elsif task.container_status == "building" %>
+    <div class="container-info">
+      <span class="container-status">
+        Container: Building...
+      </span>
+    </div>
+  <% elsif task.container_status == "removing" %>
+    <div class="container-info">
+      <span class="container-status">
+        Container: Removing...
+      </span>
+    </div>
+  <% elsif container_info.exists %>
+    <div class="container-info">
+      <span class="container-status">
+        Container: <%= task.container_name %> (<%= container_info.status %>)
+        <% if container_info.port_info %>
+          | Port: <%= link_to "localhost:#{container_info.port_info}", "http://localhost:#{container_info.port_info}", target: "_blank" %>
+        <% elsif task.project.dev_container_port.present? %>
+          | Port: <%= task.project.dev_container_port %> (not mapped)
+        <% end %>
+      </span>
+      <%= link_to "Rebuild", task_container_path(task), 
+          data: { turbo_method: :post, turbo_confirm: "Rebuild container?" },
+          class: "button action-button -mini" %>
+      <%= link_to "Remove", task_container_path(task), 
+          data: { turbo_method: :delete, turbo_confirm: "Remove container?" },
+          class: "button action-button -mini -danger" %>
+    </div>
+  <% else %>
+    <%= link_to "Build & Run Container", task_container_path(task), 
+        data: { turbo_method: :post },
+        class: "button action-button -primary -mini",
+        title: "Build and run a development container with the project's Dockerfile" %>
+  <% end %>
+</div>
