@@ -608,41 +608,6 @@ class RunTest < ActiveSupport::TestCase
     git_container
   end
 
-  def expect_clone_and_branch_detection(clone_cmd: nil, working_dir: "/workspace", env: [], binds: nil, project: nil)
-    # If clone_cmd is not provided, generate it based on project
-    if clone_cmd.nil? && project
-      clone_cmd = "git clone '#{project.repository_url}' '.'"
-    end
-    clone_cmd ||= "git clone 'https://github.com/test/repo.git' '.'"
-
-    # Expect clone
-    git_container = mock_git_container(log_output: "Cloning into '.'...")
-    expectations = {
-      "Image" => "example/image:latest",
-      "Entrypoint" => [ "sh" ],
-      "Cmd" => [ "-c", clone_cmd ],
-      "WorkingDir" => working_dir,
-      "User" => "1000",
-      "Env" => env
-    }
-    expectations["HostConfig"] = has_entries("Binds" => binds) if binds
-
-    Docker::Container.expects(:create).with(has_entries(expectations)).returns(git_container)
-
-    # Expect branch detection
-    branch_container = mock_git_container(log_output: "main", status_code: 0)
-    branch_expectations = {
-      "Image" => "example/image:latest",
-      "Entrypoint" => [ "sh" ],
-      "Cmd" => [ "-c", "git branch --show-current" ],
-      "WorkingDir" => working_dir,
-      "User" => "1000",
-      "Env" => env
-    }
-    branch_expectations["HostConfig"] = has_entries("Binds" => binds) if binds
-
-    Docker::Container.expects(:create).with(has_entries(branch_expectations)).returns(branch_container)
-  end
 
   def expect_git_clone_container(image: "example/image:latest", user: "1000", log_output: "Cloning...", status_code: 0, cmd: nil, working_dir: nil, binds: nil)
     git_container = mock_git_container(log_output: log_output, status_code: status_code)
