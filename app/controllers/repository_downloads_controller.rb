@@ -14,10 +14,7 @@ class RepositoryDownloadsController < ApplicationController
       return
     end
 
-    # Read the file into memory before sending
-    tar_data = File.read(archive_path, mode: "rb")
-
-    send_data tar_data,
+    send_file archive_path,
               filename: "#{@task.description.parameterize}-#{project.name.parameterize}-repository.tar",
               type: "application/x-tar",
               disposition: "attachment"
