@@ -14,13 +14,13 @@ class RepositoryDownloadsController < ApplicationController
       return
     end
 
-    # Use send_data with IO object for streaming and proper cleanup
-    File.open(archive_path, 'rb') do |file|
-      send_data file,
-                filename: "#{@task.description.parameterize}-#{project.name.parameterize}-repository.tar",
-                type: "application/x-tar",
-                disposition: "attachment"
-    end
+    # Read file content and send it
+    tar_data = File.binread(archive_path)
+    
+    send_data tar_data,
+              filename: "#{@task.description.parameterize}-#{project.name.parameterize}-repository.tar",
+              type: "application/x-tar",
+              disposition: "attachment"
   ensure
     # Clean up the temporary file
     if archive_path && File.exist?(archive_path)
