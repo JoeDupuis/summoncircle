@@ -19,11 +19,10 @@ class RebuildDockerContainerJob < ApplicationJob
       end
     end
 
-    # Update status to show rebuilding
+    # Clear old container info (status already set by controller)
     task.update!(
       container_id: nil,
       container_name: nil,
-      container_status: "rebuilding",
       docker_image_id: nil
     )
     broadcast_docker_status(task)

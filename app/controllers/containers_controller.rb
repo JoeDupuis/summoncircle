@@ -3,9 +3,13 @@ class ContainersController < ApplicationController
 
   def create
     if @task.container_id.present?
+      # Immediately set rebuilding state
+      @task.update!(container_status: "rebuilding")
       RebuildDockerContainerJob.perform_later(@task)
       flash[:notice] = "Rebuilding container..."
     else
+      # Set building state for new containers
+      @task.update!(container_status: "building")
       BuildDockerContainerJob.perform_later(@task)
       flash[:notice] = "Building container..."
     end

@@ -44,6 +44,12 @@
         Container: Rebuilding...
       </span>
     </div>
+  <% elsif task.container_status == "building" %>
+    <div class="container-info">
+      <span class="container-status">
+        Container: Building...
+      </span>
+    </div>
   <% elsif container_exists %>
     <div class="container-info">
       <span class="container-status">
