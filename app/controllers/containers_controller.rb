@@ -26,6 +26,8 @@ class ContainersController < ApplicationController
   end
 
   def destroy
+    # Immediately set removing state
+    @task.update!(container_status: "removing")
     RemoveDockerContainerJob.perform_later(@task)
     flash[:notice] = "Removing container..."
 

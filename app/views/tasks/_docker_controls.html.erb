@@ -13,6 +13,12 @@
         Container: Building...
       </span>
     </div>
+  <% elsif task.container_status == "removing" %>
+    <div class="container-info">
+      <span class="container-status">
+        Container: Removing...
+      </span>
+    </div>
   <% elsif container_info.exists %>
     <div class="container-info">
       <span class="container-status">
