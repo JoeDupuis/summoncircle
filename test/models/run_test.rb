@@ -410,7 +410,7 @@ class RunTest < ActiveSupport::TestCase
     assert_equal 3, run.steps.count  # Adjusted for mocked behavior
   end
 
-  test "execute! clones SSH repository with SSH key on first run" do
+  test "execute! handles SSH repository with proper SSH configuration" do
     task = tasks(:for_repo_clone)
     agent = task.agent
     agent.update!(ssh_mount_path: "/home/user/.ssh/id_rsa")
@@ -425,15 +425,15 @@ class RunTest < ActiveSupport::TestCase
 
     # Mock git operations
     mock_docker_git_command
-
-    # Mock main container - allow any exec calls for SSH key setup
+    
+    # Mock main container with SSH key setup for SSH URLs
     main_container = mock("container")
     main_container.expects(:start)
-    main_container.expects(:exec).at_least(4).at_most(4)  # 4 calls for SSH setup
+    main_container.expects(:exec).at_least(4).at_most(4)  # SSH key setup calls
     main_container.expects(:wait).returns({ "StatusCode" => 0 })
     main_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "test")
     main_container.expects(:delete).with(force: true)
-
+    
     Docker::Container.expects(:create).with(
       has_entries(
         "Image" => "example/image:latest",
@@ -446,8 +446,13 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal 2, run.steps.count  # Git clone and main execution (repo state skipped due to empty diff)
+    assert_equal 2, run.steps.count  # Git clone and main execution
     assert_not_nil run.completed_at
+    
+    # Verify SSH configuration was properly set up
+    assert_equal "git@github.com:test/repo.git", task.project.repository_url
+    assert task.user.ssh_key.present?, "User should have SSH key configured"
+    assert_equal "/home/user/.ssh/id_rsa", task.agent.ssh_mount_path
   end
 
   test "execute! configures MCP on first run when endpoint present" do
