@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_21_075105) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_22_044834) do
   create_table "agent_specific_settings", force: :cascade do |t|
     t.integer "agent_id", null: false
     t.string "type", null: false
@@ -27,7 +27,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_21_075105) do
     t.json "continue_arguments"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "docker_host"
     t.string "log_processor", default: "Text"
     t.string "workplace_path"
     t.json "env_variables"

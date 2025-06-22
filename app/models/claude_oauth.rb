@@ -6,7 +6,6 @@ class ClaudeOauth
 
   def initialize(agent)
     @agent = agent
-    set_docker_host(@agent.docker_host)
   end
 
   def login_start
@@ -31,7 +30,6 @@ class ClaudeOauth
     end
   ensure
     container&.delete(force: true) if defined?(container)
-    restore_docker_config
   end
 
   def login_finish(authorization_code)
@@ -55,7 +53,6 @@ class ClaudeOauth
     end
   ensure
     container&.delete(force: true) if defined?(container)
-    restore_docker_config
   end
 
   def refresh_token
@@ -78,7 +75,6 @@ class ClaudeOauth
     end
   ensure
     container&.delete(force: true) if defined?(container)
-    restore_docker_config
   end
 
   def check_credentials_exist
@@ -176,24 +172,5 @@ class ClaudeOauth
 
   def clean_logs(logs)
     logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
-  end
-
-  def set_docker_host(docker_host)
-    @original_docker_url = Docker.url
-    @original_docker_options = Docker.options
-
-    return unless docker_host.present?
-
-    Docker.url = docker_host
-    Docker.options = {
-      read_timeout: 600,
-      write_timeout: 600,
-      connect_timeout: 60
-    }
-  end
-
-  def restore_docker_config
-    Docker.url = @original_docker_url if @original_docker_url
-    Docker.options = @original_docker_options if @original_docker_options
   end
 end

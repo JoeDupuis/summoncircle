@@ -24,7 +24,6 @@ class Run < ApplicationRecord
     update!(started_at: Time.current)
 
     begin
-      set_docker_host(task.agent.docker_host)
       clone_repository(task) if first_run? && should_clone_repository?
       run_setup_script
 
@@ -51,7 +50,6 @@ class Run < ApplicationRecord
       steps.create!(raw_response: error_message, type: "Step::Error", content: error_message)
       failed!
     ensure
-      restore_docker_config
       update!(completed_at: Time.current)
       save!
       container&.delete(force: true) if defined?(container)
@@ -92,25 +90,6 @@ class Run < ApplicationRecord
 
   private
 
-
-  def set_docker_host(docker_host)
-    @original_docker_url ||= Docker.url
-    @original_docker_options ||= Docker.options
-
-    return unless docker_host.present?
-
-    Docker.url = docker_host
-    Docker.options = {
-      read_timeout: 600,
-      write_timeout: 600,
-      connect_timeout: 60
-    }
-  end
-
-  def restore_docker_config
-    Docker.url = @original_docker_url
-    Docker.options = @original_docker_options
-  end
 
   def create_container
     agent = task.agent
