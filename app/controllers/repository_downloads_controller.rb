@@ -23,6 +23,9 @@ class RepositoryDownloadsController < ApplicationController
               disposition: "attachment"
   ensure
     File.delete(archive_path) if archive_path && File.exist?(archive_path)
+    # Clean up extracted workspace
+    workspace_dir = Rails.root.join("tmp", "task-#{@task.id}-workspace")
+    FileUtils.rm_rf(workspace_dir) if File.exist?(workspace_dir)
   end
 
   private
@@ -37,13 +40,47 @@ class RepositoryDownloadsController < ApplicationController
   def determine_repo_path
     project = @task.project
 
-    # For now, just use the project's repo_path or a temp directory
-    # TODO: Implement proper Docker volume inspection to get the actual task workspace
-    if project.repo_path.present?
+    # Try to extract from Docker volume first
+    if extract_from_docker_volume
+      Rails.root.join("tmp", "task-#{@task.id}-workspace").to_s
+    elsif project.repo_path.present?
       project.repo_path
     elsif project.repository_url.present?
-      # This is a placeholder - in reality, we'd need to extract from Docker volume
       Rails.root.join("tmp", "repos", "task-#{@task.id}").to_s
+    end
+  end
+
+  def extract_from_docker_volume
+    workplace_mount = @task.workplace_mount
+    return false unless workplace_mount
+
+    volume_name = workplace_mount.volume_name
+    return false unless volume_name
+
+    # Create extraction directory
+    extract_dir = Rails.root.join("tmp", "task-#{@task.id}-workspace")
+    FileUtils.rm_rf(extract_dir)
+    FileUtils.mkdir_p(extract_dir)
+
+    # Use Docker to copy files from volume to local directory
+    # Create a temporary container with the volume mounted to copy files out
+    temp_container = "extract-#{SecureRandom.hex(8)}"
+
+    begin
+      # Create container with volume mounted
+      system("docker", "create", "--name", temp_container, "-v", "#{volume_name}:/source", "alpine", "true")
+
+      # Copy files from volume to host
+      system("docker", "cp", "#{temp_container}:/source/.", extract_dir.to_s)
+
+      # Check if extraction was successful
+      File.exist?(extract_dir) && !Dir.empty?(extract_dir)
+    rescue => e
+      Rails.logger.error "Failed to extract Docker volume: #{e.message}"
+      false
+    ensure
+      # Clean up temporary container
+      system("docker", "rm", temp_container) if temp_container
     end
   end
 
