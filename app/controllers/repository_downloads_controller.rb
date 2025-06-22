@@ -49,22 +49,33 @@ class RepositoryDownloadsController < ApplicationController
   def determine_repo_path
     project = @task.project
 
-    # Try to extract from Docker volume first
+    # Try to extract from Docker volume first (this is the primary method)
     if extract_from_docker_volume
       Rails.root.join("tmp", "task-#{@task.id}-workspace").to_s
     elsif project.repo_path.present?
+      # Local repository path (for development/testing)
       project.repo_path
-    elsif project.repository_url.present?
-      Rails.root.join("tmp", "repos", "task-#{@task.id}").to_s
+    else
+      # No valid repository source found
+      Rails.logger.warn "No valid repository source found for task #{@task.id}"
+      nil
     end
   end
 
   def extract_from_docker_volume
+    Rails.logger.info "Attempting to extract from Docker volume for task #{@task.id}"
     workplace_mount = @task.workplace_mount
-    return false unless workplace_mount
+    unless workplace_mount
+      Rails.logger.info "No workplace mount found for task #{@task.id}"
+      return false
+    end
 
     volume_name = workplace_mount.volume_name
-    return false unless volume_name
+    unless volume_name
+      Rails.logger.info "No volume name found for workplace mount"
+      return false
+    end
+    Rails.logger.info "Found volume: #{volume_name}"
 
     # Create extraction directory
     extract_dir = Rails.root.join("tmp", "task-#{@task.id}-workspace")
@@ -74,22 +85,48 @@ class RepositoryDownloadsController < ApplicationController
     # Use Docker to copy files from volume to local directory
     # Create a temporary container with the volume mounted to copy files out
     temp_container = "extract-#{SecureRandom.hex(8)}"
+    
+    # Add Docker host if configured
+    docker_args = ["docker"]
+    if ENV["DOCKER_URL"].present?
+      docker_args += ["-H", ENV["DOCKER_URL"]]
+    end
 
     begin
+      Rails.logger.info "Creating temporary container: #{temp_container}"
+      
       # Create container with volume mounted
-      system("docker", "create", "--name", temp_container, "-v", "#{volume_name}:/source", "alpine", "true")
+      create_result = system(*docker_args, "create", "--name", temp_container, "-v", "#{volume_name}:/source", "alpine", "true")
+      Rails.logger.info "Docker create result: #{create_result}"
 
       # Copy files from volume to host
-      system("docker", "cp", "#{temp_container}:/source/.", extract_dir.to_s)
+      # Account for project's repo_path within the volume
+      project = @task.project
+      source_path = if project.repo_path.present?
+        repo_subpath = project.repo_path.sub(/^\//, "")
+        "/source/#{repo_subpath}/."
+      else
+        "/source/."
+      end
+      
+      Rails.logger.info "Copying files from #{source_path} in volume to #{extract_dir}"
+      copy_result = system(*docker_args, "cp", "#{temp_container}:#{source_path}", extract_dir.to_s)
+      Rails.logger.info "Docker cp result: #{copy_result}"
 
       # Check if extraction was successful
-      File.exist?(extract_dir) && !Dir.empty?(extract_dir)
+      success = File.exist?(extract_dir) && !Dir.empty?(extract_dir)
+      Rails.logger.info "Extraction successful: #{success}, directory exists: #{File.exist?(extract_dir)}, directory empty: #{Dir.empty?(extract_dir) if File.exist?(extract_dir)}"
+      success
     rescue => e
       Rails.logger.error "Failed to extract Docker volume: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
       false
     ensure
       # Clean up temporary container
-      system("docker", "rm", temp_container) if temp_container
+      if temp_container
+        Rails.logger.info "Cleaning up temporary container: #{temp_container}"
+        system(*docker_args, "rm", temp_container)
+      end
     end
   end
 
