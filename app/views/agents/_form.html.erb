@@ -12,11 +12,6 @@
   </div>
 
   <div>
-    <%= form.label :docker_host %><br>
-    <%= form.text_field :docker_host %>
-  </div>
-
-  <div>
     <%= form.label :mcp_sse_endpoint, "MCP SSE Endpoint" %><br>
     <%= form.text_field :mcp_sse_endpoint, placeholder: "http://localhost:3000" %>
     <small class="form-help">Base URL for MCP server (will append /mcp/sse automatically). Leave blank to disable MCP.</small>

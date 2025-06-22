@@ -139,39 +139,6 @@ class RunTest < ActiveSupport::TestCase
     assert_equal "continued output", run.steps.first.raw_response
   end
 
-  test "execute! configures Docker host when specified and resets after completion" do
-    original_url = Docker.url
-
-    task = tasks(:with_docker_host)
-    run = task.runs.create!(prompt: "test", status: :pending)
-
-    Docker.expects(:url=).with("tcp://192.168.1.100:2375").once
-    Docker.expects(:url=).with(original_url).once
-
-    expect_main_container(cmd: [ "echo", "test" ], output: "\x04test")
-
-    run.execute!
-
-    assert run.completed?
-    assert_equal original_url, Docker.url
-  end
-
-  test "execute! resets Docker host even when run fails" do
-    original_url = "unix:///var/run/docker.sock"
-    Docker.url = original_url
-
-    task = tasks(:with_docker_host)
-    run = task.runs.create!(prompt: "test", status: :pending)
-
-    # Mock Docker to fail
-    Docker::Container.expects(:create).raises(Docker::Error::NotFoundError, "Image not found")
-
-    run.execute!
-
-    assert run.failed?
-    assert_equal original_url, Docker.url
-  end
-
 
 
   test "execute! passes environment variables to Docker container" do

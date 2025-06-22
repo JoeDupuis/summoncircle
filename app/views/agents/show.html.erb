@@ -4,12 +4,6 @@
   Docker Image: <%= @agent.docker_image %>
 </p>
 
-<% if @agent.docker_host.present? %>
-<p>
-  Docker Host: <%= @agent.docker_host %>
-</p>
-<% end %>
-
 <% if @agent.mcp_sse_endpoint.present? %>
 <p>
   MCP SSE Endpoint: <%= @agent.mcp_sse_endpoint %>

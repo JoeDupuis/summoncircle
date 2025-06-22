@@ -8,8 +8,6 @@ class DockerContainerBuilder
   def build_and_run
     return unless @task.project.dev_dockerfile_path.present?
 
-    set_docker_host(@task.agent.docker_host)
-
     image_name = "summoncircle/task-#{@task.id}-dev"
     container_name = "task-#{@task.id}-dev-container"
 
@@ -26,7 +24,6 @@ class DockerContainerBuilder
       broadcast_docker_status
     ensure
       FileUtils.rm_rf(temp_dir) if temp_dir && Dir.exist?(temp_dir)
-      restore_docker_config
     end
   end
 
@@ -154,25 +151,6 @@ class DockerContainerBuilder
       container_status: container_info["State"]["Status"],
       docker_image_id: image.id
     )
-  end
-
-  def set_docker_host(docker_host)
-    @original_docker_url ||= Docker.url
-    @original_docker_options ||= Docker.options
-
-    return unless docker_host.present?
-
-    Docker.url = docker_host
-    Docker.options = {
-      read_timeout: 600,
-      write_timeout: 600,
-      connect_timeout: 60
-    }
-  end
-
-  def restore_docker_config
-    Docker.url = @original_docker_url if @original_docker_url
-    Docker.options = @original_docker_options if @original_docker_options
   end
 
   def create_tar_stream_from_directory(dir, dockerfile_name = "Dockerfile")
