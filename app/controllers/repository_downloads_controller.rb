@@ -10,12 +10,12 @@ class RepositoryDownloadsController < ApplicationController
 
     repo_path = determine_repo_path
 
-    # For development, create a dummy archive with a README explaining the limitation
-    archive_path = if repo_path && File.exist?(repo_path)
-      create_repository_archive(repo_path)
-    else
-      create_placeholder_archive
+    unless repo_path && File.exist?(repo_path)
+      redirect_to @task, alert: "Repository not available for download"
+      return
     end
+
+    archive_path = create_repository_archive(repo_path)
 
     Rails.logger.info "Sending file: #{archive_path}, size: #{File.size(archive_path)} bytes"
 
@@ -97,40 +97,4 @@ class RepositoryDownloadsController < ApplicationController
     archive_path.to_s
   end
 
-  def create_placeholder_archive
-    archive_path = Rails.root.join("tmp", "#{SecureRandom.hex(8)}.zip")
-    temp_dir = Rails.root.join("tmp", "task-#{@task.id}-export")
-
-    FileUtils.mkdir_p(temp_dir)
-
-    # Create a README explaining the limitation
-    File.write(temp_dir.join("README.txt"), <<~EOF)
-      Task Repository Export - #{@task.description}
-      =============================================
-
-      This is a placeholder archive. The actual repository modifications made by
-      the agent are stored in Docker volumes and are not directly accessible
-      from the host filesystem.
-
-      Task Details:
-      - Task ID: #{@task.id}
-      - Agent: #{@task.agent.name}
-      - Project: #{@task.project.name}
-      - Repository URL: #{@task.project.repository_url}
-
-      To access the actual modified files, you would need to:
-      1. Access the Docker container/volume where the agent ran
-      2. Or implement Docker volume extraction functionality
-    EOF
-
-    # Create the zip
-    Dir.chdir(Rails.root.join("tmp")) do
-      system("zip", "-r", archive_path.to_s, "task-#{@task.id}-export")
-    end
-
-    # Clean up temp directory
-    FileUtils.rm_rf(temp_dir)
-
-    archive_path.to_s
-  end
 end
