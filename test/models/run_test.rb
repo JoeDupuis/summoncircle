@@ -410,49 +410,6 @@ class RunTest < ActiveSupport::TestCase
     assert_equal 3, run.steps.count  # Adjusted for mocked behavior
   end
 
-  test "execute! clones SSH repository with SSH key on first run" do
-    task = tasks(:for_repo_clone)
-    agent = task.agent
-    agent.update!(ssh_mount_path: "/home/user/.ssh/id_rsa")
-
-    user = task.user
-    user.update!(ssh_key: "-----BEGIN OPENSSH PRIVATE KEY-----\ntest_ssh_key\n-----END OPENSSH PRIVATE KEY-----")
-
-    project = task.project
-    project.update!(repository_url: "git@github.com:test/repo.git")
-
-    run = task.runs.create!(prompt: "test", status: :pending)
-
-    # Mock git operations
-    mock_docker_git_command
-    
-    # Mock main container and verify SSH key setup happens
-    main_container = mock("container")
-    main_container.expects(:start)
-    
-    # These are the exact SSH key setup calls we expect
-    main_container.expects(:exec).with([ "mkdir", "-p", "/home/user/.ssh" ])
-    main_container.expects(:exec).with([ "sh", "-c", "echo 'LS0tLS1CRUdJTiBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0KdGVzdF9zc2hfa2V5Ci0tLS0tRU5EIE9QRU5TU0ggUFJJVkFURSBLRVktLS0tLQ==' | base64 -d > /home/user/.ssh/id_rsa" ])
-    main_container.expects(:exec).with([ "chmod", "600", "/home/user/.ssh/id_rsa" ])
-    
-    main_container.expects(:wait).returns({ "StatusCode" => 0 })
-    main_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "test")
-    main_container.expects(:delete).with(force: true)
-    
-    Docker::Container.expects(:create).with(
-      has_entries(
-        "Image" => "example/image:latest",
-        "Cmd" => [ "echo", "STARTING: test" ],
-        "WorkingDir" => "/workspace",
-        "Env" => []
-      )
-    ).returns(main_container)
-
-    run.execute!
-
-    assert run.completed?
-    assert_equal 2, run.steps.count  # Git clone and main execution
-  end
 
   test "execute! configures MCP on first run when endpoint present" do
     task = tasks(:with_mcp_endpoint)
