@@ -21,10 +21,10 @@
         </div>
         <div class="task-actions-header">
           <%= link_to 'Download Repository', task_repository_download_path(@task), class: 'button', data: { turbo: false } %>
-          <button class="button" data-controller="copy-git-apply" data-copy-git-apply-task-id-value="<%= @task.id %>" data-copy-git-apply-repository-diff-url-value="<%= task_repository_diff_path(@task) %>" data-action="click->copy-git-apply#copy">
+          <button class="button copy-button" data-controller="copy-git-apply" data-copy-git-apply-task-id-value="<%= @task.id %>" data-copy-git-apply-repository-diff-url-value="<%= task_repository_diff_path(@task) %>" data-copy-git-apply-success-class="-success" data-copy-git-apply-error-class="-error" data-action="click->copy-git-apply#copy">
             Copy Git Apply Command
           </button>
-          <button class="button" data-controller="copy-diff" data-copy-diff-repository-diff-url-value="<%= task_repository_diff_path(@task) %>" data-action="click->copy-diff#copy">
+          <button class="button copy-button" data-controller="copy-diff" data-copy-diff-repository-diff-url-value="<%= task_repository_diff_path(@task) %>" data-copy-diff-success-class="-success" data-copy-diff-error-class="-error" data-action="click->copy-diff#copy">
             Copy Diff
           </button>
         </div>

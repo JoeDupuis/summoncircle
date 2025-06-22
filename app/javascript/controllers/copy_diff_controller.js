@@ -4,6 +4,8 @@ export default class extends Controller {
   static values = { 
     repositoryDiffUrl: String
   }
+  
+  static classes = ["success", "error"]
 
   async copy(event) {
     event.preventDefault()
@@ -42,16 +44,17 @@ export default class extends Controller {
     button.textContent = message
     button.disabled = true
     
-    if (success) {
-      button.classList.add('button--success')
-    } else {
-      button.classList.add('button--error')
+    if (success && this.hasSuccessClass) {
+      button.classList.add(this.successClass)
+    } else if (!success && this.hasErrorClass) {
+      button.classList.add(this.errorClass)
     }
     
     setTimeout(() => {
       button.textContent = originalText
       button.disabled = false
-      button.classList.remove('button--success', 'button--error')
+      if (this.hasSuccessClass) button.classList.remove(this.successClass)
+      if (this.hasErrorClass) button.classList.remove(this.errorClass)
     }, 2000)
   }
 }
