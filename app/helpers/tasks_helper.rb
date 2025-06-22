@@ -62,4 +62,8 @@ module TasksHelper
       )
     end
   end
+
+  def task_proxy_path(task, path = "/")
+    "/tasks/#{task.id}/proxy#{path}"
+  end
 end
