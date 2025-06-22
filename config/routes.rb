@@ -12,6 +12,7 @@ Rails.application.routes.draw do
   resources :projects do
     resources :project_branches, only: %i[index]
     resources :tasks, shallow: true do
+      resource :repository_download, only: [ :show ]
       member do
         get :branches
         patch :update_auto_push

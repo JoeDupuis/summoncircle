@@ -19,6 +19,9 @@
             <span>Total Cost: $<%= "%.6f" % @task.total_cost %></span>
           <% end %>
         </div>
+        <div class="task-actions-header">
+          <%= link_to 'Download Repository', task_repository_download_path(@task), class: 'button' %>
+        </div>
         <% if Current.user&.github_token.present? %>
           <%= render "tasks/auto_push_form", task: @task %>
         <% end %>
