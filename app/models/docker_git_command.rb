@@ -43,7 +43,7 @@ class DockerGitCommand
 
   def build_container_config
     git_working_dir = calculate_working_directory
-    
+
     {
       "Image" => task.agent.docker_image,
       "Entrypoint" => [ "sh" ],
@@ -60,7 +60,7 @@ class DockerGitCommand
   def calculate_working_directory
     repo_path = task.project.repo_path.presence || ""
     work_dir = working_dir || task.workplace_mount.container_path
-    
+
     if skip_repo_path
       work_dir
     else

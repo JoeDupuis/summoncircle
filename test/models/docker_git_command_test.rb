@@ -136,7 +136,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
 
   test "calculate_working_directory includes repo_path when not skipped" do
     @project.update!(repo_path: "myapp")
-    
+
     command = DockerGitCommand.new(
       task: @task,
       command: "ls",
@@ -244,7 +244,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container.expects(:start)
     container.expects(:exec).with([ "mkdir", "-p", "/home/user/.ssh" ])
     container.expects(:exec).with do |cmd|
-      cmd.is_a?(Array) && cmd[0] == "sh" && cmd[1] == "-c" && 
+      cmd.is_a?(Array) && cmd[0] == "sh" && cmd[1] == "-c" &&
       cmd[2].include?("base64 -d > /home/user/.ssh/id_rsa")
     end
     container.expects(:exec).with([ "chmod", "600", "/home/user/.ssh/id_rsa" ])
@@ -299,7 +299,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container.expects(:delete)
 
     Docker::Container.expects(:create).returns(container)
-    
+
     Rails.logger.expects(:error).with(includes("Failed to setup SSH key"))
 
     # Should not raise, just log the error
@@ -473,7 +473,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
 
   test "handles repo_path with leading slash correctly" do
     @project.update!(repo_path: "/src/app")
-    
+
     command = DockerGitCommand.new(
       task: @task,
       command: "pwd",
