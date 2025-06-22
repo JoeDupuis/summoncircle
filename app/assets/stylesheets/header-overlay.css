@@ -40,6 +40,16 @@
   margin-top: 0;
 }
 
+.task-actions-header {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.task-actions-header .button {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
 @media (max-width: 768px) {
   .header-overlay {
     position: relative;

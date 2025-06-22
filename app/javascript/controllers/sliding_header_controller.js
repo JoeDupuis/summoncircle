@@ -73,6 +73,7 @@ export default class extends Controller {
   showHeader() {
     this.isShowing = true
     this.headerTarget.style.transform = 'translateY(0)'
+    this.dismissFlashAlerts()
   }
   
   hideHeader() {
@@ -87,5 +88,12 @@ export default class extends Controller {
     } else if (!this.isShowing) {
       this.hideHeader()
     }
+  }
+  
+  dismissFlashAlerts() {
+    const flashAlerts = document.querySelectorAll('[data-controller="alert"]')
+    flashAlerts.forEach(alert => {
+      alert.remove()
+    })
   }
 }
