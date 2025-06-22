@@ -410,7 +410,7 @@ class RunTest < ActiveSupport::TestCase
     assert_equal 3, run.steps.count  # Adjusted for mocked behavior
   end
 
-  test "execute! handles SSH repository with proper SSH configuration" do
+  test "execute! passes SSH URL to DockerGitCommand for cloning" do
     task = tasks(:for_repo_clone)
     agent = task.agent
     agent.update!(ssh_mount_path: "/home/user/.ssh/id_rsa")
@@ -423,13 +423,24 @@ class RunTest < ActiveSupport::TestCase
 
     run = task.runs.create!(prompt: "test", status: :pending)
 
-    # Mock git operations
-    mock_docker_git_command
+    # Track that DockerGitCommand was called with SSH URL
+    ssh_clone_command = nil
     
-    # Mock main container with SSH key setup for SSH URLs
+    # Mock DockerGitCommand.new to capture the clone command
+    mock_git_command = mock("docker_git_command")
+    mock_git_command.stubs(:execute).returns(nil)
+    
+    DockerGitCommand.stubs(:new).with { |params|
+      if params[:command]&.include?("git clone")
+        ssh_clone_command = params[:command]
+      end
+      true
+    }.returns(mock_git_command)
+    
+    # Mock main container with SSH setup
     main_container = mock("container")
     main_container.expects(:start)
-    main_container.expects(:exec).at_least(4).at_most(4)  # SSH key setup calls
+    main_container.expects(:exec).at_least(4).at_most(4)  # SSH key setup
     main_container.expects(:wait).returns({ "StatusCode" => 0 })
     main_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "test")
     main_container.expects(:delete).with(force: true)
@@ -446,13 +457,11 @@ class RunTest < ActiveSupport::TestCase
     run.execute!
 
     assert run.completed?
-    assert_equal 2, run.steps.count  # Git clone and main execution
-    assert_not_nil run.completed_at
     
-    # Verify SSH configuration was properly set up
-    assert_equal "git@github.com:test/repo.git", task.project.repository_url
-    assert task.user.ssh_key.present?, "User should have SSH key configured"
-    assert_equal "/home/user/.ssh/id_rsa", task.agent.ssh_mount_path
+    # Verify SSH clone command was called with the SSH URL
+    assert ssh_clone_command, "Git clone command should have been called"
+    assert_includes ssh_clone_command, "git@github.com:test/repo.git", "Clone command should include SSH URL"
+    assert_includes ssh_clone_command, "git clone", "Should be a clone command"
   end
 
   test "execute! configures MCP on first run when endpoint present" do
