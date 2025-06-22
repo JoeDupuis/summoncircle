@@ -132,6 +132,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_22_000000) do
     t.string "container_status"
     t.string "docker_image_id"
     t.integer "container_host_port"
+    t.string "target_branch"
     t.index ["agent_id"], name: "index_tasks_on_agent_id"
     t.index ["discarded_at"], name: "index_tasks_on_discarded_at"
     t.index ["project_id"], name: "index_tasks_on_project_id"

@@ -66,13 +66,13 @@ class TasksController < ApplicationController
   def branches
     @branches = @task.fetch_branches
     Rails.logger.info "Fetched branches from controller: #{@branches.inspect}"
-    render turbo_stream: turbo_stream.replace("branch_select_container",
-                                              partial: "tasks/branch_select",
-                                              locals: { task: @task, branches: @branches })
+    render turbo_stream: turbo_stream.replace("auto_push_form",
+                                              partial: "tasks/auto_push_form",
+                                              locals: { task: @task })
   rescue => e
     Rails.logger.error "Branch fetch error: #{e.message}"
     flash.now[:alert] = "Failed to fetch branches: #{e.message}"
-    render turbo_stream: turbo_stream.prepend("flash-messages", partial: "application/flash_messages")
+    render turbo_stream: turbo_stream.replace("flash-messages", partial: "application/flash_messages")
   end
 
   def update_auto_push
@@ -92,7 +92,7 @@ class TasksController < ApplicationController
 
       render turbo_stream: [
         turbo_stream.replace("auto_push_form", partial: "tasks/auto_push_form", locals: { task: @task }),
-        turbo_stream.prepend("flash-messages", partial: "application/flash_messages")
+        turbo_stream.replace("flash-messages", partial: "application/flash_messages")
       ]
     else
       render json: { error: @task.errors.full_messages.join(", ") }, status: :unprocessable_entity
@@ -115,7 +115,7 @@ class TasksController < ApplicationController
   end
 
   def task_params
-    params.require(:task).permit(:agent_id, :project_id)
+    params.require(:task).permit(:agent_id, :project_id, :target_branch)
   end
 
   def task_update_params
