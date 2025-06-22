@@ -22,7 +22,6 @@ class ContainerProxy
   end
 
   def handle_proxy_request(env)
-    request = Rack::Request.new(env)
     host = env["HTTP_HOST"] || ""
 
     if (match = host.match(/^task-(\d+)\./))
