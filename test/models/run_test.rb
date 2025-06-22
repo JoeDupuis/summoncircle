@@ -3,8 +3,6 @@ require "test_helper"
 class RunTest < ActiveSupport::TestCase
   setup do
     Task.any_instance.stubs(:branches).returns([])
-    # Set target_branch for tasks that have existing runs (they would have detected it on first run)
-    tasks(:task_with_runs).update_column(:target_branch, "main") if defined?(tasks)
   end
   # Docker prefixes logs with 8 bytes of metadata
   DOCKER_LOG_HEADER = "\x01\x00\x00\x00\x00\x00\x00"
