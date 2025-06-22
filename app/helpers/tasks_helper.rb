@@ -63,14 +63,15 @@ module TasksHelper
     end
   end
 
-  def task_proxy_path(task, path = "/")
+  def task_proxy_path(task, path = nil)
     # Use proxy links only if CONTAINER_PROXY_LINKS is explicitly set
     use_proxy_links = ENV["CONTAINER_PROXY_LINKS"].present?
     
     unless use_proxy_links
       container_info = container_status_info(task)
       if container_info.port_info.present?
-        return "http://localhost:#{container_info.port_info}#{path}"
+        base = "http://localhost:#{container_info.port_info}"
+        return path ? "#{base}#{path}" : base
       else
         return "#" # No port available
       end
@@ -88,7 +89,8 @@ module TasksHelper
       host_parts = uri.host.split(".")
       host_parts.unshift("task-#{task.id}")
       uri.host = host_parts.join(".")
-      "#{uri}#{path}"
+      base = uri.to_s
+      return path ? "#{base}#{path}" : base
     else
       # Build from current request
       host_parts = request.host_with_port.split(".")
@@ -100,7 +102,8 @@ module TasksHelper
         host_parts.unshift("task-#{task.id}")
       end
       
-      "#{request.protocol}#{host_parts.join(".")}#{path}"
+      base = "#{request.protocol}#{host_parts.join(".")}"
+      return path ? "#{base}#{path}" : base
     end
   end
 end
