@@ -8,7 +8,10 @@ export default class extends Controller {
     event.preventDefault()
     
     const button = event.currentTarget
-    const content = this.sourceTarget.textContent.trim()
+    // For template elements, we need to access the content property
+    const content = this.sourceTarget.content ? 
+      this.sourceTarget.content.textContent.trim() : 
+      this.sourceTarget.textContent.trim()
     
     if (!content) {
       this.showFeedback(button, 'Nothing to copy', false)
