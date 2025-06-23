@@ -532,17 +532,17 @@ class RunTest < ActiveSupport::TestCase
 
   test "validates prompt presence" do
     task = tasks(:without_runs)
-    
+
     # Test with empty prompt
     run = task.runs.build(prompt: "")
     assert_not run.valid?
     assert_includes run.errors[:prompt], "can't be blank"
-    
+
     # Test with nil prompt
     run = task.runs.build(prompt: nil)
     assert_not run.valid?
     assert_includes run.errors[:prompt], "can't be blank"
-    
+
     # Test with valid prompt
     run = task.runs.build(prompt: "valid prompt")
     assert run.valid?

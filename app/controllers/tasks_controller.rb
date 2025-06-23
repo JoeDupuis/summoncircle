@@ -115,7 +115,7 @@ class TasksController < ApplicationController
   end
 
   def task_params
-    params.require(:task).permit(:agent_id, :project_id, :target_branch, runs_attributes: [:prompt])
+    params.require(:task).permit(:agent_id, :project_id, :target_branch, runs_attributes: [ :prompt ])
   end
 
   def task_update_params
