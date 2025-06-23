@@ -530,6 +530,24 @@ class RunTest < ActiveSupport::TestCase
     assert_includes run.steps.first.raw_response, "Please configure the agent's SSH mount path"
   end
 
+  test "validates prompt presence" do
+    task = tasks(:without_runs)
+    
+    # Test with empty prompt
+    run = task.runs.build(prompt: "")
+    assert_not run.valid?
+    assert_includes run.errors[:prompt], "can't be blank"
+    
+    # Test with nil prompt
+    run = task.runs.build(prompt: nil)
+    assert_not run.valid?
+    assert_includes run.errors[:prompt], "can't be blank"
+    
+    # Test with valid prompt
+    run = task.runs.build(prompt: "valid prompt")
+    assert run.valid?
+  end
+
   test "execute! provides helpful SSH authentication error when git clone fails with permission denied" do
     task = tasks(:for_repo_clone)
     task.user.update!(ssh_key: "test_key")

@@ -28,7 +28,6 @@ class TasksController < ApplicationController
     if @task.valid? && run.valid?
       @task.save!
       run.save!
-      RunJob.perform_later(run.id)
 
       cookies[:preferred_agent_id] = { value: @task.agent_id, expires: 1.year.from_now }
       cookies[:preferred_project_id] = { value: @task.project_id, expires: 1.year.from_now }
@@ -40,7 +39,6 @@ class TasksController < ApplicationController
 
       redirect_to task_path(@task), notice: "Task was successfully launched."
     else
-      @task.errors.add(:base, run.errors.full_messages.first) if run.errors.any?
       render_form_errors
     end
   end

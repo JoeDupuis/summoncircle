@@ -9,6 +9,7 @@ class Run < ApplicationRecord
 
   validates :prompt, presence: true
 
+  after_create :enqueue_job
   after_update_commit :broadcast_update
   after_create_commit :broadcast_chat_append
   after_update_commit :broadcast_chat_replace
@@ -254,5 +255,9 @@ class Run < ApplicationRecord
         content: "Failed to push changes to branch: #{task.auto_push_branch}\n\nError: #{e.message}"
       )
     end
+  end
+
+  def enqueue_job
+    RunJob.perform_later(id)
   end
 end

@@ -37,6 +37,7 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to task_path(Task.last)
   end
 
+
   test "show requires authentication" do
     get task_url(@task)
     assert_redirected_to new_session_path
