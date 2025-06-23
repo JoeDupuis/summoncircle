@@ -93,7 +93,7 @@ module GitOperations
         line.strip.sub(/^\*\s*/, "")
       end.reject(&:blank?).reject do |branch|
         # Filter out detached HEAD branches
-        branch.match(/^\(HEAD detached at [a-f0-9]+\)$/)
+        branch.match(/^\(HEAD detached at [a-fA-F0-9]+\)$/)
       end
 
       branches.presence || []
