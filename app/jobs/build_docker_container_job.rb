@@ -25,7 +25,7 @@ class BuildDockerContainerJob < ApplicationJob
     run.steps.create!(
       raw_response: "Failed to build Docker container\n\nError: #{e.message}\n\nBacktrace:\n#{e.backtrace.first(10).join("\n")}",
       type: "Step::Error",
-      content: "Docker build failed: #{e.message}"
+      content: "Docker build failed"
     )
 
     # Update docker controls to show failed status
