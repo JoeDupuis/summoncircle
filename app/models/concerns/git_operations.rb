@@ -155,7 +155,7 @@ module GitOperations
             error_message: "Failed to fetch target branch",
             return_logs: false
           )
-          
+
           # Then get the diff
           git_apply_command = "git add -N . && git diff origin/#{task.target_branch}...HEAD --unified=10"
         else
