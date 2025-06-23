@@ -119,26 +119,12 @@ module GitOperations
       target_branch_diff = nil
       if task.target_branch.present?
         begin
-          # First fetch the target branch (don't capture output)
-          run_git_command(
-            task: task,
-            command: "git fetch origin #{task.target_branch}",
-            error_message: "Failed to fetch target branch",
-            return_logs: false
-          )
-
-          # Then get the diff
           target_branch_diff = run_git_command(
             task: task,
             command: "git diff origin/#{task.target_branch}...HEAD --unified=10",
             error_message: "Failed to capture target branch diff",
             return_logs: true
           )
-
-          # Don't store if it's just fetch output
-          if target_branch_diff&.match?(/^\s*From\s+https?:\/\/.*\n\s*\*\s*branch.*->\s*FETCH_HEAD\s*$/m) && target_branch_diff.lines.count <= 2
-            target_branch_diff = nil
-          end
         rescue => e
           Rails.logger.error "Failed to capture target branch diff: #{e.message}"
         end
@@ -161,15 +147,6 @@ module GitOperations
       git_diff = nil
       begin
         if task.target_branch.present?
-          # First fetch the target branch (don't capture output)
-          run_git_command(
-            task: task,
-            command: "git fetch origin #{task.target_branch}",
-            error_message: "Failed to fetch target branch",
-            return_logs: false
-          )
-
-          # Then get the diff
           git_diff_command = "git add -N . && git diff origin/#{task.target_branch}...HEAD --unified=10"
         else
           git_diff_command = "git add -N . && git diff HEAD --unified=10"
@@ -181,11 +158,6 @@ module GitOperations
           error_message: "Failed to capture git diff",
           return_logs: true
         )
-
-        # Don't store if it's just fetch output
-        if git_diff&.match?(/^\s*From\s+https?:\/\/.*\n\s*\*\s*branch.*->\s*FETCH_HEAD\s*$/m) && git_diff.lines.count <= 2
-          git_diff = nil
-        end
       rescue => e
         Rails.logger.error "Failed to capture git diff: #{e.message}"
       end
