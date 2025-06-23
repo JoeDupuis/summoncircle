@@ -36,12 +36,36 @@ class RebuildDockerContainerJob < ApplicationJob
       content: "Docker rebuild failed"
     )
 
-    # Broadcast a redirect to show the task with the error run selected
-    Turbo::StreamsChannel.broadcast_append_to(
+    # Broadcast updates
+    Turbo::StreamsChannel.broadcast_replace_to(
       task,
+      target: "docker_controls",
+      partial: "tasks/docker_controls",
+      locals: { task: task }
+    )
+
+    # Replace the runs list to show only the new error run
+    Turbo::StreamsChannel.broadcast_replace_to(
+      task,
+      target: "runs-list",
+      partial: "tasks/runs_list",
+      locals: { runs: [ run ] }
+    )
+
+    # Also update the chat messages
+    Turbo::StreamsChannel.broadcast_replace_to(
+      task,
+      target: "chat-messages",
+      partial: "tasks/chat_messages",
+      locals: { runs: task.runs.order(:created_at) }
+    )
+
+    # Create a turbo stream to switch to the Runs tab
+    Turbo::StreamsChannel.broadcast_action_to(
+      task,
+      action: "append",
       target: "body",
-      partial: "shared/turbo_redirect",
-      locals: { url: Rails.application.routes.url_helpers.task_path(task, selected_run_id: run.id) }
+      html: "<div data-controller=\"auto-tab-switch\" data-auto-tab-switch-target-value=\"steps\"></div>"
     )
 
     raise
