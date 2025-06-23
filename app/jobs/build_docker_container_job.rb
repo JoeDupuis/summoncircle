@@ -1,4 +1,6 @@
 class BuildDockerContainerJob < ApplicationJob
+  include DockerBuildErrorHandling
+
   queue_as :default
 
   def perform(task)
@@ -7,34 +9,7 @@ class BuildDockerContainerJob < ApplicationJob
     Rails.logger.error "Failed to build/run container: #{e.message}"
     Rails.logger.error e.backtrace.join("\n")
 
-    task.update!(
-      container_status: "failed",
-      container_id: nil,
-      container_name: nil,
-      docker_image_id: nil
-    )
-
-    # Create a run with the error information
-    run = task.runs.create!(
-      prompt: "Docker container build failed",
-      status: :failed,
-      started_at: Time.current,
-      completed_at: Time.current
-    )
-
-    run.steps.create!(
-      raw_response: "Failed to build Docker container\n\nError: #{e.message}\n\nBacktrace:\n#{e.backtrace.first(10).join("\n")}",
-      type: "Step::Error",
-      content: "Docker build failed"
-    )
-
-    # Update docker controls to show failed status
-    Turbo::StreamsChannel.broadcast_replace_to(
-      task,
-      target: "docker_controls",
-      partial: "tasks/docker_controls",
-      locals: { task: task }
-    )
+    handle_docker_build_error(task, e, error_type: "build")
 
     raise
   end
