@@ -1,0 +1,31 @@
+<div class="write-tool file-tool" data-tool-id="<%= write_tool.tool_id %>">
+  <div class="tool-header">
+    <span class="tool-icon">📝</span>
+    <span class="tool-label">Write File</span>
+    <span class="file-path"><%= write_tool.file_path %></span>
+  </div>
+  
+  <% if write_tool.file_content %>
+    <div class="file-content">
+      <div class="content-preview">
+        <div class="code-block">
+          <% lines = write_tool.format_code_with_line_numbers(write_tool.file_content) %>
+          <% display_lines = lines.first(10) %>
+          <% display_lines.each do |line_data| %>
+            <div class="code-line">
+              <span class="line-number"><%= line_data[:number] %></span>
+              <span class="line-content"><%= line_data[:content] %></span>
+            </div>
+          <% end %>
+          <% if lines.size > 10 %>
+            <div class="truncated-indicator">
+              <span class="truncated">... (<%= lines.size - 10 %> more lines)</span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  
+  <%= render "step/write_tools/write_tool_result", write_tool: write_tool %>
+</div>

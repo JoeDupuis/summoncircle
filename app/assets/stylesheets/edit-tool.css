@@ -1,0 +1,82 @@
+.edit-tool {
+  --bg-file-tool: var(--bg-edit-tool);
+  --bg-file-header: var(--bg-edit-header);
+}
+
+.edit-tool .tool-icon {
+  color: var(--color-edit-icon);
+}
+
+.edit-tool .edit-details {
+  padding: 1rem;
+}
+
+.edit-tool .string-change {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.edit-tool .old-string,
+.edit-tool .new-string {
+  position: relative;
+}
+
+.edit-tool .old-string .code-block {
+  background: var(--bg-edit-remove);
+  border: 1px solid var(--border-edit-remove);
+}
+
+.edit-tool .new-string .code-block {
+  background: var(--bg-edit-add);
+  border: 1px solid var(--border-edit-add);
+}
+
+.edit-tool .old-string .line-number {
+  background: var(--bg-line-number-remove);
+  color: var(--text-line-number-remove);
+}
+
+.edit-tool .new-string .line-number {
+  background: var(--bg-line-number-add);
+  color: var(--text-line-number-add);
+}
+
+.edit-tool .old-string .line-content {
+  background: var(--bg-content-remove);
+}
+
+.edit-tool .new-string .line-content {
+  background: var(--bg-content-add);
+}
+
+.edit-tool .replace-all-indicator {
+  margin-bottom: 0.75rem;
+}
+
+.edit-tool .replace-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: var(--bg-replace-badge);
+  color: var(--color-white);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+@media (prefers-color-scheme: dark) {
+  .edit-tool .replace-badge {
+    color: var(--text-replace-badge-dark);
+  }
+}
+
+.edit-tool .result-block {
+  background: var(--bg-code);
+}
+
+.edit-tool .result-block .line-number {
+  background: var(--bg-line-number);
+  color: var(--text-line-number);
+}

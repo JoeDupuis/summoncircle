@@ -1,0 +1,11 @@
+<% if write_tool.tool_result %>
+  <div class="tool-result -complete">
+    <span class="status-icon">✅</span>
+    <span>File written successfully</span>
+  </div>
+<% else %>
+  <div class="tool-result -pending">
+    <div class="spinner"></div>
+    <span>Writing file...</span>
+  </div>
+<% end %>

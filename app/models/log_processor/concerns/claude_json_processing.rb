@@ -23,6 +23,18 @@ module LogProcessor::Concerns::ClaudeJsonProcessing
           { raw_response: item_json, type: "Step::BashTool", content: extract_content(item), tool_use_id: tool_use_id }
         elsif tool_use && tool_use["name"] == "TodoWrite"
           { raw_response: item_json, type: "Step::TodoWrite", content: extract_content(item), tool_use_id: tool_use_id }
+        elsif tool_use && tool_use["name"] == "Read"
+          { raw_response: item_json, type: "Step::ReadTool", content: extract_content(item), tool_use_id: tool_use_id }
+        elsif tool_use && tool_use["name"] == "Edit"
+          { raw_response: item_json, type: "Step::EditTool", content: extract_content(item), tool_use_id: tool_use_id }
+        elsif tool_use && tool_use["name"] == "MultiEdit"
+          { raw_response: item_json, type: "Step::MultiEditTool", content: extract_content(item), tool_use_id: tool_use_id }
+        elsif tool_use && tool_use["name"] == "Write"
+          { raw_response: item_json, type: "Step::WriteTool", content: extract_content(item), tool_use_id: tool_use_id }
+        elsif tool_use && tool_use["name"] == "Glob"
+          { raw_response: item_json, type: "Step::GlobTool", content: extract_content(item), tool_use_id: tool_use_id }
+        elsif tool_use && tool_use["name"] == "Grep"
+          { raw_response: item_json, type: "Step::GrepTool", content: extract_content(item), tool_use_id: tool_use_id }
         else
           { raw_response: item_json, type: "Step::ToolCall", content: extract_content(item), tool_use_id: tool_use_id }
         end
@@ -81,6 +93,18 @@ module LogProcessor::Concerns::ClaudeJsonProcessing
               tool_use["input"]["command"]
             elsif tool_use["name"] == "TodoWrite"
               "Todo list updated"
+            elsif tool_use["name"] == "Read"
+              tool_use["input"]["file_path"] || tool_use["input"].to_json
+            elsif tool_use["name"] == "Edit"
+              tool_use["input"]["file_path"] || tool_use["input"].to_json
+            elsif tool_use["name"] == "MultiEdit"
+              tool_use["input"]["file_path"] || tool_use["input"].to_json
+            elsif tool_use["name"] == "Write"
+              tool_use["input"]["file_path"] || tool_use["input"].to_json
+            elsif tool_use["name"] == "Glob"
+              tool_use["input"]["pattern"] || tool_use["input"].to_json
+            elsif tool_use["name"] == "Grep"
+              tool_use["input"]["pattern"] || tool_use["input"].to_json
             else
               "name: #{tool_use['name']}\ninputs: #{tool_use['input'].to_json}"
             end

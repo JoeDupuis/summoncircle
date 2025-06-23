@@ -1,0 +1,69 @@
+.search-tool {
+  margin: 0.5rem 0;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-search-tool);
+  overflow: hidden;
+}
+
+.search-tool .tool-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-file-header);
+  border-bottom: 1px solid var(--border);
+  font-weight: 500;
+}
+
+.search-tool .tool-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.search-tool .tool-label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.search-tool .search-pattern {
+  flex: 1;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 0.875rem;
+  color: var(--text);
+  background: var(--bg-code);
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  word-break: break-word;
+}
+
+.search-tool .search-details {
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.search-tool .search-filter,
+.search-tool .search-path-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-tool .label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.search-tool .filter-value,
+.search-tool .search-path {
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 0.8125rem;
+  color: var(--text);
+}

@@ -1,0 +1,8 @@
+.read-tool {
+  --bg-file-tool: var(--bg-read-tool);
+  --bg-file-header: var(--bg-read-header);
+}
+
+.read-tool .tool-icon {
+  color: var(--color-read-icon);
+}

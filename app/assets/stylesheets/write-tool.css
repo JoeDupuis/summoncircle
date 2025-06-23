@@ -1,0 +1,30 @@
+.write-tool {
+  --bg-file-tool: var(--bg-write-tool);
+  --bg-file-header: var(--bg-write-header);
+}
+
+.write-tool .tool-icon {
+  color: var(--color-write-icon);
+}
+
+.write-tool .file-content {
+  padding: 0;
+}
+
+.write-tool .content-preview .code-block {
+  max-height: 300px;
+  overflow: auto;
+}
+
+.write-tool .truncated-indicator {
+  padding: 0.5rem 1rem;
+  text-align: center;
+  background: var(--bg-truncated);
+  border-top: 1px solid var(--border);
+}
+
+.write-tool .truncated {
+  font-style: italic;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}

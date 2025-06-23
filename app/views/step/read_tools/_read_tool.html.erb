@@ -1,0 +1,9 @@
+<div class="read-tool file-tool" data-tool-id="<%= read_tool.tool_id %>">
+  <div class="tool-header">
+    <span class="tool-icon">📖</span>
+    <span class="tool-label">Read File</span>
+    <span class="file-path"><%= read_tool.file_path %></span>
+  </div>
+  
+  <%= render "step/read_tools/read_tool_result", read_tool: read_tool %>
+</div>
