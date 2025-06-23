@@ -27,12 +27,12 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create requires authentication" do
-    post project_tasks_url(@project), params: { task: { agent_id: @agent.id, prompt: "hi" } }
+    post project_tasks_url(@project), params: { task: { agent_id: @agent.id, runs_attributes: { "0" => { prompt: "hi" } } } }
     assert_redirected_to new_session_path
 
     login @user
     assert_difference([ "Task.count", "Run.count" ]) do
-      post project_tasks_url(@project), params: { task: { agent_id: @agent.id, prompt: "hi" } }
+      post project_tasks_url(@project), params: { task: { agent_id: @agent.id, runs_attributes: { "0" => { prompt: "hi" } } } }
     end
     assert_redirected_to task_path(Task.last)
   end

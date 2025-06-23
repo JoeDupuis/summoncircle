@@ -13,6 +13,8 @@ class Task < ApplicationRecord
 
   validates :description, presence: true
 
+  accepts_nested_attributes_for :runs
+
   def run(prompt)
     runs.create(prompt: prompt)
   end

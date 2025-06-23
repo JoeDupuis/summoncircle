@@ -14,10 +14,12 @@
     <span data-branch-select-target="loading" class="_hidden">Loading branches...</span>
   </div>
 
-  <div data-controller="prompt">
-    <%= form.label :prompt %><br>
-    <%= form.text_area :prompt, required: true, data: { prompt_target: "textarea", action: "keydown->prompt#keydown" } %>
-  </div>
+  <%= form.fields_for :runs do |run_form| %>
+    <div data-controller="prompt">
+      <%= run_form.label :prompt %><br>
+      <%= run_form.text_area :prompt, required: true, data: { prompt_target: "textarea", action: "keydown->prompt#keydown" } %>
+    </div>
+  <% end %>
 
   <div>
     <%= form.submit "Launch Task" %>

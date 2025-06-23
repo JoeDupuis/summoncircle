@@ -19,16 +19,13 @@ class TasksController < ApplicationController
     @task = @project.tasks.new
     @task.agent_id = cookies[:preferred_agent_id] if cookies[:preferred_agent_id].present?
     @task.project_id = cookies[:preferred_project_id] if cookies[:preferred_project_id].present?
+    @task.runs.build
   end
 
   def create
     @task = Task.new(task_params.with_defaults(project_id: @project&.id, user_id: Current.user.id))
-    run = @task.runs.build(prompt: params[:task][:prompt])
 
-    if @task.valid? && run.valid?
-      @task.save!
-      run.save!
-
+    if @task.save
       cookies[:preferred_agent_id] = { value: @task.agent_id, expires: 1.year.from_now }
       cookies[:preferred_project_id] = { value: @task.project_id, expires: 1.year.from_now }
       @task.update!(started_at: Time.current)
@@ -118,7 +115,7 @@ class TasksController < ApplicationController
   end
 
   def task_params
-    params.require(:task).permit(:agent_id, :project_id, :target_branch)
+    params.require(:task).permit(:agent_id, :project_id, :target_branch, runs_attributes: [:prompt])
   end
 
   def task_update_params
