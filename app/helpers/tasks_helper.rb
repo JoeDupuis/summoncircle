@@ -6,7 +6,7 @@ module TasksHelper
       exists: false,
       status: task.container_status,
       port_info: nil
-    ) if %w[building rebuilding removing].include?(task.container_status)
+    ) if %w[building removing].include?(task.container_status)
 
     return OpenStruct.new(
       exists: false,
