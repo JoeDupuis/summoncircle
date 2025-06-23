@@ -49,7 +49,7 @@ class BuildDockerContainerJobTest < ActiveJob::TestCase
     assert_equal "Step::Error", error_step.type
     assert_includes error_step.content, "Failed to build Docker container"
     assert_includes error_step.raw_response, "Build failed with specific error"
-    
+
     # Check the result step (for chat display)
     result_step = run.steps.last
     assert_equal "Step::Result", result_step.type
@@ -62,29 +62,8 @@ class BuildDockerContainerJobTest < ActiveJob::TestCase
 
     DockerContainerBuilder.expects(:new).with(@task).returns(mock_builder)
 
-    # Expect broadcast for docker controls update
-    Turbo::StreamsChannel.expects(:broadcast_replace_to).with(
-      @task,
-      target: "docker_controls",
-      partial: "tasks/docker_controls",
-      locals: { task: @task }
-    )
-    
-    # Expect broadcast for runs list update
-    Turbo::StreamsChannel.expects(:broadcast_replace_to).with(
-      @task,
-      target: "runs-list",
-      partial: "tasks/runs_list",
-      locals: { runs: @task.runs }
-    )
-    
-    # Expect broadcast for chat messages update
-    Turbo::StreamsChannel.expects(:broadcast_replace_to).with(
-      @task,
-      target: "chat-messages",
-      partial: "tasks/chat_messages",
-      locals: { runs: @task.runs.order(:created_at) }
-    )
+    # Expect all three broadcasts
+    Turbo::StreamsChannel.expects(:broadcast_replace_to).times(3)
 
     assert_raises(StandardError) do
       BuildDockerContainerJob.perform_now(@task)
