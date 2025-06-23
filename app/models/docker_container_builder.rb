@@ -8,9 +8,8 @@ class DockerContainerBuilder
   def build_and_run
     return unless @task.project.dev_dockerfile_path.present?
 
-    # Clean up any existing containers and images first
-    cleanup_existing_containers
-    remove_existing_container if @task.container_id.present?
+    # Clean up any existing container and image first
+    remove_existing_container
 
     image_name = "summoncircle/task-#{@task.id}-dev"
     remove_old_image(image_name)
@@ -67,29 +66,6 @@ class DockerContainerBuilder
   end
 
   private
-
-  def cleanup_existing_containers
-    # Find and remove any containers with our task's name pattern
-    begin
-      containers = Docker::Container.all(all: true)
-      name_pattern = "task-#{@task.id}-dev-container"
-
-      containers.each do |container|
-        container_names = container.info["Names"] || []
-        if container_names.any? { |name| name.include?(name_pattern) }
-          Rails.logger.info "Cleaning up existing container: #{container.id}"
-          begin
-            container.stop(t: 5) if container.info["State"] == "running"
-            container.delete(force: true)
-          rescue => e
-            Rails.logger.warn "Failed to cleanup container #{container.id}: #{e.message}"
-          end
-        end
-      end
-    rescue => e
-      Rails.logger.warn "Failed to list containers for cleanup: #{e.message}"
-    end
-  end
 
   def extract_workspace_files(temp_dir)
     # Create a temporary container to copy files from the volume
