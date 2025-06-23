@@ -1,16 +1,8 @@
 .grep-tool {
-  --bg-search-tool: #fff0f5;
-  --bg-search-tool-dark: #2e0f1a;
-  --bg-header: #ffe5ed;
-  --bg-header-dark: #4e1f2d;
+  --bg-search-tool: var(--bg-grep-tool);
+  --bg-file-header: var(--bg-grep-header);
 }
 
 .grep-tool .tool-icon {
-  color: #ec4899;
-}
-
-@media (prefers-color-scheme: dark) {
-  .grep-tool .tool-icon {
-    color: #f472b6;
-  }
+  color: var(--color-grep-icon);
 }

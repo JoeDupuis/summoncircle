@@ -1,9 +1,9 @@
 .bash-tool.delete-tool {
-  background-color: var(--bg-delete, #fff5f5);
-  color: var(--text-delete, #991b1b);
+  background-color: var(--bg-delete-tool);
+  color: var(--text-delete);
   padding: 0;
   border-radius: 6px;
-  border: 1px solid var(--border-delete, #fecaca);
+  border: 1px solid var(--border-delete);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 0.875rem;
   line-height: 1.5;
@@ -11,29 +11,14 @@
   overflow: hidden;
 }
 
-@media (prefers-color-scheme: dark) {
-  .bash-tool.delete-tool {
-    background-color: var(--bg-delete-dark, #2d1515);
-    color: var(--text-delete-dark, #fca5a5);
-    border-color: var(--border-delete-dark, #5a2020);
-  }
-}
-
 .delete-tool .tool-header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  background: var(--bg-header, #fee2e2);
-  border-bottom: 1px solid var(--border-delete, #fecaca);
+  background: var(--bg-delete-header);
+  border-bottom: 1px solid var(--border-delete);
   font-weight: 500;
-}
-
-@media (prefers-color-scheme: dark) {
-  .delete-tool .tool-header {
-    background: var(--bg-header-dark, #3d1a1a);
-    border-bottom-color: var(--border-delete-dark, #5a2020);
-  }
 }
 
 .delete-tool .tool-icon {
@@ -42,30 +27,18 @@
 }
 
 .delete-tool .tool-label {
-  color: var(--text-secondary, #7f1d1d);
+  color: var(--text-delete-secondary);
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.025em;
-}
-
-@media (prefers-color-scheme: dark) {
-  .delete-tool .tool-label {
-    color: var(--text-secondary-dark, #fca5a5);
-  }
 }
 
 .delete-tool .file-path {
   flex: 1;
   font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
   font-size: 0.875rem;
-  color: var(--text-primary, #991b1b);
+  color: var(--text-delete);
   word-break: break-word;
-}
-
-@media (prefers-color-scheme: dark) {
-  .delete-tool .file-path {
-    color: var(--text-primary-dark, #fca5a5);
-  }
 }
 
 .delete-tool .tool-result {
@@ -78,14 +51,8 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--text-secondary, #7f1d1d);
+  color: var(--text-delete-secondary);
   font-size: 0.875rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  .delete-tool .tool-result.-complete {
-    color: var(--text-secondary-dark, #fca5a5);
-  }
 }
 
 .delete-tool .status-icon {

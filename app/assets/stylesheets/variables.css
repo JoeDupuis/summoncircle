@@ -13,6 +13,61 @@
   --border: #ddd;
   --border-hover: #bbb;
   --spacing-sm: 10px;
+  
+  /* File tool colors */
+  --bg-file-tool: #f8f9fa;
+  --bg-file-header: #f3f4f6;
+  --bg-code: #f6f8fa;
+  --bg-line-number: #f0f3f6;
+  --text-line-number: #6e7781;
+  --bg-hover: rgba(0, 0, 0, 0.02);
+  
+  /* Read tool colors */
+  --bg-read-tool: #f0f8ff;
+  --bg-read-header: #e6f3ff;
+  --color-read-icon: #2188ff;
+  
+  /* Edit tool colors */
+  --bg-edit-tool: #fef9f0;
+  --bg-edit-header: #fee9d1;
+  --color-edit-icon: #f39c12;
+  --bg-edit-remove: #ffeef0;
+  --border-edit-remove: #ffd1dc;
+  --bg-edit-add: #e6ffec;
+  --border-edit-add: #b4e2c5;
+  --bg-line-number-remove: #ffd7d5;
+  --text-line-number-remove: #b91c1c;
+  --bg-line-number-add: #bbf7d0;
+  --text-line-number-add: #15803d;
+  --bg-content-remove: rgba(254, 202, 202, 0.3);
+  --bg-content-add: rgba(187, 247, 208, 0.3);
+  --bg-replace-badge: #f39c12;
+  
+  /* Write tool colors */
+  --bg-write-tool: #f0fff4;
+  --bg-write-header: #d1f5d9;
+  --color-write-icon: #28a745;
+  --bg-truncated: #f0f3f6;
+  
+  /* Search tool colors */
+  --bg-search-tool: #fafbfc;
+  
+  /* Glob tool colors */
+  --bg-glob-tool: #f5f0ff;
+  --bg-glob-header: #ede5ff;
+  --color-glob-icon: #8b5cf6;
+  
+  /* Grep tool colors */
+  --bg-grep-tool: #fff0f5;
+  --bg-grep-header: #ffe5ed;
+  --color-grep-icon: #ec4899;
+  
+  /* Delete tool colors */
+  --bg-delete-tool: #fff5f5;
+  --bg-delete-header: #fee2e2;
+  --border-delete: #fecaca;
+  --text-delete: #991b1b;
+  --text-delete-secondary: #7f1d1d;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -23,5 +78,61 @@
     --text-secondary: #b3b3b3;
     --border: #404040;
     --border-hover: #555;
+    
+    /* File tool colors - dark */
+    --bg-file-tool: #1c2128;
+    --bg-file-header: #161b22;
+    --bg-code: #0d1117;
+    --bg-line-number: #161b22;
+    --text-line-number: #484f58;
+    --bg-hover: rgba(255, 255, 255, 0.02);
+    
+    /* Read tool colors - dark */
+    --bg-read-tool: #0a192f;
+    --bg-read-header: #0d1f3d;
+    --color-read-icon: #58a6ff;
+    
+    /* Edit tool colors - dark */
+    --bg-edit-tool: #2d1f0a;
+    --bg-edit-header: #3d2d0d;
+    --color-edit-icon: #f9c74f;
+    --bg-edit-remove: #462c32;
+    --border-edit-remove: #5e363b;
+    --bg-edit-add: #2c462f;
+    --border-edit-add: #3b5e40;
+    --bg-line-number-remove: #5e363b;
+    --text-line-number-remove: #fca5a5;
+    --bg-line-number-add: #3b5e40;
+    --text-line-number-add: #86efac;
+    --bg-content-remove: rgba(254, 202, 202, 0.1);
+    --bg-content-add: rgba(187, 247, 208, 0.1);
+    --bg-replace-badge: #f9c74f;
+    --text-replace-badge-dark: #1a1a1a;
+    
+    /* Write tool colors - dark */
+    --bg-write-tool: #0a2f1a;
+    --bg-write-header: #0d3d1f;
+    --color-write-icon: #3fb950;
+    --bg-truncated: #161b22;
+    
+    /* Search tool colors - dark */
+    --bg-search-tool: #0d1117;
+    
+    /* Glob tool colors - dark */
+    --bg-glob-tool: #1a0f2e;
+    --bg-glob-header: #2d1f4e;
+    --color-glob-icon: #a78bfa;
+    
+    /* Grep tool colors - dark */
+    --bg-grep-tool: #2e0f1a;
+    --bg-grep-header: #4e1f2d;
+    --color-grep-icon: #f472b6;
+    
+    /* Delete tool colors - dark */
+    --bg-delete-tool: #2d1515;
+    --bg-delete-header: #3d1a1a;
+    --border-delete: #5a2020;
+    --text-delete: #fca5a5;
+    --text-delete-secondary: #fca5a5;
   }
 }

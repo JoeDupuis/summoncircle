@@ -1,16 +1,9 @@
 .file-tool {
   margin: 0.5rem 0;
   border-radius: 6px;
-  border: 1px solid var(--border-color, #e1e4e8);
-  background: var(--bg-file-tool, #f8f9fa);
+  border: 1px solid var(--border);
+  background: var(--bg-file-tool);
   overflow: hidden;
-}
-
-@media (prefers-color-scheme: dark) {
-  .file-tool {
-    background: var(--bg-file-tool-dark, #1c2128);
-    border-color: var(--border-color-dark, #30363d);
-  }
 }
 
 .file-tool .tool-header {
@@ -18,16 +11,9 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  background: var(--bg-header, #f3f4f6);
-  border-bottom: 1px solid var(--border-color, #e1e4e8);
+  background: var(--bg-file-header);
+  border-bottom: 1px solid var(--border);
   font-weight: 500;
-}
-
-@media (prefers-color-scheme: dark) {
-  .file-tool .tool-header {
-    background: var(--bg-header-dark, #161b22);
-    border-bottom-color: var(--border-color-dark, #30363d);
-  }
 }
 
 .file-tool .tool-icon {
@@ -36,36 +22,24 @@
 }
 
 .file-tool .tool-label {
-  color: var(--text-secondary, #586069);
+  color: var(--text-secondary);
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.025em;
-}
-
-@media (prefers-color-scheme: dark) {
-  .file-tool .tool-label {
-    color: var(--text-secondary-dark, #8b949e);
-  }
 }
 
 .file-tool .file-path {
   flex: 1;
   font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
   font-size: 0.875rem;
-  color: var(--text-primary, #24292e);
+  color: var(--text);
   word-break: break-word;
-}
-
-@media (prefers-color-scheme: dark) {
-  .file-tool .file-path {
-    color: var(--text-primary-dark, #c9d1d9);
-  }
 }
 
 .file-tool pre {
   margin: 0;
   padding: 0.5rem;
-  background: var(--bg-code, #f6f8fa);
+  background: var(--bg-code);
   border-radius: 3px;
   font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
   font-size: 0.8125rem;
@@ -75,42 +49,23 @@
   word-break: break-word;
 }
 
-@media (prefers-color-scheme: dark) {
-  .file-tool pre {
-    background: var(--bg-code-dark, #0d1117);
-    color: var(--text-code-dark, #c9d1d9);
-  }
-}
-
 .file-tool .label {
   display: block;
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--text-secondary, #586069);
+  color: var(--text-secondary);
   margin-bottom: 0.25rem;
   text-transform: uppercase;
   letter-spacing: 0.025em;
 }
 
-@media (prefers-color-scheme: dark) {
-  .file-tool .label {
-    color: var(--text-secondary-dark, #8b949e);
-  }
-}
-
 .file-tool .code-block {
-  background: var(--bg-code, #f6f8fa);
+  background: var(--bg-code);
   border-radius: 3px;
   font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
   font-size: 0.8125rem;
   line-height: 1.45;
   overflow-x: auto;
-}
-
-@media (prefers-color-scheme: dark) {
-  .file-tool .code-block {
-    background: var(--bg-code-dark, #0d1117);
-  }
 }
 
 .file-tool .code-line {
@@ -120,13 +75,7 @@
 }
 
 .file-tool .code-line:hover {
-  background: var(--bg-hover, rgba(0, 0, 0, 0.02));
-}
-
-@media (prefers-color-scheme: dark) {
-  .file-tool .code-line:hover {
-    background: var(--bg-hover-dark, rgba(255, 255, 255, 0.02));
-  }
+  background: var(--bg-hover);
 }
 
 .file-tool .line-number {
@@ -134,17 +83,10 @@
   min-width: 3rem;
   padding: 0 0.75rem;
   text-align: right;
-  color: var(--text-line-number, #6e7781);
-  background: var(--bg-line-number, #f0f3f6);
+  color: var(--text-line-number);
+  background: var(--bg-line-number);
   user-select: none;
   flex-shrink: 0;
-}
-
-@media (prefers-color-scheme: dark) {
-  .file-tool .line-number {
-    color: var(--text-line-number-dark, #484f58);
-    background: var(--bg-line-number-dark, #161b22);
-  }
 }
 
 .file-tool .line-content {
@@ -166,13 +108,7 @@
 .file-tool .tool-result .code-block {
   max-height: 600px;
   overflow-y: auto;
-  border: 1px solid var(--border-color, #e1e4e8);
-}
-
-@media (prefers-color-scheme: dark) {
-  .file-tool .tool-result .code-block {
-    border-color: var(--border-color-dark, #30363d);
-  }
+  border: 1px solid var(--border);
 }
 
 .file-tool .tool-result.-complete {
@@ -180,14 +116,8 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  color: var(--text-secondary, #586069);
+  color: var(--text-secondary);
   font-size: 0.875rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  .file-tool .tool-result.-complete {
-    color: var(--text-secondary-dark, #8b949e);
-  }
 }
 
 .file-tool .status-icon {
