@@ -19,12 +19,21 @@ class BuildDockerContainerJob < ApplicationJob
       prompt: "Docker container build failed",
       status: :failed,
       started_at: Time.current,
-      completed_at: Time.current
+      completed_at: Time.current,
+      skip_agent: true
     )
 
+    # Create error step with full details
     run.steps.create!(
-      raw_response: "Failed to build Docker container\n\nError: #{e.message}\n\nBacktrace:\n#{e.backtrace.first(10).join("\n")}",
       type: "Step::Error",
+      raw_response: "Failed to build Docker container\n\nError: #{e.message}\n\nBacktrace:\n#{e.backtrace.first(10).join("\n")}",
+      content: "Failed to build Docker container\n\nError: #{e.message}\n\nBacktrace:\n#{e.backtrace.first(10).join("\n")}"
+    )
+    
+    # Create result step for chat display
+    run.steps.create!(
+      type: "Step::Result",
+      raw_response: "Docker build failed",
       content: "Docker build failed"
     )
 
