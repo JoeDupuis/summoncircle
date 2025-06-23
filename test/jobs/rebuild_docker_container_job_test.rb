@@ -25,6 +25,35 @@ class RebuildDockerContainerJobTest < ActiveJob::TestCase
     assert_nil @task.docker_image_id
   end
 
+  test "creates failed run with error details when rebuild fails" do
+    mock_builder = mock()
+    mock_builder.expects(:remove_existing_container)
+    mock_builder.expects(:remove_old_image).with("summoncircle/task-#{@task.id}-dev")
+    error = StandardError.new("Rebuild failed with specific error")
+    mock_builder.expects(:build_and_run).raises(error)
+
+    DockerContainerBuilder.expects(:new).with(@task).returns(mock_builder)
+
+    assert_difference "Run.count", 1 do
+      assert_difference "Step.count", 1 do
+        assert_raises(StandardError) do
+          RebuildDockerContainerJob.perform_now(@task)
+        end
+      end
+    end
+
+    run = @task.runs.last
+    assert_equal "Docker container rebuild failed", run.prompt
+    assert_equal "failed", run.status
+    assert_not_nil run.started_at
+    assert_not_nil run.completed_at
+
+    step = run.steps.last
+    assert_equal "Step::Error", step.type
+    assert_includes step.content, "Failed to rebuild Docker container"
+    assert_includes step.content, "Rebuild failed with specific error"
+  end
+
   test "broadcasts turbo stream update on failure" do
     mock_builder = mock()
     mock_builder.expects(:remove_existing_container)

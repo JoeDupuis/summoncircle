@@ -14,6 +14,20 @@ class BuildDockerContainerJob < ApplicationJob
       docker_image_id: nil
     )
 
+    # Create a run with the error information
+    run = task.runs.create!(
+      prompt: "Docker container build failed",
+      status: :failed,
+      started_at: Time.current,
+      completed_at: Time.current
+    )
+
+    run.steps.create!(
+      raw_response: "Docker build error",
+      type: "Step::Error",
+      content: "Failed to build Docker container\n\nError: #{e.message}\n\nBacktrace:\n#{e.backtrace.first(10).join("\n")}"
+    )
+
     Turbo::StreamsChannel.broadcast_replace_to(
       task,
       target: "docker_controls",
