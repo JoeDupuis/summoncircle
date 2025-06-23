@@ -15,8 +15,20 @@ class RebuildDockerContainerJob < ApplicationJob
     Rails.logger.error "Failed to rebuild container: #{e.message}"
     Rails.logger.error e.backtrace.join("\n")
 
-    task.update!(container_status: "failed")
-    builder.send(:broadcast_docker_status) if builder
+    task.update!(
+      container_status: "failed",
+      container_id: nil,
+      container_name: nil,
+      docker_image_id: nil
+    )
+
+    Turbo::StreamsChannel.broadcast_replace_to(
+      task,
+      target: "docker_controls",
+      partial: "tasks/docker_controls",
+      locals: { task: task }
+    )
+
     raise
   end
 end

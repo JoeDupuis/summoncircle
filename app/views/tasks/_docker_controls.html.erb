@@ -19,6 +19,15 @@
         Container: Removing...
       </span>
     </div>
+  <% elsif task.container_status == "failed" %>
+    <div class="container-info">
+      <span class="container-status -error">
+        Container: Build Failed
+      </span>
+      <%= link_to "Retry Build", task_container_path(task), 
+          data: { turbo_method: :post },
+          class: "button action-button -mini -primary" %>
+    </div>
   <% elsif container_info.exists %>
     <div class="container-info">
       <span class="container-status">
