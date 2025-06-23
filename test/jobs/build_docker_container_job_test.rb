@@ -31,7 +31,7 @@ class BuildDockerContainerJobTest < ActiveJob::TestCase
     DockerContainerBuilder.expects(:new).with(@task).returns(mock_builder)
 
     assert_difference "Run.count", 1 do
-      assert_difference "Step.count", 1 do
+      assert_difference "Step.count", 2 do
         assert_raises(StandardError) do
           BuildDockerContainerJob.perform_now(@task)
         end
@@ -44,11 +44,16 @@ class BuildDockerContainerJobTest < ActiveJob::TestCase
     assert_not_nil run.started_at
     assert_not_nil run.completed_at
 
-    step = run.steps.last
-    assert_equal "Step::Error", step.type
-    assert_equal "Docker build failed", step.content
-    assert_includes step.raw_response, "Failed to build Docker container"
-    assert_includes step.raw_response, "Build failed with specific error"
+    # Check the error step (first one)
+    error_step = run.steps.first
+    assert_equal "Step::Error", error_step.type
+    assert_includes error_step.content, "Failed to build Docker container"
+    assert_includes error_step.raw_response, "Build failed with specific error"
+    
+    # Check the result step (for chat display)
+    result_step = run.steps.last
+    assert_equal "Step::Result", result_step.type
+    assert_equal "Docker build failed", result_step.content
   end
 
   test "broadcasts turbo stream updates on failure" do
@@ -63,6 +68,22 @@ class BuildDockerContainerJobTest < ActiveJob::TestCase
       target: "docker_controls",
       partial: "tasks/docker_controls",
       locals: { task: @task }
+    )
+    
+    # Expect broadcast for runs list update
+    Turbo::StreamsChannel.expects(:broadcast_replace_to).with(
+      @task,
+      target: "runs-list",
+      partial: "tasks/runs_list",
+      locals: { runs: @task.runs }
+    )
+    
+    # Expect broadcast for chat messages update
+    Turbo::StreamsChannel.expects(:broadcast_replace_to).with(
+      @task,
+      target: "chat-messages",
+      partial: "tasks/chat_messages",
+      locals: { runs: @task.runs.order(:created_at) }
     )
 
     assert_raises(StandardError) do
