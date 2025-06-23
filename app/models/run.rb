@@ -7,6 +7,8 @@ class Run < ApplicationRecord
 
   enum :status, { pending: 0, running: 1, completed: 2, failed: 3 }, default: :pending
 
+  validates :prompt, presence: true
+
   after_update_commit :broadcast_update
   after_create_commit :broadcast_chat_append
   after_update_commit :broadcast_chat_replace

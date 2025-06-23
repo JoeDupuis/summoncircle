@@ -24,7 +24,7 @@
 
   <div data-controller="prompt">
     <%= form.label :prompt %><br>
-    <%= form.text_area :prompt, data: { prompt_target: "textarea", action: "keydown->prompt#keydown" } %>
+    <%= form.text_area :prompt, required: true, data: { prompt_target: "textarea", action: "keydown->prompt#keydown" } %>
   </div>
 
   <div>
