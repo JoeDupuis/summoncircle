@@ -52,7 +52,10 @@ class TasksController < ApplicationController
 
   def update
     if @task.update(task_update_params)
-      redirect_to @task, notice: "Task was successfully updated."
+      respond_to do |format|
+        format.html { redirect_to @task, notice: "Task was successfully updated." }
+        format.turbo_stream { render turbo_stream: turbo_stream.replace("task_#{@task.id}_description", partial: "tasks/description", locals: { task: @task }) }
+      end
     else
       render :edit, status: :unprocessable_entity
     end
