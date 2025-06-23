@@ -1,0 +1,102 @@
+.search-tool {
+  margin: 0.5rem 0;
+  border-radius: 6px;
+  border: 1px solid var(--border-color, #e1e4e8);
+  background: var(--bg-search-tool, #fafbfc);
+  overflow: hidden;
+}
+
+@media (prefers-color-scheme: dark) {
+  .search-tool {
+    background: var(--bg-search-tool-dark, #0d1117);
+    border-color: var(--border-color-dark, #30363d);
+  }
+}
+
+.search-tool .tool-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-header, #f3f4f6);
+  border-bottom: 1px solid var(--border-color, #e1e4e8);
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .search-tool .tool-header {
+    background: var(--bg-header-dark, #161b22);
+    border-bottom-color: var(--border-color-dark, #30363d);
+  }
+}
+
+.search-tool .tool-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.search-tool .tool-label {
+  color: var(--text-secondary, #586069);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+@media (prefers-color-scheme: dark) {
+  .search-tool .tool-label {
+    color: var(--text-secondary-dark, #8b949e);
+  }
+}
+
+.search-tool .search-pattern {
+  flex: 1;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 0.875rem;
+  color: var(--text-primary, #24292e);
+  background: var(--bg-code, #f6f8fa);
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  word-break: break-word;
+}
+
+@media (prefers-color-scheme: dark) {
+  .search-tool .search-pattern {
+    color: var(--text-primary-dark, #c9d1d9);
+    background: var(--bg-code-dark, #21262d);
+  }
+}
+
+.search-tool .search-details {
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.search-tool .search-filter,
+.search-tool .search-path-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-tool .label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary, #586069);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+@media (prefers-color-scheme: dark) {
+  .search-tool .label {
+    color: var(--text-secondary-dark, #8b949e);
+  }
+}
+
+.search-tool .filter-value,
+.search-tool .search-path {
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 0.8125rem;
+  color: var(--text-primary, #24292e);
+}

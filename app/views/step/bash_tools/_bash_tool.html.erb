@@ -1,8 +1,20 @@
-<div class="bash-tool">
-  <div class="terminal-prompt">
-    <span class="prompt-symbol">$</span>
-    <span class="command"><%= bash_tool.content %></span>
+<% if bash_tool.delete_operation? %>
+  <div class="bash-tool delete-tool">
+    <div class="tool-header">
+      <span class="tool-icon">🗑️</span>
+      <span class="tool-label">Delete File</span>
+      <span class="file-path"><%= bash_tool.deleted_path || bash_tool.command %></span>
+    </div>
+    
+    <%= render "step/bash_tools/bash_tool_result", bash_tool: bash_tool %>
   </div>
-  
-  <%= render "step/tool_calls/tool_result_section", tool_call: bash_tool %>
-</div>
+<% else %>
+  <div class="bash-tool">
+    <div class="terminal-prompt">
+      <span class="prompt-symbol">$</span>
+      <span class="command"><%= bash_tool.command %></span>
+    </div>
+    
+    <%= render "step/tool_calls/tool_result_section", tool_call: bash_tool %>
+  </div>
+<% end %>

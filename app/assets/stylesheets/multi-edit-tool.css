@@ -1,0 +1,143 @@
+.multi-edit-tool {
+  --bg-file-tool: #fef9f0;
+  --bg-file-tool-dark: #2d1f0a;
+  --bg-header: #fee9d1;
+  --bg-header-dark: #3d2d0d;
+}
+
+.multi-edit-tool .tool-icon {
+  color: #e74c3c;
+}
+
+@media (prefers-color-scheme: dark) {
+  .multi-edit-tool .tool-icon {
+    color: #ff6b6b;
+  }
+}
+
+.multi-edit-tool .edit-list {
+  padding: 1rem;
+}
+
+.multi-edit-tool .edit-count {
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding: 0.375rem 0.75rem;
+  background: var(--bg-header, #ffe0e0);
+  border-radius: 20px;
+  display: inline-block;
+  font-size: 0.875rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .multi-edit-tool .edit-count {
+    background: var(--bg-header-dark, #3d1a1a);
+  }
+}
+
+.multi-edit-tool .edit-item {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color, #e1e4e8);
+}
+
+.multi-edit-tool .edit-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .multi-edit-tool .edit-item {
+    border-bottom-color: var(--border-color-dark, #30363d);
+  }
+}
+
+
+.multi-edit-tool .string-change {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.multi-edit-tool .old-string .code-block {
+  background: #ffeef0;
+  border: 1px solid #ffd1dc;
+}
+
+.multi-edit-tool .new-string .code-block {
+  background: #e6ffec;
+  border: 1px solid #b4e2c5;
+}
+
+@media (prefers-color-scheme: dark) {
+  .multi-edit-tool .old-string .code-block {
+    background: #462c32;
+    border-color: #5e363b;
+  }
+  
+  .multi-edit-tool .new-string .code-block {
+    background: #2c462f;
+    border-color: #3b5e40;
+  }
+}
+
+.multi-edit-tool .old-string .line-number {
+  background: #ffd7d5;
+  color: #b91c1c;
+}
+
+.multi-edit-tool .new-string .line-number {
+  background: #bbf7d0;
+  color: #15803d;
+}
+
+.multi-edit-tool .old-string .line-content {
+  background: rgba(254, 202, 202, 0.3);
+}
+
+.multi-edit-tool .new-string .line-content {
+  background: rgba(187, 247, 208, 0.3);
+}
+
+@media (prefers-color-scheme: dark) {
+  .multi-edit-tool .old-string .line-number {
+    background: #5e363b;
+    color: #fca5a5;
+  }
+  
+  .multi-edit-tool .new-string .line-number {
+    background: #3b5e40;
+    color: #86efac;
+  }
+  
+  .multi-edit-tool .old-string .line-content {
+    background: rgba(254, 202, 202, 0.1);
+  }
+  
+  .multi-edit-tool .new-string .line-content {
+    background: rgba(187, 247, 208, 0.1);
+  }
+}
+
+.multi-edit-tool .replace-badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.125rem 0.5rem;
+  background: #e74c3c;
+  color: white;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  vertical-align: middle;
+}
+
+@media (prefers-color-scheme: dark) {
+  .multi-edit-tool .replace-badge {
+    background: #ff6b6b;
+    color: #1a1a1a;
+  }
+}

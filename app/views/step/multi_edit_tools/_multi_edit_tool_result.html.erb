@@ -1,0 +1,11 @@
+<% if multi_edit_tool.tool_result %>
+  <div class="tool-result -complete">
+    <span class="status-icon">✅</span>
+    <span>All edits completed</span>
+  </div>
+<% else %>
+  <div class="tool-result -pending">
+    <div class="spinner"></div>
+    <span>Applying edits...</span>
+  </div>
+<% end %>

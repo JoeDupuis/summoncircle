@@ -1,0 +1,16 @@
+<div class="glob-tool search-tool" data-tool-id="<%= glob_tool.tool_id %>">
+  <div class="tool-header">
+    <span class="tool-icon">🔍</span>
+    <span class="tool-label">File Pattern Search</span>
+    <span class="search-pattern"><%= glob_tool.tool_inputs&.dig("pattern") || glob_tool.content %></span>
+  </div>
+  
+  <% if glob_tool.tool_inputs&.dig("path") %>
+    <div class="search-details">
+      <span class="label">In directory:</span>
+      <span class="search-path"><%= glob_tool.tool_inputs["path"] %></span>
+    </div>
+  <% end %>
+  
+  <%= render "step/tool_calls/tool_result_section", tool_call: glob_tool %>
+</div>

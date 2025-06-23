@@ -1,0 +1,136 @@
+.edit-tool {
+  --bg-file-tool: #fef9f0;
+  --bg-file-tool-dark: #2d1f0a;
+  --bg-header: #fee9d1;
+  --bg-header-dark: #3d2d0d;
+}
+
+.edit-tool .tool-icon {
+  color: #f39c12;
+}
+
+@media (prefers-color-scheme: dark) {
+  .edit-tool .tool-icon {
+    color: #f9c74f;
+  }
+}
+
+.edit-tool .edit-details {
+  padding: 1rem;
+}
+
+.edit-tool .string-change {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.edit-tool .old-string,
+.edit-tool .new-string {
+  position: relative;
+}
+
+.edit-tool .old-string .code-block {
+  background: #ffeef0;
+  border: 1px solid #ffd1dc;
+}
+
+.edit-tool .new-string .code-block {
+  background: #e6ffec;
+  border: 1px solid #b4e2c5;
+}
+
+@media (prefers-color-scheme: dark) {
+  .edit-tool .old-string .code-block {
+    background: #462c32;
+    border-color: #5e363b;
+  }
+  
+  .edit-tool .new-string .code-block {
+    background: #2c462f;
+    border-color: #3b5e40;
+  }
+}
+
+.edit-tool .old-string .line-number {
+  background: #ffd7d5;
+  color: #b91c1c;
+}
+
+.edit-tool .new-string .line-number {
+  background: #bbf7d0;
+  color: #15803d;
+}
+
+.edit-tool .old-string .line-content {
+  background: rgba(254, 202, 202, 0.3);
+}
+
+.edit-tool .new-string .line-content {
+  background: rgba(187, 247, 208, 0.3);
+}
+
+@media (prefers-color-scheme: dark) {
+  .edit-tool .old-string .line-number {
+    background: #5e363b;
+    color: #fca5a5;
+  }
+  
+  .edit-tool .new-string .line-number {
+    background: #3b5e40;
+    color: #86efac;
+  }
+  
+  .edit-tool .old-string .line-content {
+    background: rgba(254, 202, 202, 0.1);
+  }
+  
+  .edit-tool .new-string .line-content {
+    background: rgba(187, 247, 208, 0.1);
+  }
+}
+
+.edit-tool .replace-all-indicator {
+  margin-bottom: 0.75rem;
+}
+
+.edit-tool .replace-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: #f39c12;
+  color: white;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+@media (prefers-color-scheme: dark) {
+  .edit-tool .replace-badge {
+    background: #f9c74f;
+    color: #1a1a1a;
+  }
+}
+
+.edit-tool .result-block {
+  background: var(--bg-result, #f8f9fa);
+}
+
+@media (prefers-color-scheme: dark) {
+  .edit-tool .result-block {
+    background: var(--bg-result-dark, #0d1117);
+  }
+}
+
+.edit-tool .result-block .line-number {
+  background: var(--bg-line-number-result, #e6e9ec);
+  color: var(--text-line-number, #6e7781);
+}
+
+@media (prefers-color-scheme: dark) {
+  .edit-tool .result-block .line-number {
+    background: var(--bg-line-number-result-dark, #21262d);
+    color: var(--text-line-number-dark, #484f58);
+  }
+}

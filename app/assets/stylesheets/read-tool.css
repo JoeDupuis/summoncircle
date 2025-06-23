@@ -1,0 +1,16 @@
+.read-tool {
+  --bg-file-tool: #f0f8ff;
+  --bg-file-tool-dark: #0a192f;
+  --bg-header: #e6f3ff;
+  --bg-header-dark: #0d1f3d;
+}
+
+.read-tool .tool-icon {
+  color: #2188ff;
+}
+
+@media (prefers-color-scheme: dark) {
+  .read-tool .tool-icon {
+    color: #58a6ff;
+  }
+}

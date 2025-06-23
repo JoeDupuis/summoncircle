@@ -1,0 +1,51 @@
+.write-tool {
+  --bg-file-tool: #f0fff4;
+  --bg-file-tool-dark: #0a2f1a;
+  --bg-header: #d1f5d9;
+  --bg-header-dark: #0d3d1f;
+}
+
+.write-tool .tool-icon {
+  color: #28a745;
+}
+
+@media (prefers-color-scheme: dark) {
+  .write-tool .tool-icon {
+    color: #3fb950;
+  }
+}
+
+.write-tool .file-content {
+  padding: 0;
+}
+
+.write-tool .content-preview .code-block {
+  max-height: 300px;
+  overflow: auto;
+}
+
+.write-tool .truncated-indicator {
+  padding: 0.5rem 1rem;
+  text-align: center;
+  background: var(--bg-truncated, #f0f3f6);
+  border-top: 1px solid var(--border-color, #e1e4e8);
+}
+
+@media (prefers-color-scheme: dark) {
+  .write-tool .truncated-indicator {
+    background: var(--bg-truncated-dark, #161b22);
+    border-top-color: var(--border-color-dark, #30363d);
+  }
+}
+
+.write-tool .truncated {
+  font-style: italic;
+  color: var(--text-secondary, #586069);
+  font-size: 0.875rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .write-tool .truncated {
+    color: var(--text-secondary-dark, #8b949e);
+  }
+}

@@ -1,0 +1,16 @@
+.glob-tool {
+  --bg-search-tool: #f5f0ff;
+  --bg-search-tool-dark: #1a0f2e;
+  --bg-header: #ede5ff;
+  --bg-header-dark: #2d1f4e;
+}
+
+.glob-tool .tool-icon {
+  color: #8b5cf6;
+}
+
+@media (prefers-color-scheme: dark) {
+  .glob-tool .tool-icon {
+    color: #a78bfa;
+  }
+}
