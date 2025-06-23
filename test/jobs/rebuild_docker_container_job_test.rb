@@ -50,8 +50,9 @@ class RebuildDockerContainerJobTest < ActiveJob::TestCase
 
     step = run.steps.last
     assert_equal "Step::Error", step.type
-    assert_includes step.content, "Failed to rebuild Docker container"
-    assert_includes step.content, "Rebuild failed with specific error"
+    assert_equal "Docker rebuild failed", step.content
+    assert_includes step.raw_response, "Failed to rebuild Docker container"
+    assert_includes step.raw_response, "Rebuild failed with specific error"
   end
 
   test "broadcasts turbo stream updates on failure" do

@@ -46,8 +46,9 @@ class BuildDockerContainerJobTest < ActiveJob::TestCase
 
     step = run.steps.last
     assert_equal "Step::Error", step.type
-    assert_includes step.content, "Failed to build Docker container"
-    assert_includes step.content, "Build failed with specific error"
+    assert_equal "Docker build failed", step.content
+    assert_includes step.raw_response, "Failed to build Docker container"
+    assert_includes step.raw_response, "Build failed with specific error"
   end
 
   test "broadcasts turbo stream updates on failure" do
