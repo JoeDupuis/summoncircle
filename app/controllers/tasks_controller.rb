@@ -39,7 +39,14 @@ class TasksController < ApplicationController
 
       redirect_to task_path(@task), notice: "Task was successfully launched."
     else
-      render_form_errors
+      if @project.present?
+        render :new, status: :unprocessable_entity
+      else
+        @tasks = Task.kept.includes(:agent, :project).order(created_at: :desc)
+        @projects = Project.kept
+        @agents = Agent.kept
+        render "dashboard/index", status: :unprocessable_entity
+      end
     end
   end
 
@@ -120,16 +127,5 @@ class TasksController < ApplicationController
 
   def auto_push_params
     params.require(:task).permit(:auto_push_enabled, :auto_push_branch)
-  end
-
-  def render_form_errors
-    if @project.present?
-      render :new, status: :unprocessable_entity
-    else
-      @tasks = Task.kept.includes(:agent, :project).order(created_at: :desc)
-      @projects = Project.kept
-      @agents = Agent.kept
-      render "dashboard/index", status: :unprocessable_entity
-    end
   end
 end
