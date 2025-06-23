@@ -1,13 +1,13 @@
 .copy-button {
   &.-success {
-    background-color: #28a745;
-    color: white;
-    border-color: #28a745;
+    background-color: var(--color-success);
+    color: var(--color-white);
+    border-color: var(--color-success);
   }
 
   &.-error {
-    background-color: #dc3545;
-    color: white;
-    border-color: #dc3545;
+    background-color: var(--color-danger);
+    color: var(--color-white);
+    border-color: var(--color-danger);
   }
 }
