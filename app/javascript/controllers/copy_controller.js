@@ -1,41 +1,26 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static values = { 
-    repositoryDiffUrl: String
-  }
-  
+  static targets = ["source"]
   static classes = ["success", "error"]
 
   async copy(event) {
     event.preventDefault()
     
+    const button = event.currentTarget
+    const content = this.sourceTarget.textContent.trim()
+    
+    if (!content) {
+      this.showFeedback(button, 'Nothing to copy', false)
+      return
+    }
+    
     try {
-      const response = await fetch(this.repositoryDiffUrlValue, {
-        headers: {
-          'Accept': 'application/json',
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
-        }
-      })
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch diff')
-      }
-      
-      const data = await response.json()
-      const diff = data.diff
-      
-      if (!diff || diff.trim() === '') {
-        this.showFeedback(event.target, 'No changes to copy', false)
-        return
-      }
-      
-      await navigator.clipboard.writeText(diff)
-      this.showFeedback(event.target, 'Copied!', true)
-      
+      await navigator.clipboard.writeText(content)
+      this.showFeedback(button, 'Copied!', true)
     } catch (error) {
-      console.error('Error copying diff:', error)
-      this.showFeedback(event.target, 'Failed to copy', false)
+      console.error('Error copying to clipboard:', error)
+      this.showFeedback(button, 'Failed to copy', false)
     }
   }
   

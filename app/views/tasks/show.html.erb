@@ -21,12 +21,23 @@
         </div>
         <div class="task-actions-header">
           <%= link_to 'Download Repository', task_repository_download_path(@task), class: 'button', data: { turbo: false } %>
-          <button class="button copy-button" data-controller="copy-git-apply" data-copy-git-apply-task-id-value="<%= @task.id %>" data-copy-git-apply-repository-diff-url-value="<%= task_repository_diff_path(@task) %>" data-copy-git-apply-success-class="-success" data-copy-git-apply-error-class="-error" data-action="click->copy-git-apply#copy">
-            Copy Git Apply Command
-          </button>
-          <button class="button copy-button" data-controller="copy-diff" data-copy-diff-repository-diff-url-value="<%= task_repository_diff_path(@task) %>" data-copy-diff-success-class="-success" data-copy-diff-error-class="-error" data-action="click->copy-diff#copy">
-            Copy Diff
-          </button>
+          <% if (repo_state = @task.latest_repo_state) && repo_state.git_apply_diff.present? %>
+            <div data-controller="copy" data-copy-success-class="-success" data-copy-error-class="-error" style="display: inline-block;">
+              <template data-copy-target="source">(cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF'
+<%= repo_state.git_apply_diff %>
+EOF
+)</template>
+              <button class="button copy-button" data-action="click->copy#copy">
+                Copy Git Apply Command
+              </button>
+            </div>
+            <div data-controller="copy" data-copy-success-class="-success" data-copy-error-class="-error" style="display: inline-block;">
+              <template data-copy-target="source"><%= repo_state.git_apply_diff %></template>
+              <button class="button copy-button" data-action="click->copy#copy">
+                Copy Diff
+              </button>
+            </div>
+          <% end %>
         </div>
         <% if Current.user&.github_token.present? %>
           <%= render "tasks/auto_push_form", task: @task %>
