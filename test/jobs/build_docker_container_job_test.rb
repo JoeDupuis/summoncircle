@@ -46,9 +46,8 @@ class BuildDockerContainerJobTest < ActiveJob::TestCase
 
     step = run.steps.last
     assert_equal "Step::Error", step.type
-    assert_equal "Docker build failed", step.content
-    assert_includes step.raw_response, "Failed to build Docker container"
-    assert_includes step.raw_response, "Build failed with specific error"
+    assert_includes step.content, "Failed to build Docker container"
+    assert_includes step.content, "Build failed with specific error"
   end
 
   test "broadcasts turbo stream updates on failure" do
@@ -57,9 +56,13 @@ class BuildDockerContainerJobTest < ActiveJob::TestCase
 
     DockerContainerBuilder.expects(:new).with(@task).returns(mock_builder)
 
-    # Expect multiple broadcasts
-    Turbo::StreamsChannel.expects(:broadcast_replace_to).at_least_once
-    Turbo::StreamsChannel.expects(:broadcast_action_to).at_least_once
+    # Expect broadcast for docker controls update
+    Turbo::StreamsChannel.expects(:broadcast_replace_to).with(
+      @task,
+      target: "docker_controls",
+      partial: "tasks/docker_controls",
+      locals: { task: @task }
+    )
 
     assert_raises(StandardError) do
       BuildDockerContainerJob.perform_now(@task)

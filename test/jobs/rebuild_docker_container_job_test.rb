@@ -50,9 +50,8 @@ class RebuildDockerContainerJobTest < ActiveJob::TestCase
 
     step = run.steps.last
     assert_equal "Step::Error", step.type
-    assert_equal "Docker rebuild failed", step.content
-    assert_includes step.raw_response, "Failed to rebuild Docker container"
-    assert_includes step.raw_response, "Rebuild failed with specific error"
+    assert_includes step.content, "Failed to rebuild Docker container"
+    assert_includes step.content, "Rebuild failed with specific error"
   end
 
   test "broadcasts turbo stream updates on failure" do
@@ -63,9 +62,13 @@ class RebuildDockerContainerJobTest < ActiveJob::TestCase
 
     DockerContainerBuilder.expects(:new).with(@task).returns(mock_builder)
 
-    # Expect multiple broadcasts
-    Turbo::StreamsChannel.expects(:broadcast_replace_to).at_least_once
-    Turbo::StreamsChannel.expects(:broadcast_action_to).at_least_once
+    # Expect broadcast for docker controls update
+    Turbo::StreamsChannel.expects(:broadcast_replace_to).with(
+      @task,
+      target: "docker_controls",
+      partial: "tasks/docker_controls",
+      locals: { task: @task }
+    )
 
     assert_raises(StandardError) do
       RebuildDockerContainerJob.perform_now(@task)
