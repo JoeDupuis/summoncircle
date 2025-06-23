@@ -13,7 +13,11 @@
     </div>
   <% elsif error_step %>
     <div class="assistant-message">
-      <pre><%= error_step.content %></pre>
+      <% if run.prompt&.include?("Docker container") && run.prompt&.include?("failed") %>
+        Docker build failed. <%= link_to "View error details", task_path(run.task, selected_run_id: run.id), class: "chat-log-link" %>
+      <% else %>
+        <pre><%= error_step.content %></pre>
+      <% end %>
     </div>
   <% elsif run.status == "running" %>
     <div class="assistant-message">
