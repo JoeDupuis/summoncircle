@@ -1,13 +1,7 @@
 <div id="docker_controls" class="docker-controls">
   <% container_info = container_status_info(task) %>
   
-  <% if task.container_status == "rebuilding" %>
-    <div class="container-info">
-      <span class="container-status">
-        Container: Rebuilding...
-      </span>
-    </div>
-  <% elsif task.container_status == "building" %>
+  <% if task.container_status == "building" %>
     <div class="container-info">
       <span class="container-status">
         Container: Building...
@@ -18,6 +12,15 @@
       <span class="container-status">
         Container: Removing...
       </span>
+    </div>
+  <% elsif task.container_status == "failed" %>
+    <div class="container-info">
+      <span class="container-status -error">
+        Container: Build Failed
+      </span>
+      <%= link_to "Retry Build", task_container_path(task), 
+          data: { turbo_method: :post },
+          class: "button action-button -mini -primary" %>
     </div>
   <% elsif container_info.exists %>
     <div class="container-info">
@@ -30,8 +33,8 @@
           | Port: <%= task.project.dev_container_port %> (not mapped)
         <% end %>
       </span>
-      <%= link_to "Rebuild", task_container_path(task), 
-          data: { turbo_method: :post, turbo_confirm: "Rebuild container?" },
+      <%= link_to "Build", task_container_path(task), 
+          data: { turbo_method: :post, turbo_confirm: "Build container?" },
           class: "button action-button -mini" %>
       <%= link_to "Remove", task_container_path(task), 
           data: { turbo_method: :delete, turbo_confirm: "Remove container?" },

@@ -8,8 +8,13 @@ class DockerContainerBuilder
   def build_and_run
     return unless @task.project.dev_dockerfile_path.present?
 
+    # Clean up any existing container and image first
+    remove_existing_container
+
     image_name = "summoncircle/task-#{@task.id}-dev"
-    container_name = "task-#{@task.id}-dev-container"
+    remove_old_image(image_name)
+
+    container_name = "task-#{@task.id}-dev-container-#{SecureRandom.hex(4)}"
 
     # Extract files from the workspace volume to build
     temp_dir = Rails.root.join("tmp", "docker-build-#{@task.id}")

@@ -58,7 +58,7 @@
     <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="steps" class="tab -active">Runs</button>
   </div>
   <div data-tabs-target="panel" data-resizable-panels-target="chat" data-panel-id="chat" class="chat-panel">
-    <%= render "tasks/chat_panel", task: @task, runs: @task.runs.order(:created_at) %>
+    <%= render "tasks/chat_panel", task: @task %>
   </div>
   <div class="panel-divider" data-resizable-panels-target="divider" data-action="mousedown->resizable-panels#startResize"></div>
   <div data-tabs-target="panel" data-resizable-panels-target="log" data-panel-id="steps" class="log-panel -active">
