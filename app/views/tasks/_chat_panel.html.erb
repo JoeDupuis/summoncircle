@@ -1,4 +1,4 @@
-<div class="chat-panel">
-  <%= render "tasks/chat_messages", runs: runs %>
+<div id="chat-panel" class="chat-panel">
+  <%= render "tasks/chat_messages", runs: task.runs.order(:created_at) %>
   <%= render "tasks/run_form", task: task, run: Run.new %>
 </div>

@@ -29,7 +29,7 @@ class BuildDockerContainerJob < ApplicationJob
       raw_response: "Failed to build Docker container\n\nError: #{e.message}\n\nBacktrace:\n#{e.backtrace.first(10).join("\n")}",
       content: "Failed to build Docker container\n\nError: #{e.message}\n\nBacktrace:\n#{e.backtrace.first(10).join("\n")}"
     )
-    
+
     # Create result step for chat display
     run.steps.create!(
       type: "Step::Result",
@@ -43,6 +43,20 @@ class BuildDockerContainerJob < ApplicationJob
       target: "docker_controls",
       partial: "tasks/docker_controls",
       locals: { task: task }
+    )
+
+    Turbo::StreamsChannel.broadcast_replace_to(
+      task,
+      target: "runs-list",
+      partial: "tasks/runs_list",
+      locals: { runs: task.runs }
+    )
+
+    Turbo::StreamsChannel.broadcast_replace_to(
+      task,
+      target: "chat-messages",
+      partial: "tasks/chat_messages",
+      locals: { runs: task.runs.order(:created_at) }
     )
 
     raise
