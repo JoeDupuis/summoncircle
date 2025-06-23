@@ -1,1 +1,5 @@
-<pre class="step-error"><%= error.content %></pre>
+<% if error.raw_response.present? && error.raw_response != error.content %>
+  <pre class="step-error"><%= error.raw_response %></pre>
+<% else %>
+  <pre class="step-error"><%= error.content %></pre>
+<% end %>

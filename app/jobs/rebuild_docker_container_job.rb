@@ -31,9 +31,9 @@ class RebuildDockerContainerJob < ApplicationJob
     )
 
     run.steps.create!(
-      raw_response: "Docker rebuild error",
+      raw_response: "Failed to rebuild Docker container\n\nError: #{e.message}\n\nBacktrace:\n#{e.backtrace.first(10).join("\n")}",
       type: "Step::Error",
-      content: "Failed to rebuild Docker container\n\nError: #{e.message}\n\nBacktrace:\n#{e.backtrace.first(10).join("\n")}"
+      content: "Docker rebuild failed: #{e.message}"
     )
 
     # Update docker controls to show failed status
