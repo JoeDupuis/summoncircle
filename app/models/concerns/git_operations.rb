@@ -147,10 +147,19 @@ module GitOperations
       # Capture git apply diff (all changes including untracked files)
       git_apply_diff = nil
       begin
-        git_apply_command = if task.target_branch.present?
-          "git fetch origin #{task.target_branch} && git add -N . && git diff origin/#{task.target_branch}...HEAD --unified=10"
+        if task.target_branch.present?
+          # First fetch the target branch (don't capture output)
+          run_git_command(
+            task: task,
+            command: "git fetch origin #{task.target_branch}",
+            error_message: "Failed to fetch target branch",
+            return_logs: false
+          )
+          
+          # Then get the diff
+          git_apply_command = "git add -N . && git diff origin/#{task.target_branch}...HEAD --unified=10"
         else
-          "git add -N . && git diff HEAD --unified=10"
+          git_apply_command = "git add -N . && git diff HEAD --unified=10"
         end
 
         git_apply_diff = run_git_command(
