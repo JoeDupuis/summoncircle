@@ -24,24 +24,28 @@ class TasksController < ApplicationController
   def create
     @task = Task.new(task_params.with_defaults(project_id: @project&.id, user_id: Current.user.id))
 
-    if params[:task][:prompt].blank?
-      @task.errors.add(:base, "Prompt can't be blank")
-      if @project.present?
-        render :new, status: :unprocessable_entity
-      else
-        @tasks = Task.kept.includes(:agent, :project).order(created_at: :desc)
-        @projects = Project.kept
-        @agents = Agent.kept
-        render "dashboard/index", status: :unprocessable_entity
-      end
-      return
-    end
-
     if @task.save
       cookies[:preferred_agent_id] = { value: @task.agent_id, expires: 1.year.from_now }
       cookies[:preferred_project_id] = { value: @task.project_id, expires: 1.year.from_now }
       @task.update!(started_at: Time.current)
-      @task.run(params[:task][:prompt])
+      
+      begin
+        @task.run(params[:task][:prompt])
+      rescue ActiveRecord::RecordInvalid => e
+        @task.destroy
+        @task = Task.new(task_params.with_defaults(project_id: @project&.id, user_id: Current.user.id))
+        @task.errors.add(:base, "Prompt can't be blank")
+        
+        if @project.present?
+          render :new, status: :unprocessable_entity
+        else
+          @tasks = Task.kept.includes(:agent, :project).order(created_at: :desc)
+          @projects = Project.kept
+          @agents = Agent.kept
+          render "dashboard/index", status: :unprocessable_entity
+        end
+        return
+      end
 
       if Current.user.shrimp_mode?
         flash[:shrimp_mode] = true
