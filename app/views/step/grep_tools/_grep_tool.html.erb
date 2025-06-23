@@ -1,0 +1,25 @@
+<div class="grep-tool search-tool" data-tool-id="<%= grep_tool.tool_id %>">
+  <div class="tool-header">
+    <span class="tool-icon">🔎</span>
+    <span class="tool-label">Content Search</span>
+    <span class="search-pattern"><%= grep_tool.tool_inputs&.dig("pattern") || grep_tool.content %></span>
+  </div>
+  
+  <div class="search-details">
+    <% if grep_tool.tool_inputs&.dig("include") %>
+      <div class="search-filter">
+        <span class="label">File filter:</span>
+        <span class="filter-value"><%= grep_tool.tool_inputs["include"] %></span>
+      </div>
+    <% end %>
+    
+    <% if grep_tool.tool_inputs&.dig("path") %>
+      <div class="search-path-info">
+        <span class="label">In directory:</span>
+        <span class="search-path"><%= grep_tool.tool_inputs["path"] %></span>
+      </div>
+    <% end %>
+  </div>
+  
+  <%= render "step/tool_calls/tool_result_section", tool_call: grep_tool %>
+</div>

@@ -1,0 +1,42 @@
+<div class="edit-tool file-tool" data-tool-id="<%= edit_tool.tool_id %>">
+  <div class="tool-header">
+    <span class="tool-icon">✏️</span>
+    <span class="tool-label">Edit File</span>
+    <span class="file-path"><%= edit_tool.file_path %></span>
+  </div>
+  
+  <% if edit_tool.old_string && edit_tool.new_string %>
+    <div class="edit-details">
+      <% if edit_tool.replace_all? %>
+        <div class="replace-all-indicator">
+          <span class="replace-badge">Replace All</span>
+        </div>
+      <% end %>
+      
+      <div class="string-change">
+        <div class="old-string">
+          <div class="code-block">
+            <% edit_tool.format_code_with_line_numbers(edit_tool.old_string).each do |line_data| %>
+              <div class="code-line">
+                <span class="line-number"><%= line_data[:number] %></span>
+                <span class="line-content"><%= line_data[:content] %></span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        <div class="new-string">
+          <div class="code-block">
+            <% edit_tool.format_code_with_line_numbers(edit_tool.new_string).each do |line_data| %>
+              <div class="code-line">
+                <span class="line-number"><%= line_data[:number] %></span>
+                <span class="line-content"><%= line_data[:content] %></span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  
+  <%= render "step/edit_tools/edit_tool_result", edit_tool: edit_tool %>
+</div>

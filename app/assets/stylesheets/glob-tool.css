@@ -1,0 +1,8 @@
+.glob-tool {
+  --bg-search-tool: var(--bg-glob-tool);
+  --bg-file-header: var(--bg-glob-header);
+}
+
+.glob-tool .tool-icon {
+  color: var(--color-glob-icon);
+}

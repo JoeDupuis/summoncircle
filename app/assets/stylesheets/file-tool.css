@@ -1,0 +1,125 @@
+.file-tool {
+  margin: 0.5rem 0;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-file-tool);
+  overflow: hidden;
+}
+
+.file-tool .tool-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-file-header);
+  border-bottom: 1px solid var(--border);
+  font-weight: 500;
+}
+
+.file-tool .tool-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.file-tool .tool-label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.file-tool .file-path {
+  flex: 1;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 0.875rem;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.file-tool pre {
+  margin: 0;
+  padding: 0.5rem;
+  background: var(--bg-code);
+  border-radius: 3px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.file-tool .label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.file-tool .code-block {
+  background: var(--bg-code);
+  border-radius: 3px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  overflow-x: auto;
+}
+
+.file-tool .code-line {
+  display: flex;
+  min-height: 1.45rem;
+  white-space: nowrap;
+}
+
+.file-tool .code-line:hover {
+  background: var(--bg-hover);
+}
+
+.file-tool .line-number {
+  display: inline-block;
+  min-width: 3rem;
+  padding: 0 0.75rem;
+  text-align: right;
+  color: var(--text-line-number);
+  background: var(--bg-line-number);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.file-tool .line-content {
+  flex: 1;
+  padding: 0 0.75rem;
+  white-space: pre;
+}
+
+.file-tool .tool-result {
+  margin-top: 0;
+  border-top: none;
+  padding-top: 0;
+}
+
+.file-tool .tool-result .label {
+  margin-bottom: 0.75rem;
+}
+
+.file-tool .tool-result .code-block {
+  max-height: 600px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+}
+
+.file-tool .tool-result.-complete {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.file-tool .status-icon {
+  font-size: 1rem;
+}

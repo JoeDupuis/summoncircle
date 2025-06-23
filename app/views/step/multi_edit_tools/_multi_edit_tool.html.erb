@@ -1,0 +1,47 @@
+<div class="multi-edit-tool file-tool" data-tool-id="<%= multi_edit_tool.tool_id %>">
+  <div class="tool-header">
+    <span class="tool-icon">✏️✏️</span>
+    <span class="tool-label">Multi-Edit File</span>
+    <span class="file-path"><%= multi_edit_tool.file_path %></span>
+  </div>
+  
+  <% if multi_edit_tool.edits.any? %>
+    <div class="edit-list">
+      <div class="edit-count"><%= pluralize(multi_edit_tool.edits.size, 'edit') %></div>
+      <% multi_edit_tool.edits.each_with_index do |edit, index| %>
+        <div class="edit-item">
+          <% if edit["replace_all"] == true %>
+            <span class="replace-badge">Replace All</span>
+          <% end %>
+          
+          <% if edit["old_string"] && edit["new_string"] %>
+            <div class="string-change">
+              <div class="old-string">
+                <div class="code-block">
+                  <% multi_edit_tool.format_code_with_line_numbers(edit["old_string"]).each do |line_data| %>
+                    <div class="code-line">
+                      <span class="line-number"><%= line_data[:number] %></span>
+                      <span class="line-content"><%= line_data[:content] %></span>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+              <div class="new-string">
+                <div class="code-block">
+                  <% multi_edit_tool.format_code_with_line_numbers(edit["new_string"]).each do |line_data| %>
+                    <div class="code-line">
+                      <span class="line-number"><%= line_data[:number] %></span>
+                      <span class="line-content"><%= line_data[:content] %></span>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+  
+  <%= render "step/multi_edit_tools/multi_edit_tool_result", multi_edit_tool: multi_edit_tool %>
+</div>

@@ -1,0 +1,8 @@
+.grep-tool {
+  --bg-search-tool: var(--bg-grep-tool);
+  --bg-file-header: var(--bg-grep-header);
+}
+
+.grep-tool .tool-icon {
+  color: var(--color-grep-icon);
+}

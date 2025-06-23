@@ -1,0 +1,90 @@
+.multi-edit-tool {
+  --bg-file-tool: var(--bg-edit-tool);
+  --bg-file-header: var(--bg-edit-header);
+}
+
+.multi-edit-tool .tool-icon {
+  color: var(--color-edit-icon);
+}
+
+.multi-edit-tool .edit-list {
+  padding: 1rem;
+}
+
+.multi-edit-tool .edit-count {
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding: 0.375rem 0.75rem;
+  background: var(--bg-edit-header);
+  border-radius: 20px;
+  display: inline-block;
+  font-size: 0.875rem;
+}
+
+.multi-edit-tool .edit-item {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.multi-edit-tool .edit-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+
+.multi-edit-tool .string-change {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.multi-edit-tool .old-string .code-block {
+  background: var(--bg-edit-remove);
+  border: 1px solid var(--border-edit-remove);
+}
+
+.multi-edit-tool .new-string .code-block {
+  background: var(--bg-edit-add);
+  border: 1px solid var(--border-edit-add);
+}
+
+.multi-edit-tool .old-string .line-number {
+  background: var(--bg-line-number-remove);
+  color: var(--text-line-number-remove);
+}
+
+.multi-edit-tool .new-string .line-number {
+  background: var(--bg-line-number-add);
+  color: var(--text-line-number-add);
+}
+
+.multi-edit-tool .old-string .line-content {
+  background: var(--bg-content-remove);
+}
+
+.multi-edit-tool .new-string .line-content {
+  background: var(--bg-content-add);
+}
+
+.multi-edit-tool .replace-badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.125rem 0.5rem;
+  background: var(--bg-replace-badge);
+  color: var(--color-white);
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  vertical-align: middle;
+}
+
+@media (prefers-color-scheme: dark) {
+  .multi-edit-tool .replace-badge {
+    color: var(--text-replace-badge-dark);
+  }
+}
