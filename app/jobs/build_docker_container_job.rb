@@ -41,9 +41,9 @@ class BuildDockerContainerJob < ApplicationJob
       task,
       target: "runs-list",
       partial: "tasks/runs_list",
-      locals: { runs: [run] }
+      locals: { runs: [ run ] }
     )
-    
+
     # Also update the chat messages
     Turbo::StreamsChannel.broadcast_replace_to(
       task,
