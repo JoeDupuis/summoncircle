@@ -55,7 +55,7 @@ class RebuildDockerContainerJobTest < ActiveJob::TestCase
     assert_includes step.raw_response, "Rebuild failed with specific error"
   end
 
-  test "broadcasts turbo stream updates on failure" do
+  test "broadcasts turbo stream redirect on failure" do
     mock_builder = mock()
     mock_builder.expects(:remove_existing_container)
     mock_builder.expects(:remove_old_image).with("summoncircle/task-#{@task.id}-dev")
@@ -63,9 +63,8 @@ class RebuildDockerContainerJobTest < ActiveJob::TestCase
 
     DockerContainerBuilder.expects(:new).with(@task).returns(mock_builder)
 
-    # Expect multiple broadcasts
-    Turbo::StreamsChannel.expects(:broadcast_replace_to).at_least_once
-    Turbo::StreamsChannel.expects(:broadcast_action_to).at_least_once
+    # Expect at least one broadcast (run callbacks + redirect)
+    Turbo::StreamsChannel.expects(:broadcast_append_to).at_least_once
 
     assert_raises(StandardError) do
       RebuildDockerContainerJob.perform_now(@task)

@@ -51,15 +51,14 @@ class BuildDockerContainerJobTest < ActiveJob::TestCase
     assert_includes step.raw_response, "Build failed with specific error"
   end
 
-  test "broadcasts turbo stream updates on failure" do
+  test "broadcasts turbo stream redirect on failure" do
     mock_builder = mock()
     mock_builder.expects(:build_and_run).raises(StandardError.new("Build failed"))
 
     DockerContainerBuilder.expects(:new).with(@task).returns(mock_builder)
 
-    # Expect multiple broadcasts
-    Turbo::StreamsChannel.expects(:broadcast_replace_to).at_least_once
-    Turbo::StreamsChannel.expects(:broadcast_action_to).at_least_once
+    # Expect at least one broadcast (run callbacks + redirect)
+    Turbo::StreamsChannel.expects(:broadcast_append_to).at_least_once
 
     assert_raises(StandardError) do
       BuildDockerContainerJob.perform_now(@task)
