@@ -44,12 +44,20 @@ class RebuildDockerContainerJob < ApplicationJob
       locals: { task: task }
     )
 
-    # Replace the runs list to show the new error run
+    # Replace the runs list to show only the new error run
     Turbo::StreamsChannel.broadcast_replace_to(
       task,
       target: "runs-list",
       partial: "tasks/runs_list",
-      locals: { runs: task.runs.order(created_at: :desc).limit(20) }
+      locals: { runs: [run] }
+    )
+    
+    # Also update the chat messages
+    Turbo::StreamsChannel.broadcast_replace_to(
+      task,
+      target: "chat-messages",
+      partial: "tasks/chat_messages",
+      locals: { runs: task.runs.order(:created_at) }
     )
 
     # Create a turbo stream to switch to the Runs tab
