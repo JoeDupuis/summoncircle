@@ -42,6 +42,14 @@ class Task < ApplicationRecord
     }
   end
 
+  def latest_repo_state
+    RepoState
+      .joins(step: :run)
+      .where(runs: { task_id: id })
+      .order("runs.created_at DESC, steps.created_at DESC")
+      .first
+  end
+
 
   private
 

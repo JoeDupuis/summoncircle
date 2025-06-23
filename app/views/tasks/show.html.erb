@@ -21,6 +21,23 @@
         </div>
         <div class="task-actions-header">
           <%= link_to 'Download Repository', task_repository_download_path(@task), class: 'button', data: { turbo: false } %>
+          <% if (repo_state = @task.latest_repo_state) %>
+            <% diff_content = repo_state.git_diff.presence || repo_state.target_branch_diff.presence || repo_state.uncommitted_diff %>
+            <% if diff_content.present? %>
+              <div data-controller="copy" data-copy-success-class="-success" data-copy-error-class="-error" style="display: inline-block;">
+                <template data-copy-target="source"><%= git_apply_command(diff_content) %></template>
+                <button class="button copy-button" data-action="click->copy#copy">
+                  Copy Git Apply Command
+                </button>
+              </div>
+              <div data-controller="copy" data-copy-success-class="-success" data-copy-error-class="-error" style="display: inline-block;">
+                <template data-copy-target="source"><%= diff_content %></template>
+                <button class="button copy-button" data-action="click->copy#copy">
+                  Copy Diff
+                </button>
+              </div>
+            <% end %>
+          <% end %>
         </div>
         <% if Current.user&.github_token.present? %>
           <%= render "tasks/auto_push_form", task: @task %>

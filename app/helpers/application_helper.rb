@@ -67,4 +67,13 @@ module ApplicationHelper
 
     markdown_processor.render(text).html_safe
   end
+
+  def git_apply_command(diff_content)
+    <<~COMMAND.strip
+      (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF'
+      #{diff_content}
+      EOF
+      )
+    COMMAND
+  end
 end

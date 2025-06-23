@@ -1,6 +1,8 @@
 :root {
   --color-danger: #dc3545;
   --color-danger-hover: #c82333;
+  --color-success: #28a745;
+  --color-success-hover: #218838;
   --color-white: white;
   --color-primary: #0066cc;
   --color-primary-hover: #0052cc;
