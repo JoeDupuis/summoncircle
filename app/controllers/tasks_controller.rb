@@ -1,4 +1,5 @@
 class TasksController < ApplicationController
+  layout "application"
   before_action :set_project
   before_action :set_task, only: [ :show, :edit, :update, :destroy, :branches, :update_auto_push ]
 
