@@ -91,7 +91,10 @@ module GitOperations
       branches = logs.lines.map do |line|
         # Remove the * for current branch and any whitespace
         line.strip.sub(/^\*\s*/, "")
-      end.reject(&:blank?)
+      end.reject(&:blank?).reject do |branch|
+        # Filter out detached HEAD branches
+        branch.match(/^\(HEAD detached at [a-fA-F0-9]+\)$/)
+      end
 
       branches.presence || []
     rescue => e

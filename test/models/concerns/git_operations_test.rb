@@ -121,6 +121,33 @@ class GitOperationsTest < ActiveSupport::TestCase
     task.push_changes_to_branch
   end
 
+  test "fetch_branches filters out detached HEAD entries" do
+    task = tasks(:without_runs)
+    task.workplace_mount
+
+    # Mock git branch output with detached HEAD
+    # Note: DockerGitCommand strips first 8 chars from each line for Docker log prefixes
+    git_branch_output = <<~OUTPUT
+      XXXXXXXX* main
+      XXXXXXXX  feature-branch
+      XXXXXXXX  (HEAD detached at 7aae1c2)
+      XXXXXXXX  another-branch
+    OUTPUT
+
+    Docker::Container.expects(:create).with do |config|
+      assert_match(/git branch/, config["Cmd"][1])
+      true
+    end.returns(mock_container_with_output(git_branch_output))
+
+    branches = task.fetch_branches
+
+    assert_equal 3, branches.length
+    assert_includes branches, "main"
+    assert_includes branches, "feature-branch"
+    assert_includes branches, "another-branch"
+    refute_includes branches, "(HEAD detached at 7aae1c2)"
+  end
+
   private
 
   def mock_container
