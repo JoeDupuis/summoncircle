@@ -23,43 +23,25 @@ class TasksController < ApplicationController
 
   def create
     @task = Task.new(task_params.with_defaults(project_id: @project&.id, user_id: Current.user.id))
+    run = @task.runs.build(prompt: params[:task][:prompt])
 
-    if @task.save
+    if @task.valid? && run.valid?
+      @task.save!
+      run.save!
+      RunJob.perform_later(run.id)
+
       cookies[:preferred_agent_id] = { value: @task.agent_id, expires: 1.year.from_now }
       cookies[:preferred_project_id] = { value: @task.project_id, expires: 1.year.from_now }
       @task.update!(started_at: Time.current)
 
-      run = @task.run(params[:task][:prompt])
-
-      if run.persisted?
-        if Current.user.shrimp_mode?
-          flash[:shrimp_mode] = true
-        end
-
-        redirect_to task_path(@task), notice: "Task was successfully launched."
-      else
-        @task.destroy
-        @task = Task.new(task_params.with_defaults(project_id: @project&.id, user_id: Current.user.id))
-        @task.errors.add(:base, run.errors.full_messages.first)
-
-        if @project.present?
-          render :new, status: :unprocessable_entity
-        else
-          @tasks = Task.kept.includes(:agent, :project).order(created_at: :desc)
-          @projects = Project.kept
-          @agents = Agent.kept
-          render "dashboard/index", status: :unprocessable_entity
-        end
+      if Current.user.shrimp_mode?
+        flash[:shrimp_mode] = true
       end
+
+      redirect_to task_path(@task), notice: "Task was successfully launched."
     else
-      if @project.present?
-        render :new, status: :unprocessable_entity
-      else
-        @tasks = Task.kept.includes(:agent, :project).order(created_at: :desc)
-        @projects = Project.kept
-        @agents = Agent.kept
-        render "dashboard/index", status: :unprocessable_entity
-      end
+      @task.errors.add(:base, run.errors.full_messages.first) if run.errors.any?
+      render_form_errors
     end
   end
 
@@ -140,5 +122,16 @@ class TasksController < ApplicationController
 
   def auto_push_params
     params.require(:task).permit(:auto_push_enabled, :auto_push_branch)
+  end
+
+  def render_form_errors
+    if @project.present?
+      render :new, status: :unprocessable_entity
+    else
+      @tasks = Task.kept.includes(:agent, :project).order(created_at: :desc)
+      @projects = Project.kept
+      @agents = Agent.kept
+      render "dashboard/index", status: :unprocessable_entity
+    end
   end
 end
