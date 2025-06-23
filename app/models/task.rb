@@ -14,8 +14,8 @@ class Task < ApplicationRecord
   validates :description, presence: true
 
   def run(prompt)
-    run = runs.create!(prompt: prompt)
-    RunJob.perform_later(run.id)
+    run = runs.create(prompt: prompt)
+    RunJob.perform_later(run.id) if run.persisted?
     run
   end
 

@@ -29,12 +29,18 @@ class TasksController < ApplicationController
       cookies[:preferred_project_id] = { value: @task.project_id, expires: 1.year.from_now }
       @task.update!(started_at: Time.current)
 
-      begin
-        @task.run(params[:task][:prompt])
-      rescue ActiveRecord::RecordInvalid => e
+      run = @task.run(params[:task][:prompt])
+
+      if run.persisted?
+        if Current.user.shrimp_mode?
+          flash[:shrimp_mode] = true
+        end
+
+        redirect_to task_path(@task), notice: "Task was successfully launched."
+      else
         @task.destroy
         @task = Task.new(task_params.with_defaults(project_id: @project&.id, user_id: Current.user.id))
-        @task.errors.add(:base, "Prompt can't be blank")
+        @task.errors.add(:base, run.errors.full_messages.first)
 
         if @project.present?
           render :new, status: :unprocessable_entity
@@ -44,14 +50,7 @@ class TasksController < ApplicationController
           @agents = Agent.kept
           render "dashboard/index", status: :unprocessable_entity
         end
-        return
       end
-
-      if Current.user.shrimp_mode?
-        flash[:shrimp_mode] = true
-      end
-
-      redirect_to task_path(@task), notice: "Task was successfully launched."
     else
       if @project.present?
         render :new, status: :unprocessable_entity
