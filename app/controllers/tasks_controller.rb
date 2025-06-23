@@ -1,4 +1,5 @@
 class TasksController < ApplicationController
+  layout "application"
   before_action :set_project
   before_action :set_task, only: [ :show, :edit, :update, :destroy, :branches, :update_auto_push ]
 
@@ -52,10 +53,7 @@ class TasksController < ApplicationController
 
   def update
     if @task.update(task_update_params)
-      respond_to do |format|
-        format.html { redirect_to @task, notice: "Task was successfully updated." }
-        format.turbo_stream { render turbo_stream: turbo_stream.replace("task_#{@task.id}_description", partial: "tasks/description", locals: { task: @task }) }
-      end
+      redirect_to @task, notice: "Task was successfully updated."
     else
       render :edit, status: :unprocessable_entity
     end
