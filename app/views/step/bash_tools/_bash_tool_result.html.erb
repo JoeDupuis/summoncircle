@@ -1,15 +1,1 @@
-<% if bash_tool.delete_operation? %>
-  <% if bash_tool.tool_result %>
-    <div class="tool-result -complete">
-      <span class="status-icon">✅</span>
-      <span>File deleted successfully</span>
-    </div>
-  <% else %>
-    <div class="tool-result -pending">
-      <div class="spinner"></div>
-      <span>Deleting file...</span>
-    </div>
-  <% end %>
-<% else %>
-  <%= render "step/tool_calls/tool_result_section", tool_call: bash_tool %>
-<% end %>
+<%= render "step/tool_calls/tool_result_section", tool_call: bash_tool %>

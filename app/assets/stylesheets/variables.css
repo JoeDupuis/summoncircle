@@ -61,13 +61,6 @@
   --bg-grep-tool: #fff0f5;
   --bg-grep-header: #ffe5ed;
   --color-grep-icon: #ec4899;
-  
-  /* Delete tool colors */
-  --bg-delete-tool: #fff5f5;
-  --bg-delete-header: #fee2e2;
-  --border-delete: #fecaca;
-  --text-delete: #991b1b;
-  --text-delete-secondary: #7f1d1d;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -127,12 +120,5 @@
     --bg-grep-tool: #2e0f1a;
     --bg-grep-header: #4e1f2d;
     --color-grep-icon: #f472b6;
-    
-    /* Delete tool colors - dark */
-    --bg-delete-tool: #2d1515;
-    --bg-delete-header: #3d1a1a;
-    --border-delete: #5a2020;
-    --text-delete: #fca5a5;
-    --text-delete-secondary: #fca5a5;
   }
 }
