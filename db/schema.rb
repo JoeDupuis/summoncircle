@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_22_044834) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_22_234155) do
   create_table "agent_specific_settings", force: :cascade do |t|
     t.integer "agent_id", null: false
     t.string "type", null: false
@@ -61,6 +61,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_22_044834) do
     t.integer "step_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "git_diff"
     t.index ["step_id"], name: "index_repo_states_on_step_id"
   end
 

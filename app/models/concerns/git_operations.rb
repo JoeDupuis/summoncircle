@@ -91,7 +91,10 @@ module GitOperations
       branches = logs.lines.map do |line|
         # Remove the * for current branch and any whitespace
         line.strip.sub(/^\*\s*/, "")
-      end.reject(&:blank?)
+      end.reject(&:blank?).reject do |branch|
+        # Filter out detached HEAD branches
+        branch.match(/^\(HEAD detached at [a-fA-F0-9]+\)$/)
+      end
 
       branches.presence || []
     rescue => e
@@ -119,10 +122,9 @@ module GitOperations
       target_branch_diff = nil
       if task.target_branch.present?
         begin
-          target_command = "git fetch origin #{task.target_branch} && git diff origin/#{task.target_branch}...HEAD --unified=10"
           target_branch_diff = run_git_command(
             task: task,
-            command: target_command,
+            command: "git diff origin/#{task.target_branch}...HEAD --unified=10",
             error_message: "Failed to capture target branch diff",
             return_logs: true
           )
@@ -144,10 +146,30 @@ module GitOperations
         content: "Repository state captured"
       )
 
+      # Capture git diff (all changes including untracked files)
+      git_diff = nil
+      begin
+        if task.target_branch.present?
+          git_diff_command = "git add -N . && git diff origin/#{task.target_branch}...HEAD --unified=10"
+        else
+          git_diff_command = "git add -N . && git diff HEAD --unified=10"
+        end
+
+        git_diff = run_git_command(
+          task: task,
+          command: git_diff_command,
+          error_message: "Failed to capture git diff",
+          return_logs: true
+        )
+      rescue => e
+        Rails.logger.error "Failed to capture git diff: #{e.message}"
+      end
+
       repo_state_step.repo_states.create!(
         uncommitted_diff: diff_output,
         target_branch_diff: target_branch_diff,
-        repository_path: git_working_dir
+        repository_path: git_working_dir,
+        git_diff: git_diff
       )
     rescue => e
       Rails.logger.error "Failed to capture repository state: #{e.message}"

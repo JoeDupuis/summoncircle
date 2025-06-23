@@ -13,10 +13,10 @@ class Task < ApplicationRecord
 
   validates :description, presence: true
 
+  accepts_nested_attributes_for :runs
+
   def run(prompt)
-    run = runs.create!(prompt: prompt)
-    RunJob.perform_later(run.id)
-    run
+    runs.create(prompt: prompt)
   end
 
   def workplace_mount
@@ -40,6 +40,14 @@ class Task < ApplicationRecord
       cache_creation: runs.joins(:steps).where.not(steps: { cache_creation_tokens: nil }).sum("steps.cache_creation_tokens"),
       cache_read: runs.joins(:steps).where.not(steps: { cache_read_tokens: nil }).sum("steps.cache_read_tokens")
     }
+  end
+
+  def latest_repo_state
+    RepoState
+      .joins(step: :run)
+      .where(runs: { task_id: id })
+      .order("runs.created_at DESC, steps.created_at DESC")
+      .first
   end
 
 
