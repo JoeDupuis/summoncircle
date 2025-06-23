@@ -126,7 +126,7 @@ module GitOperations
             error_message: "Failed to fetch target branch",
             return_logs: false
           )
-          
+
           # Then get the diff
           target_branch_diff = run_git_command(
             task: task,
@@ -134,7 +134,7 @@ module GitOperations
             error_message: "Failed to capture target branch diff",
             return_logs: true
           )
-          
+
           # Don't store if it's just fetch output
           if target_branch_diff&.match?(/^\s*From\s+https?:\/\/.*\n\s*\*\s*branch.*->\s*FETCH_HEAD\s*$/m) && target_branch_diff.lines.count <= 2
             target_branch_diff = nil
@@ -181,7 +181,7 @@ module GitOperations
           error_message: "Failed to capture git diff",
           return_logs: true
         )
-        
+
         # Don't store if it's just fetch output
         if git_diff&.match?(/^\s*From\s+https?:\/\/.*\n\s*\*\s*branch.*->\s*FETCH_HEAD\s*$/m) && git_diff.lines.count <= 2
           git_diff = nil
