@@ -4,6 +4,7 @@ class DashboardController < ApplicationController
     @task = Task.new
     @task.agent_id = cookies[:preferred_agent_id] if cookies[:preferred_agent_id].present?
     @task.project_id = cookies[:preferred_project_id] if cookies[:preferred_project_id].present?
+    @task.runs.build
     @projects = Project.kept
     @agents = Agent.kept
   end

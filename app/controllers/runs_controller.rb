@@ -6,7 +6,6 @@ class RunsController < ApplicationController
 
     respond_to do |format|
       if @run.save
-        RunJob.perform_later(@run.id)
         format.turbo_stream
         format.html { redirect_to task_path(@task), notice: "Run started successfully." }
       else

@@ -20,6 +20,7 @@ class TasksController < ApplicationController
     @task = @project.tasks.new
     @task.agent_id = cookies[:preferred_agent_id] if cookies[:preferred_agent_id].present?
     @task.project_id = cookies[:preferred_project_id] if cookies[:preferred_project_id].present?
+    @task.runs.build
   end
 
   def create
@@ -29,7 +30,6 @@ class TasksController < ApplicationController
       cookies[:preferred_agent_id] = { value: @task.agent_id, expires: 1.year.from_now }
       cookies[:preferred_project_id] = { value: @task.project_id, expires: 1.year.from_now }
       @task.update!(started_at: Time.current)
-      @task.run(params[:task][:prompt])
 
       if Current.user.shrimp_mode?
         flash[:shrimp_mode] = true
@@ -116,7 +116,7 @@ class TasksController < ApplicationController
   end
 
   def task_params
-    params.require(:task).permit(:agent_id, :project_id, :target_branch)
+    params.require(:task).permit(:agent_id, :project_id, :target_branch, runs_attributes: [ :prompt ])
   end
 
   def task_update_params

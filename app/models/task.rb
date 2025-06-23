@@ -13,10 +13,10 @@ class Task < ApplicationRecord
 
   validates :description, presence: true
 
+  accepts_nested_attributes_for :runs
+
   def run(prompt)
-    run = runs.create!(prompt: prompt)
-    RunJob.perform_later(run.id)
-    run
+    runs.create(prompt: prompt)
   end
 
   def workplace_mount
