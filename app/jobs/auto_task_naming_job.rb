@@ -10,8 +10,8 @@ class AutoTaskNamingJob < ApplicationJob
     Rails.logger.info "Using naming agent: #{naming_agent.name} (#{naming_agent.id})"
 
     begin
-      generated_name = generate_name_with_docker(naming_agent, naming_prompt)
-      
+      generated_name = generate_name_with_docker(task, naming_agent, naming_prompt)
+
       if generated_name.present?
         task.update!(description: generated_name.strip)
         Rails.logger.info "Updated task #{task.id} with new description: #{generated_name.strip}"
@@ -28,29 +28,77 @@ class AutoTaskNamingJob < ApplicationJob
     "I need a name for a task. Keep it short, but multiple words and spaces are allowed. It needs to describe the prompt. Answer with the name but nothing else. Your answer will be set as the name automatically. Here's the prompt: #{original_prompt}"
   end
 
-  def generate_name_with_docker(agent, prompt)
+  def generate_name_with_docker(task, agent, prompt)
     # Prepare Docker command
     command_template = agent.start_arguments
     command = command_template.map { |arg| arg.gsub("{PROMPT}", prompt) }
+    
+    # Get environment variables (agent + task user)
+    user = task.user
+    env_vars = agent.env_strings + user.env_strings
+    
+    # Get volume binds from agent
+    binds = agent.volumes.map do |volume|
+      if volume.external?
+        "#{volume.external_name}:#{volume.mount_path}"
+      else
+        "#{volume.name}:#{volume.mount_path}"
+      end
+    end
     
     # Create and run container
     container = Docker::Container.create(
       "Image" => agent.docker_image,
       "Cmd" => command,
+      "Env" => env_vars,
       "User" => agent.user_id.to_s,
+      "WorkingDir" => agent.workplace_path || "/workspace",
+      "HostConfig" => {
+        "Binds" => binds
+      },
       "AttachStdout" => true,
       "AttachStderr" => true
     )
     
+    container.start
+    
+    # Setup container files (git config, instructions, ssh key)
+    setup_container_files(container, agent, user)
+    
+    # Attach and collect output
     output = ""
-    container.tap(&:start).attach { |stream, chunk| output += chunk if stream == :stdout }
+    container.attach { |stream, chunk| output += chunk if stream == :stdout }
     container.wait
     
     # Process output to extract the task name
-    # Assuming the agent outputs only the task name
     extract_task_name_from_output(output, agent)
   ensure
     container&.delete(force: true)
+  end
+  
+  def setup_container_files(container, agent, user)
+    
+    if user.git_config.present? && agent.home_path.present?
+      archive_file_to_container(container, user.git_config, File.join(agent.home_path, ".gitconfig"))
+    end
+    
+    if user.instructions.present? && agent.instructions_mount_path.present?
+      archive_file_to_container(container, user.instructions, agent.instructions_mount_path)
+    end
+    
+    if user.ssh_key.present? && agent.ssh_mount_path.present?
+      archive_file_to_container(container, user.ssh_key, agent.ssh_mount_path, 0o600)
+    end
+  end
+  
+  def archive_file_to_container(container, content, destination_path, permissions = 0o644)
+    target_dir = File.dirname(destination_path)
+    
+    container.exec([ "mkdir", "-p", target_dir ])
+    
+    encoded_content = Base64.strict_encode64(content)
+    container.exec([ "sh", "-c", "echo '#{encoded_content}' | base64 -d > #{destination_path}" ])
+    container.exec([ "chmod", permissions.to_s(8), destination_path ])
   end
 
   def extract_task_name_from_output(output, agent)
