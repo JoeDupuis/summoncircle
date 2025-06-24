@@ -392,7 +392,11 @@ class RunTest < ActiveSupport::TestCase
 
     # Mock MCP container
     expect_mcp_container(
-      cmd: [ "mcp", "add", "summoncircle", "http://localhost:3000/mcp/sse", "-s", "user", "-t", "sse" ],
+      cmd: [
+        "mcp", "add", "summoncircle", "http://localhost:3000/mcp/sse", "-s", "user", "-t", "sse",
+        "-H", "Authorization: Bearer test-auth-token",
+        "-H", "X-Task-Id: #{task.id}"
+      ],
       output: "MCP configured"
     )
 
@@ -414,7 +418,11 @@ class RunTest < ActiveSupport::TestCase
 
     # Mock MCP container
     expect_mcp_container(
-      cmd: [ "mcp", "add", "summoncircle", "http://localhost:3000/mcp/sse", "-s", "user", "-t", "sse" ],
+      cmd: [
+        "mcp", "add", "summoncircle", "http://localhost:3000/mcp/sse", "-s", "user", "-t", "sse",
+        "-H", "Authorization: Bearer test-auth-token",
+        "-H", "X-Task-Id: #{task.id}"
+      ],
       output: "MCP configured"
     )
 
@@ -436,7 +444,11 @@ class RunTest < ActiveSupport::TestCase
 
     # Mock MCP container
     expect_mcp_container(
-      cmd: [ "mcp", "add", "summoncircle", "http://localhost:3000/mcp/sse", "-s", "user", "-t", "sse" ],
+      cmd: [
+        "mcp", "add", "summoncircle", "http://localhost:3000/mcp/sse", "-s", "user", "-t", "sse",
+        "-H", "Authorization: Bearer test-auth-token",
+        "-H", "X-Task-Id: #{task.id}"
+      ],
       output: "MCP configured"
     )
 
@@ -490,7 +502,11 @@ class RunTest < ActiveSupport::TestCase
 
     # Mock MCP container with failure
     expect_mcp_container(
-      cmd: [ "mcp", "add", "summoncircle", "http://localhost:3000/mcp/sse", "-s", "user", "-t", "sse" ],
+      cmd: [
+        "mcp", "add", "summoncircle", "http://localhost:3000/mcp/sse", "-s", "user", "-t", "sse",
+        "-H", "Authorization: Bearer test-auth-token",
+        "-H", "X-Task-Id: #{task.id}"
+      ],
       output: "MCP error: connection refused",
       status_code: 1
     )
@@ -520,7 +536,11 @@ class RunTest < ActiveSupport::TestCase
     Docker::Container.expects(:create).with(
       has_entries(
         "Image" => "example/image:latest",
-        "Cmd" => [ "mcp", "add", "summoncircle", "http://localhost:3000/mcp/sse", "-s", "user", "-t", "sse" ]
+        "Cmd" => [
+          "mcp", "add", "summoncircle", "http://localhost:3000/mcp/sse", "-s", "user", "-t", "sse",
+          "-H", "Authorization: Bearer test-auth-token",
+          "-H", "X-Task-Id: #{task.id}"
+        ]
       )
     ).returns(mcp_container)
 

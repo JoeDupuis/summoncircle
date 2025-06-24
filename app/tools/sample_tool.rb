@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class SampleTool < ApplicationTool
-  description "Greet someone"
+  description "Greet someone and show current task ID"
 
   arguments do
     required(:name).filled(:string).description("Name of the person to greet")
@@ -9,6 +9,7 @@ class SampleTool < ApplicationTool
   end
 
   def call(name:, prefix: "Hello")
-    "#{prefix} #{name}!"
+    task_id = headers["x-task-id"] || "unknown"
+    "#{prefix} #{name}! Current task ID: #{task_id}"
   end
 end
