@@ -1,13 +1,16 @@
 # frozen_string_literal: true
 
-auth_token = ENV["MCP_AUTH_TOKEN"] ||
-             Rails.application.credentials.dig(:fast_mcp, :auth_token)
+# Only configure auth token if not already set (e.g., in test environment)
+unless Rails.application.config.x.mcp.auth_token.present?
+  auth_token = ENV["MCP_AUTH_TOKEN"] ||
+               Rails.application.credentials.dig(:fast_mcp, :auth_token)
 
-if auth_token.blank?
-  raise "MCP auth token not found. Set MCP_AUTH_TOKEN environment variable or configure fast_mcp.auth_token in Rails credentials."
+  if auth_token.blank?
+    raise "MCP auth token not found. Set MCP_AUTH_TOKEN environment variable or configure fast_mcp.auth_token in Rails credentials."
+  end
+
+  Rails.application.config.x.mcp.auth_token = auth_token
 end
-
-Rails.application.config.x.mcp.auth_token = auth_token
 
 # FastMcp - Model Context Protocol for Rails
 # This initializer sets up the MCP middleware in your Rails application.

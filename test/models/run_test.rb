@@ -3,7 +3,6 @@ require "test_helper"
 class RunTest < ActiveSupport::TestCase
   setup do
     Task.any_instance.stubs(:branches).returns([])
-    Rails.application.config.x.mcp.auth_token = "test-auth-token"
   end
   # Docker prefixes logs with 8 bytes of metadata
   DOCKER_LOG_HEADER = "\x01\x00\x00\x00\x00\x00\x00\x00"
