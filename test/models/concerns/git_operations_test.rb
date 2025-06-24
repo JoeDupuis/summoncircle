@@ -52,10 +52,10 @@ class GitOperationsTest < ActiveSupport::TestCase
     # Create task with user that has github token access disabled
     user = users(:no_github_access)
     user.update!(github_token: "test_token_123")
-    
+
     project = projects(:one)
     project.update!(repository_url: "https://gitlab.com/test/repo.git")
-    
+
     task = Task.create!(
       user: user,
       project: project,
