@@ -95,6 +95,27 @@ class Run < ApplicationRecord
     }
   end
 
+  def stop_container
+    return unless container_id.present?
+
+    begin
+      container = Docker::Container.get(container_id)
+      container.stop
+
+      steps.create!(
+        raw_response: "Run cancelled",
+        type: "Step::System",
+        content: "This run was cancelled because a new run was started for the same task."
+      )
+
+      failed!
+    rescue Docker::Error::NotFoundError
+      Rails.logger.info "Container #{container_id} not found, may have already been stopped"
+    rescue => e
+      Rails.logger.error "Error stopping container #{container_id}: #{e.message}"
+    end
+  end
+
   private
 
 
@@ -268,27 +289,6 @@ class Run < ApplicationRecord
   def cancel_running_runs
     task.runs.running.where.not(container_id: nil).find_each do |run|
       run.stop_container
-    end
-  end
-
-  def stop_container
-    return unless container_id.present?
-
-    begin
-      container = Docker::Container.get(container_id)
-      container.stop
-
-      steps.create!(
-        raw_response: "Run cancelled",
-        type: "Step::System",
-        content: "This run was cancelled because a new run was started for the same task."
-      )
-
-      failed!
-    rescue Docker::Error::NotFoundError
-      Rails.logger.info "Container #{container_id} not found, may have already been stopped"
-    rescue => e
-      Rails.logger.error "Error stopping container #{container_id}: #{e.message}"
     end
   end
 end
