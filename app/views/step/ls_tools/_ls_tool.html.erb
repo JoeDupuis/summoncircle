@@ -1,0 +1,9 @@
+<div class="ls-tool" data-tool-id="<%= ls_tool.tool_id %>">
+  <div class="tool-header">
+    <span class="tool-icon">📋</span>
+    <span class="tool-label">List Directory</span>
+    <span class="file-path"><%= ls_tool.path %></span>
+  </div>
+  
+  <%= render "step/tool_calls/tool_result_section", tool_call: ls_tool %>
+</div>

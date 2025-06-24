@@ -73,10 +73,10 @@ class LogProcessor::ClaudeJsonTest < ActiveSupport::TestCase
         "content": [
           {
             "type": "tool_use",
-            "name": "WebFetch",
+            "name": "UnknownTool",
             "input": {
-              "url": "https://example.com",
-              "prompt": "What is the title?"
+              "param1": "value1",
+              "param2": "value2"
             }
           }
         ]
@@ -87,7 +87,7 @@ class LogProcessor::ClaudeJsonTest < ActiveSupport::TestCase
 
     assert_equal 1, result.size
     assert_equal "Step::ToolCall", result[0][:type]
-    expected_content = "name: WebFetch\ninputs: {\"url\":\"https://example.com\",\"prompt\":\"What is the title?\"}"
+    expected_content = "name: UnknownTool\ninputs: {\"param1\":\"value1\",\"param2\":\"value2\"}"
     assert_equal expected_content, result[0][:content]
   end
 
@@ -114,5 +114,78 @@ class LogProcessor::ClaudeJsonTest < ActiveSupport::TestCase
     assert_equal 1, result.size
     assert_equal "Step::BashTool", result[0][:type]
     assert_equal "ls -la", result[0][:content]
+  end
+
+  test "process creates Step::LsTool for LS tool calls" do
+    processor = LogProcessor::ClaudeJson.new
+    logs = '{
+      "type": "assistant",
+      "message": {
+        "content": [
+          {
+            "type": "tool_use",
+            "name": "LS",
+            "input": {
+              "path": "/workspace"
+            }
+          }
+        ]
+      }
+    }'
+
+    result = processor.process(logs)
+
+    assert_equal 1, result.size
+    assert_equal "Step::LsTool", result[0][:type]
+    assert_equal "/workspace", result[0][:content]
+  end
+
+  test "process creates Step::WebFetchTool for WebFetch tool calls" do
+    processor = LogProcessor::ClaudeJson.new
+    logs = '{
+      "type": "assistant",
+      "message": {
+        "content": [
+          {
+            "type": "tool_use",
+            "name": "WebFetch",
+            "input": {
+              "url": "https://example.com",
+              "prompt": "What is the title?"
+            }
+          }
+        ]
+      }
+    }'
+
+    result = processor.process(logs)
+
+    assert_equal 1, result.size
+    assert_equal "Step::WebFetchTool", result[0][:type]
+    assert_equal "https://example.com", result[0][:content]
+  end
+
+  test "process creates Step::WebSearchTool for WebSearch tool calls" do
+    processor = LogProcessor::ClaudeJson.new
+    logs = '{
+      "type": "assistant",
+      "message": {
+        "content": [
+          {
+            "type": "tool_use",
+            "name": "WebSearch",
+            "input": {
+              "query": "cats"
+            }
+          }
+        ]
+      }
+    }'
+
+    result = processor.process(logs)
+
+    assert_equal 1, result.size
+    assert_equal "Step::WebSearchTool", result[0][:type]
+    assert_equal "cats", result[0][:content]
   end
 end
