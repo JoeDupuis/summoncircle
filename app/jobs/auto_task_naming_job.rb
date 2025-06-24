@@ -43,9 +43,11 @@ class AutoTaskNamingJob < ApplicationJob
     # Get volume binds from agent
     binds = agent.volumes.map do |volume|
       if volume.external?
-        "#{volume.external_name}:#{volume.mount_path}"
+        "#{volume.external_name}:#{volume.path}"
       else
-        "#{volume.name}:#{volume.mount_path}"
+        # Generate volume name similar to VolumeMount
+        volume_name = "summoncircle_#{volume.name}_volume_#{SecureRandom.uuid}"
+        "#{volume_name}:#{volume.path}"
       end
     end
     
