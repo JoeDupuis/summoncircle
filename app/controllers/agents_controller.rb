@@ -48,6 +48,8 @@ class AgentsController < ApplicationController
         create_volumes_from_config(@agent, volumes_config)
       end
 
+      update_agent_secrets if params[:agent][:secrets].present?
+
       redirect_to @agent, notice: "Agent was successfully updated."
     else
       render :edit, status: :unprocessable_entity
@@ -88,5 +90,17 @@ class AgentsController < ApplicationController
       end
     rescue JSON::ParserError
       Rails.logger.error "Invalid JSON in volumes_config"
+    end
+
+    def update_agent_secrets
+      secrets_json = params[:agent][:secrets]
+      return if secrets_json.blank?
+
+      begin
+        secrets_hash = JSON.parse(secrets_json)
+        @agent.update_secrets(secrets_hash)
+      rescue JSON::ParserError
+        flash[:alert] = "Invalid JSON format for secrets"
+      end
     end
 end

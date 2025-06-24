@@ -52,6 +52,12 @@
   </div>
 
   <div>
+    <%= form.label :secrets, "Secrets (JSON)" %><br>
+    <%= text_area_tag "agent[secrets]", "", placeholder: '{"API_KEY": "secret", "DATABASE_PASSWORD": "password"}', rows: 3 %>
+    <small class="form-help">JSON format. Leave empty to keep existing secrets. Values are encrypted and hidden after saving.</small>
+  </div>
+
+  <div>
     <%= form.label :log_processor %><br>
     <%= form.select :log_processor, 
         options_for_select(
