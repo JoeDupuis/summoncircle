@@ -1,6 +1,7 @@
 class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
+  belongs_to :auto_task_naming_agent, class_name: "Agent", optional: true
 
   encrypts :github_token, deterministic: false
   encrypts :ssh_key, deterministic: false
