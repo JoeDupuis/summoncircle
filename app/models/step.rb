@@ -38,8 +38,8 @@ class Step < ApplicationRecord
       end
     end
 
-    project_secret_values = run&.task&.project&.secret_values || []
-    project_secret_values.each do |secret_value|
+    all_secret_values = Secret.pluck(:value)
+    all_secret_values.each do |secret_value|
       next unless secret_value.present?
 
       filtered_message = filtered_message.gsub(secret_value, "[FILTERED]")
