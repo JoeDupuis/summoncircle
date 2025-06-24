@@ -104,6 +104,10 @@ class RunTest < ActiveSupport::TestCase
     # Mock git operations
     mock_docker_git_command
     
+    # Track all update! calls
+    update_calls = []
+    run.stubs(:update!).with { |attrs| update_calls << attrs; true }.returns(true)
+    
     container = mock_container_with_output("\x04test output")
     Docker::Container.expects(:create).with(
       has_entries({
@@ -113,23 +117,14 @@ class RunTest < ActiveSupport::TestCase
       })
     ).returns(container)
     
-    # Verify container ID is stored during execution
-    # We'll check by stubbing the update! calls
-    update_calls = []
-    run.stubs(:update!).with { |attrs| update_calls << attrs; true }.returns(true)
-    
     run.execute!
     
-    # Find the calls that set container_id
-    container_id_set = update_calls.find { |attrs| attrs[:container_id] && attrs[:container_id] != nil }
-    container_id_cleared = update_calls.find { |attrs| attrs.key?(:container_id) && attrs[:container_id].nil? }
-    
-    # Verify container ID was stored during execution
-    assert container_id_set, "Container ID should have been set during execution"
-    assert_equal "test-container-id-123", container_id_set[:container_id]
-    
-    # Verify container ID was cleared after execution
-    assert container_id_cleared, "Container ID should have been cleared after execution"
+    # Verify container_id was set and then cleared
+    container_id_updates = update_calls.select { |attrs| attrs.key?(:container_id) }
+    assert container_id_updates.any? { |attrs| attrs[:container_id] == "test-container-id-123" }, 
+           "Container ID should have been set to test-container-id-123"
+    assert container_id_updates.any? { |attrs| attrs[:container_id].nil? }, 
+           "Container ID should have been cleared (set to nil)"
   end
 
   test "execute! calls Docker container methods correctly for first run" do
