@@ -100,30 +100,30 @@ class RunTest < ActiveSupport::TestCase
   test "execute! stores and clears container_id" do
     task = tasks(:without_runs)
     run = task.runs.create!(prompt: "test", status: :pending)
-    
+
     # Mock git operations
     mock_docker_git_command
-    
+
     # Track all update! calls
     update_calls = []
     run.stubs(:update!).with { |attrs| update_calls << attrs; true }.returns(true)
-    
+
     container = mock_container_with_output("\x04test output")
     Docker::Container.expects(:create).with(
       has_entries({
         "Image" => "example/image:latest",
-        "Cmd" => ["echo", "STARTING: test"],
+        "Cmd" => [ "echo", "STARTING: test" ],
         "WorkingDir" => "/workspace"
       })
     ).returns(container)
-    
+
     run.execute!
-    
+
     # Verify container_id was set and then cleared
     container_id_updates = update_calls.select { |attrs| attrs.key?(:container_id) }
-    assert container_id_updates.any? { |attrs| attrs[:container_id] == "test-container-id-123" }, 
+    assert container_id_updates.any? { |attrs| attrs[:container_id] == "test-container-id-123" },
            "Container ID should have been set to test-container-id-123"
-    assert container_id_updates.any? { |attrs| attrs[:container_id].nil? }, 
+    assert container_id_updates.any? { |attrs| attrs[:container_id].nil? },
            "Container ID should have been cleared (set to nil)"
   end
 
@@ -601,13 +601,13 @@ class RunTest < ActiveSupport::TestCase
 
   test "new run creation handles missing containers gracefully" do
     task = tasks(:without_runs)
-    
+
     # Create a running run with a container_id that doesn't exist
     running_run = task.runs.create!(prompt: "first run", status: :running, container_id: "missing-container")
-    
+
     # Mock Docker to raise NotFoundError
     Docker::Container.expects(:get).with("missing-container").raises(Docker::Error::NotFoundError)
-    
+
     # Should not raise an error when creating a new run
     assert_nothing_raised do
       new_run = task.runs.create!(prompt: "new run")
@@ -617,21 +617,21 @@ class RunTest < ActiveSupport::TestCase
 
   test "new run creation only cancels running runs with container_ids" do
     task = tasks(:without_runs)
-    
+
     # Create various runs
     pending_run = task.runs.create!(prompt: "pending", status: :pending)
     running_without_container = task.runs.create!(prompt: "running no container", status: :running, container_id: nil)
     completed_run = task.runs.create!(prompt: "completed", status: :completed, container_id: "old-container")
     running_with_container = task.runs.create!(prompt: "running with container", status: :running, container_id: "active-container")
-    
+
     # Only the running run with container should be affected
     mock_container = mock("container")
     Docker::Container.expects(:get).with("active-container").returns(mock_container)
     mock_container.expects(:stop)
-    
+
     # Create a new run
     new_run = task.runs.create!(prompt: "new run")
-    
+
     # Check that only the appropriate run was affected
     assert_equal "pending", pending_run.reload.status
     assert_equal "running", running_without_container.reload.status
@@ -643,10 +643,10 @@ class RunTest < ActiveSupport::TestCase
   test "stop_container does nothing when container_id is nil" do
     run = runs(:pending)
     run.container_id = nil
-    
+
     # Should not call Docker API
     Docker::Container.expects(:get).never
-    
+
     run.stop_container
     assert_equal "pending", run.status
   end
@@ -654,10 +654,10 @@ class RunTest < ActiveSupport::TestCase
   test "stop_container handles Docker errors gracefully" do
     run = runs(:pending)
     run.update!(container_id: "error-container")
-    
+
     # Mock Docker to raise a generic error
     Docker::Container.expects(:get).with("error-container").raises(StandardError, "Connection error")
-    
+
     # Should not raise an error
     assert_nothing_raised do
       run.stop_container
@@ -666,18 +666,18 @@ class RunTest < ActiveSupport::TestCase
 
   test "before_create callback cancels running runs" do
     task = tasks(:without_runs)
-    
+
     # Create a running run with a container_id
     running_run = task.runs.create!(prompt: "first run", status: :running, container_id: "container-456")
-    
+
     # Mock the Docker container
     mock_container = mock("container")
     Docker::Container.expects(:get).with("container-456").returns(mock_container)
     mock_container.expects(:stop)
-    
+
     # Create a new run which should trigger the before_create callback
     new_run = task.runs.create!(prompt: "new run")
-    
+
     # Verify the running run was cancelled
     running_run.reload
     assert_equal "failed", running_run.status
