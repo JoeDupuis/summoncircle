@@ -223,9 +223,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container.expects(:delete)
 
     Docker::Container.expects(:create).with do |config|
-      # GITHUB_TOKEN should not be included when access is disabled
       !config["Env"].any? { |e| e.include?("GITHUB_TOKEN") } &&
-      # Git credential helper is not set up for non-GitHub URLs
       !config["Env"].any? { |e| e.include?("GIT_ASKPASS") }
     end.returns(container)
 
