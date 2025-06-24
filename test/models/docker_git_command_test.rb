@@ -207,7 +207,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
   end
 
   test "setup_git_credentials skips non-GitHub URLs" do
-    @user.update!(github_token: "ghp_test123")
+    @user.update!(github_token: "ghp_test123", allow_github_token_access: false)
     @project.update!(repository_url: "https://gitlab.com/user/repo.git")
 
     command = DockerGitCommand.new(
@@ -223,7 +223,8 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container.expects(:delete)
 
     Docker::Container.expects(:create).with do |config|
-      !config["Env"].any? { |e| e.include?("GITHUB_TOKEN") }
+      !config["Env"].any? { |e| e.include?("GITHUB_TOKEN") } &&
+      !config["Env"].any? { |e| e.include?("GIT_ASKPASS") }
     end.returns(container)
 
     command.execute

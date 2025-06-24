@@ -2,7 +2,7 @@ class Project < ApplicationRecord
   include Discard::Model
 
   has_many :tasks, dependent: :destroy
-  has_many :secrets, dependent: :destroy
+  has_many :secrets, as: :secretable, dependent: :destroy
   validates :name, presence: true
   validate :valid_repository_url
 
@@ -24,6 +24,10 @@ class Project < ApplicationRecord
 
   def secret_values
     secrets.pluck(:value)
+  end
+
+  def env_strings
+    secrets.map { |secret| "#{secret.key}=#{secret.value}" }
   end
 
   private

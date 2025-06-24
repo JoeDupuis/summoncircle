@@ -9,3 +9,9 @@ two:
   email_address: two@example.com
   password_digest: <%= password_digest %>
   role: standard
+
+no_github_access:
+  email_address: no_github@example.com
+  password_digest: <%= password_digest %>
+  role: standard
+  allow_github_token_access: false

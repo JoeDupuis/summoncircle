@@ -102,12 +102,11 @@ class Run < ApplicationRecord
     command = command_template.map { |arg| arg.gsub("{PROMPT}", prompt) }
 
     binds = task.volume_mounts.includes(:volume).map(&:bind_string)
-    env_vars = agent.env_strings + project_env_strings + user_env_strings
 
     Docker::Container.create(
       "Image" => agent.docker_image,
       "Cmd" => command,
-      "Env" => env_vars,
+      "Env" => task.docker_env_strings,
       "User" => agent.user_id.to_s,
       "WorkingDir" => task.agent.workplace_path,
       "HostConfig" => {
@@ -123,20 +122,6 @@ class Run < ApplicationRecord
   end
 
 
-  def project_env_strings
-    task.project.secrets.map { |secret| "#{secret.key}=#{secret.value}" }
-  end
-
-  def user_env_strings
-    user = task.user
-    env_strings = []
-
-    if user&.github_token.present? && user.allow_github_token_access
-      env_strings << "GITHUB_TOKEN=#{user.github_token}"
-    end
-
-    env_strings
-  end
 
   def setup_container_files(container)
     agent = task.agent
@@ -164,7 +149,7 @@ class Run < ApplicationRecord
     mcp_container = Docker::Container.create(
       "Image" => agent.docker_image,
       "Cmd" => [ "mcp", "add", "summoncircle", full_url, "-s", "user", "-t", "sse" ],
-      "Env" => agent.env_strings + project_env_strings + user_env_strings,
+      "Env" => task.docker_env_strings,
       "User" => agent.user_id.to_s,
       "WorkingDir" => task.agent.workplace_path,
       "HostConfig" => {
@@ -213,7 +198,7 @@ class Run < ApplicationRecord
       "Cmd" => [ "-c", project.setup_script ],
       "WorkingDir" => setup_working_dir,
       "User" => task.agent.user_id.to_s,
-      "Env" => task.agent.env_strings + project_env_strings + user_env_strings,
+      "Env" => task.docker_env_strings,
       "HostConfig" => {
         "Binds" => task.volume_mounts.includes(:volume).map(&:bind_string)
       }
