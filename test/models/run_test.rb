@@ -97,6 +97,28 @@ class RunTest < ActiveSupport::TestCase
     assert_includes run.steps.first.raw_response, "Image not found"
   end
 
+  test "execute! stores and clears container_id" do
+    task = tasks(:without_runs)
+    run = task.runs.create!(prompt: "test", status: :pending)
+    
+    # Mock git operations
+    mock_docker_git_command
+    
+    container = mock_container_with_output("\x04test output")
+    Docker::Container.expects(:create).with(
+      has_entries({
+        "Image" => "example/image:latest",
+        "Cmd" => ["echo", "STARTING: test"],
+        "WorkingDir" => "/workspace"
+      })
+    ).returns(container)
+    
+    run.execute!
+    
+    # Container ID should be cleared after execution
+    assert_nil run.reload.container_id
+  end
+
   test "execute! calls Docker container methods correctly for first run" do
     task = tasks(:without_runs)
     run = task.runs.create!(prompt: "test command", status: :pending)
@@ -567,6 +589,111 @@ class RunTest < ActiveSupport::TestCase
     assert_includes run.steps.first.raw_response, "SSH authentication failed"
     assert_includes run.steps.first.raw_response, "SSH key may not have access to this repository"
     assert_includes run.steps.first.raw_response, "deploy keys"
+  end
+
+  test "cancel_running_runs stops containers of running runs" do
+    task = tasks(:without_runs)
+    
+    # Create a running run with a container_id
+    running_run = task.runs.create!(prompt: "first run", status: :running, container_id: "container-123")
+    
+    # Mock the Docker container
+    mock_container = mock("container")
+    Docker::Container.expects(:get).with("container-123").returns(mock_container)
+    mock_container.expects(:stop)
+    
+    # Create a new run which should trigger cancellation via before_create
+    new_run = task.runs.build(prompt: "new run")
+    new_run.send(:cancel_running_runs)
+    
+    # Verify the running run was marked as failed
+    running_run.reload
+    assert_equal "failed", running_run.status
+    assert running_run.steps.exists?(type: "Step::System", content: "This run was cancelled because a new run was started for the same task.")
+  end
+
+  test "cancel_running_runs handles missing containers gracefully" do
+    task = tasks(:without_runs)
+    
+    # Create a running run with a container_id that doesn't exist
+    running_run = task.runs.create!(prompt: "first run", status: :running, container_id: "missing-container")
+    
+    # Mock Docker to raise NotFoundError
+    Docker::Container.expects(:get).with("missing-container").raises(Docker::Error::NotFoundError)
+    
+    # Should not raise an error
+    new_run = task.runs.build(prompt: "new run")
+    assert_nothing_raised do
+      new_run.send(:cancel_running_runs)
+    end
+  end
+
+  test "cancel_running_runs only affects running runs with container_ids" do
+    task = tasks(:without_runs)
+    
+    # Create various runs
+    pending_run = task.runs.create!(prompt: "pending", status: :pending)
+    running_without_container = task.runs.create!(prompt: "running no container", status: :running, container_id: nil)
+    completed_run = task.runs.create!(prompt: "completed", status: :completed, container_id: "old-container")
+    running_with_container = task.runs.create!(prompt: "running with container", status: :running, container_id: "active-container")
+    
+    # Only the running run with container should be affected
+    mock_container = mock("container")
+    Docker::Container.expects(:get).with("active-container").returns(mock_container)
+    mock_container.expects(:stop)
+    
+    new_run = task.runs.build(prompt: "new run")
+    new_run.send(:cancel_running_runs)
+    
+    # Check that only the appropriate run was affected
+    assert_equal "pending", pending_run.reload.status
+    assert_equal "running", running_without_container.reload.status
+    assert_equal "completed", completed_run.reload.status
+    assert_equal "failed", running_with_container.reload.status
+  end
+
+  test "stop_container does nothing when container_id is nil" do
+    run = runs(:pending)
+    run.container_id = nil
+    
+    # Should not call Docker API
+    Docker::Container.expects(:get).never
+    
+    run.stop_container
+    assert_equal "pending", run.status
+  end
+
+  test "stop_container handles Docker errors gracefully" do
+    run = runs(:pending)
+    run.update!(container_id: "error-container")
+    
+    # Mock Docker to raise a generic error
+    Docker::Container.expects(:get).with("error-container").raises(StandardError, "Connection error")
+    
+    # Should not raise an error
+    assert_nothing_raised do
+      run.stop_container
+    end
+  end
+
+  test "before_create callback cancels running runs" do
+    task = tasks(:without_runs)
+    
+    # Create a running run with a container_id
+    running_run = task.runs.create!(prompt: "first run", status: :running, container_id: "container-456")
+    
+    # Mock the Docker container
+    mock_container = mock("container")
+    Docker::Container.expects(:get).with("container-456").returns(mock_container)
+    mock_container.expects(:stop)
+    
+    # Create a new run which should trigger the before_create callback
+    new_run = task.runs.create!(prompt: "new run")
+    
+    # Verify the running run was cancelled
+    running_run.reload
+    assert_equal "failed", running_run.status
+    assert new_run.persisted?
   end
 
   private
