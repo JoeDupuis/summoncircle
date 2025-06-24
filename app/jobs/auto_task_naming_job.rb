@@ -15,10 +15,13 @@ class AutoTaskNamingJob < ApplicationJob
       if generated_name.present?
         task.update!(description: generated_name.strip)
         Rails.logger.info "Updated task #{task.id} with new description: #{generated_name.strip}"
+      else
+        Rails.logger.warn "Auto task naming returned empty result for task #{task.id}"
       end
     rescue => e
       Rails.logger.error "Auto task naming failed: #{e.message}"
       Rails.logger.error e.backtrace.join("\n")
+      raise # Re-raise the exception so the job fails properly
     end
   end
 
