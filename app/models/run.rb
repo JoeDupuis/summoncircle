@@ -11,6 +11,7 @@ class Run < ApplicationRecord
 
   attr_accessor :skip_agent
 
+  before_create :cancel_running_runs
   after_create :enqueue_job, unless: :skip_agent
   after_update_commit :broadcast_update
   after_create_commit :broadcast_chat_append
@@ -37,6 +38,7 @@ class Run < ApplicationRecord
       end
 
       container = create_container
+      update!(container_id: container.id)
       container.start
       setup_container_files(container)
 
@@ -55,7 +57,7 @@ class Run < ApplicationRecord
       steps.create!(raw_response: error_message, type: "Step::Error", content: error_message)
       failed!
     ensure
-      update!(completed_at: Time.current)
+      update!(completed_at: Time.current, container_id: nil)
       save!
       container&.delete(force: true) if defined?(container)
     end
@@ -91,6 +93,27 @@ class Run < ApplicationRecord
       cache_creation: steps.where.not(cache_creation_tokens: nil).sum(:cache_creation_tokens),
       cache_read: steps.where.not(cache_read_tokens: nil).sum(:cache_read_tokens)
     }
+  end
+
+  def stop_container
+    return unless container_id.present?
+
+    begin
+      container = Docker::Container.get(container_id)
+      container.stop
+
+      steps.create!(
+        raw_response: "Run cancelled",
+        type: "Step::System",
+        content: "This run was cancelled because a new run was started for the same task."
+      )
+
+      failed!
+    rescue Docker::Error::NotFoundError
+      Rails.logger.info "Container #{container_id} not found, may have already been stopped"
+    rescue => e
+      Rails.logger.error "Error stopping container #{container_id}: #{e.message}"
+    end
   end
 
   private
@@ -246,5 +269,11 @@ class Run < ApplicationRecord
 
   def enqueue_job
     RunJob.perform_later(id)
+  end
+
+  def cancel_running_runs
+    task.runs.running.where.not(container_id: nil).find_each do |run|
+      run.stop_container
+    end
   end
 end
