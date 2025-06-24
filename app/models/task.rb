@@ -16,7 +16,13 @@ class Task < ApplicationRecord
   accepts_nested_attributes_for :runs
 
   def run(prompt)
-    runs.create(prompt: prompt)
+    run_instance = runs.create(prompt: prompt)
+
+    if user.auto_task_naming_agent && description == "#{agent.name} in #{project.name}"
+      generate_auto_task_name_async(prompt)
+    end
+
+    run_instance
   end
 
   def workplace_mount
@@ -66,5 +72,9 @@ class Task < ApplicationRecord
 
   def set_default_description
     self.description ||= "#{agent.name} in #{project.name}" if agent && project
+  end
+
+  def generate_auto_task_name_async(prompt)
+    AutoTaskNamingJob.perform_later(self, prompt)
   end
 end
