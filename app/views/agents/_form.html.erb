@@ -45,16 +45,63 @@
     <% end %>
   </div>
 
-  <div>
-    <%= form.label :env_variables_json, "Environment Variables (JSON format)" %><br>
-    <%= form.text_area :env_variables_json %>
-    <small class="form-help">Example: {"NODE_ENV": "development", "DEBUG": "true"}</small>
+  <div data-controller="nested-fields">
+    <h3>Environment Variables</h3>
+    <div data-nested-fields-target="fields">
+      <% agent.env_variables_fields.each do |index, field| %>
+        <div class="nested-field" style="display: flex; gap: 10px; margin-bottom: 10px;">
+          <% env_obj = OpenStruct.new(field) %>
+          <%= form.fields_for :env_variables_fields, env_obj, index: index do |env_field| %>
+            <%= env_field.text_field :key, placeholder: "Key", style: "flex: 1;" %>
+            <%= env_field.text_field :value, placeholder: "Value", style: "flex: 2;" %>
+            <button type="button" data-action="click->nested-fields#remove" style="padding: 5px 10px;">Remove</button>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+    
+    <button type="button" data-action="click->nested-fields#add" style="margin-top: 10px;">Add Environment Variable</button>
+    
+    <template data-nested-fields-target="template">
+      <div class="nested-field" style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <% env_placeholder = OpenStruct.new(key: "", value: "") %>
+        <%= form.fields_for :env_variables_fields, env_placeholder, index: "__INDEX__" do |env_field| %>
+          <%= env_field.text_field :key, placeholder: "Key", style: "flex: 1;" %>
+          <%= env_field.text_field :value, placeholder: "Value", style: "flex: 2;" %>
+          <button type="button" data-action="click->nested-fields#remove" style="padding: 5px 10px;">Remove</button>
+        <% end %>
+      </div>
+    </template>
   </div>
 
-  <div>
-    <%= form.label :secrets, "Secrets (JSON)" %><br>
-    <%= text_area_tag "agent[secrets]", "", placeholder: '{"API_KEY": "secret", "DATABASE_PASSWORD": "password"}', rows: 3 %>
-    <small class="form-help">JSON format. Leave empty to keep existing secrets. Values are encrypted and hidden after saving.</small>
+  <div data-controller="nested-fields">
+    <h3>Secrets</h3>
+    <small class="form-help" style="display: block; margin-bottom: 10px;">Values are encrypted and hidden after saving. Existing secrets show as "[ENCRYPTED]".</small>
+    <div data-nested-fields-target="fields">
+      <% agent.secrets.each do |secret| %>
+        <div class="nested-field" style="display: flex; gap: 10px; margin-bottom: 10px;">
+          <%= form.fields_for :secrets, secret do |secret_field| %>
+            <%= secret_field.hidden_field :id %>
+            <%= secret_field.hidden_field :_destroy %>
+            <%= secret_field.text_field :key, placeholder: "Key", style: "flex: 1;" %>
+            <%= secret_field.password_field :value, placeholder: secret.persisted? ? "[ENCRYPTED]" : "Value", style: "flex: 2;" %>
+            <button type="button" data-action="click->nested-fields#remove" style="padding: 5px 10px;">Remove</button>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+    
+    <button type="button" data-action="click->nested-fields#add" style="margin-top: 10px;">Add Secret</button>
+    
+    <template data-nested-fields-target="template">
+      <div class="nested-field" style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <%= form.fields_for :secrets, agent.secrets.build, child_index: "__INDEX__" do |secret_field| %>
+          <%= secret_field.text_field :key, placeholder: "Key", style: "flex: 1;" %>
+          <%= secret_field.password_field :value, placeholder: "Value", style: "flex: 2;" %>
+          <button type="button" data-action="click->nested-fields#remove" style="padding: 5px 10px;">Remove</button>
+        <% end %>
+      </div>
+    </template>
   </div>
 
   <div>

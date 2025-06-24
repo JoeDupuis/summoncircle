@@ -7,6 +7,7 @@ class Agent < ApplicationRecord
   has_many :secrets, as: :secretable, dependent: :destroy
 
   accepts_nested_attributes_for :agent_specific_settings, allow_destroy: true, reject_if: :reject_new_destroyed_settings
+  accepts_nested_attributes_for :secrets, allow_destroy: true, reject_if: :all_blank
 
   validates :name, presence: true
   validates :docker_image, presence: true
@@ -14,8 +15,9 @@ class Agent < ApplicationRecord
   validates :user_id, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
   before_save :update_agent_specific_setting
+  before_save :process_env_variables_fields
 
-  attr_accessor :volumes_config, :env_variables_json, :agent_specific_setting_type
+  attr_accessor :volumes_config, :env_variables_json, :agent_specific_setting_type, :env_variables_fields
 
   def volumes_config
     return @volumes_config if @volumes_config.present?
@@ -60,17 +62,6 @@ class Agent < ApplicationRecord
     vars
   end
 
-  def update_secrets(secrets_hash)
-    return unless secrets_hash.is_a?(Hash)
-
-    secrets_hash.each do |key, value|
-      next if key.blank? || value.blank?
-
-      secret = secrets.find_or_initialize_by(key: key)
-      secret.value = value
-      secret.save!
-    end
-  end
 
   def secrets_hash
     secrets.pluck(:key, :value).to_h
@@ -93,6 +84,22 @@ class Agent < ApplicationRecord
 
   def log_processor_class
     "LogProcessor::#{log_processor}".constantize
+  end
+
+  def env_variables_fields=(fields_hash)
+    @env_variables_fields = fields_hash
+  end
+
+  def env_variables_fields
+    return @env_variables_fields if @env_variables_fields.present?
+
+    if env_variables.present?
+      env_variables.map.with_index { |(key, value), index|
+        { "#{index}" => { "key" => key, "value" => value } }
+      }.reduce({}, :merge)
+    else
+      {}
+    end
   end
 
   private
@@ -124,5 +131,17 @@ class Agent < ApplicationRecord
 
   def agent_specific_setting_type_changed?
     @agent_specific_setting_type != agent_specific_settings.first&.type
+  end
+
+  def process_env_variables_fields
+    return unless @env_variables_fields.present?
+
+    new_env_vars = {}
+    @env_variables_fields.each do |_, field|
+      next if field["_destroy"] == "1" || field["key"].blank?
+      new_env_vars[field["key"]] = field["value"]
+    end
+
+    self.env_variables = new_env_vars
   end
 end
