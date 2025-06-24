@@ -4,7 +4,6 @@ class Run < ApplicationRecord
   belongs_to :task
   has_many :siblings, through: :task, source: :runs
   has_many :steps, -> { order(:id) }, dependent: :destroy
-  has_many :top_level_steps, -> { where(parent_tool_use_id: nil).order(:id) }, class_name: "Step"
 
   enum :status, { pending: 0, running: 1, completed: 2, failed: 3 }, default: :pending
 

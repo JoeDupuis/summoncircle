@@ -12,7 +12,7 @@
   <div class="content">
     <div data-tabs-target="panel" data-panel-id="steps" class="panel -active">
       <div class="output" data-controller="auto-scroll">
-        <%= render run.top_level_steps %>
+        <%= render run.steps.top_level %>
         <% if run.status == 'running' %>
           <div class="run-spinner">
             <div class="spinner"></div>
