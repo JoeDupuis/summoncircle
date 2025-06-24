@@ -10,6 +10,7 @@ class Task < ApplicationRecord
   has_many :volume_mounts, dependent: :destroy
 
   after_create :create_volume_mounts
+  after_create :generate_task_name
   before_validation :set_default_description, on: :create
   after_update_commit :broadcast_description_update, if: :saved_change_to_description?
 
@@ -18,7 +19,8 @@ class Task < ApplicationRecord
   accepts_nested_attributes_for :runs
 
   def run(prompt)
-    runs.create(prompt: prompt)
+    run_instance = runs.create(prompt: prompt)
+    run_instance
   end
 
   def workplace_mount
@@ -68,6 +70,14 @@ class Task < ApplicationRecord
 
   def set_default_description
     self.description ||= "#{agent.name} in #{project.name}" if agent && project
+  end
+
+  def generate_task_name
+    return unless user.auto_task_naming_agent
+    return unless description == "#{agent.name} in #{project.name}"
+    prompt = self.runs.first&.prompt
+    return unless prompt
+    AutoTaskNamingJob.perform_later(self, prompt)
   end
 
   def broadcast_description_update

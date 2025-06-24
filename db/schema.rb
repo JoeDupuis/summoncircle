@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_24_023931) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_24_044111) do
   create_table "agent_specific_settings", force: :cascade do |t|
     t.integer "agent_id", null: false
     t.string "type", null: false
@@ -156,6 +156,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_24_023931) do
     t.text "git_config"
     t.boolean "allow_github_token_access", default: true, null: false
     t.boolean "shrimp_mode", default: true, null: false
+    t.integer "auto_task_naming_agent_id"
+    t.index ["auto_task_naming_agent_id"], name: "index_users_on_auto_task_naming_agent_id"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
@@ -188,6 +190,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_24_023931) do
   add_foreign_key "tasks", "agents"
   add_foreign_key "tasks", "projects"
   add_foreign_key "tasks", "users"
+  add_foreign_key "users", "agents", column: "auto_task_naming_agent_id"
   add_foreign_key "volume_mounts", "tasks"
   add_foreign_key "volume_mounts", "volumes"
   add_foreign_key "volumes", "agents"
