@@ -83,6 +83,14 @@
   --bg-websearch-header: #e8d4ec;
   --color-websearch-icon: #6a1b9a;
   --border-websearch: #9c27b0;
+  
+  /* Task tool colors */
+  --bg-task-tool: #e8f4f0;
+  --bg-task-header: #d1ebe3;
+  --color-task-icon: #00897b;
+  --border-task: #00acc1;
+  --bg-task-prompt: #f0f9f7;
+  --color-task-prompt-label: #00695c;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -162,5 +170,13 @@
     --bg-websearch-header: #3d2444;
     --color-websearch-icon: #ba68c8;
     --border-websearch: #7b1fa2;
+    
+    /* Task tool colors - dark */
+    --bg-task-tool: #1a2e28;
+    --bg-task-header: #244039;
+    --color-task-icon: #4db6ac;
+    --border-task: #0288d1;
+    --bg-task-prompt: #1e3330;
+    --color-task-prompt-label: #26a69a;
   }
 }

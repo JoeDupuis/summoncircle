@@ -188,4 +188,55 @@ class LogProcessor::ClaudeJsonTest < ActiveSupport::TestCase
     assert_equal "Step::WebSearchTool", result[0][:type]
     assert_equal "cats", result[0][:content]
   end
+
+  test "process creates Step::TaskTool for Task tool calls" do
+    processor = LogProcessor::ClaudeJson.new
+    logs = '{
+      "type": "assistant",
+      "message": {
+        "content": [
+          {
+            "type": "tool_use",
+            "name": "Task",
+            "input": {
+              "description": "Tell a joke",
+              "prompt": "Please tell me a funny joke. Just return the joke itself, nothing else."
+            }
+          }
+        ]
+      }
+    }'
+
+    result = processor.process(logs)
+
+    assert_equal 1, result.size
+    assert_equal "Step::TaskTool", result[0][:type]
+    assert_equal "Tell a joke", result[0][:content]
+  end
+
+  test "process captures parent_tool_use_id for nested tool calls" do
+    processor = LogProcessor::ClaudeJson.new
+    logs = '{
+      "type": "assistant",
+      "message": {
+        "content": [
+          {
+            "type": "tool_use",
+            "name": "LS",
+            "input": {
+              "path": "/workspace"
+            }
+          }
+        ]
+      },
+      "parent_tool_use_id": "toolu_017M9aLhzpKXEzH98bPSnUg3"
+    }'
+
+    result = processor.process(logs)
+
+    assert_equal 1, result.size
+    assert_equal "Step::LsTool", result[0][:type]
+    assert_equal "/workspace", result[0][:content]
+    assert_equal "toolu_017M9aLhzpKXEzH98bPSnUg3", result[0][:parent_tool_use_id]
+  end
 end

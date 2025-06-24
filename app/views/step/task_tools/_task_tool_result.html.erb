@@ -1,0 +1,47 @@
+<% child_steps = task_tool.child_steps %>
+<% if child_steps.any? %>
+  <div class="task-execution">
+    <div class="execution-header">
+      <span class="execution-icon">⚙️</span>
+      <span class="execution-label">Sub-Agent Execution</span>
+    </div>
+    <div class="execution-steps">
+      <% child_steps.each do |child_step| %>
+        <%= render child_step %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<% if task_tool.tool_result %>
+  <div class="task-result">
+    <div class="result-header">
+      <span class="result-icon">✅</span>
+      <span class="result-label">Sub-Agent Response</span>
+    </div>
+    <div class="result-content">
+      <% parsed_content = task_tool.tool_result.parsed_response %>
+      <% if parsed_content.is_a?(Hash) && parsed_content.dig("message", "content").is_a?(Array) %>
+        <% content_array = parsed_content.dig("message", "content") %>
+        <% content_array.each do |content_item| %>
+          <% if content_item["type"] == "text" %>
+            <pre class="agent-response"><%= content_item["text"] %></pre>
+          <% elsif content_item["type"] == "tool_result" && content_item["content"].is_a?(Array) %>
+            <% content_item["content"].each do |result_item| %>
+              <% if result_item["type"] == "text" %>
+                <pre class="agent-response"><%= result_item["text"] %></pre>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% else %>
+        <pre class="agent-response"><%= task_tool.tool_result.content %></pre>
+      <% end %>
+    </div>
+  </div>
+<% elsif child_steps.empty? %>
+  <div class="task-result -pending">
+    <div class="spinner"></div>
+    <span>Sub-agent is working...</span>
+  </div>
+<% end %>

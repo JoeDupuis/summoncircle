@@ -1,0 +1,15 @@
+<div class="task-tool" data-tool-id="<%= task_tool.tool_id %>">
+  <div class="tool-header">
+    <span class="tool-icon">🤖</span>
+    <span class="tool-label">Sub-Agent Task</span>
+    <span class="description"><%= task_tool.description %></span>
+  </div>
+  <% if task_tool.prompt.present? %>
+    <div class="prompt">
+      <span class="prompt-label">Instructions:</span>
+      <%= task_tool.prompt %>
+    </div>
+  <% end %>
+  
+  <%= render "step/task_tools/task_tool_result", task_tool: task_tool %>
+</div>
