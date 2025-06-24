@@ -68,3 +68,12 @@ with_mcp_endpoint_full_url:
   continue_arguments: [ "echo hello" ]
   user_id: 1000
   mcp_sse_endpoint: "http://localhost:3000/mcp/sse"
+
+claude:
+  name: Claude
+  docker_image: anthropic/claude:latest
+  workplace_path: "/workspace"
+  start_arguments: [ "claude", "--prompt", "{PROMPT}" ]
+  continue_arguments: [ "claude", "--continue", "{PROMPT}" ]
+  user_id: 1000
+  log_processor: "ClaudeJson"

@@ -9,3 +9,10 @@ two:
   name: MyString
   path: MyString
   agent: two
+
+claude_config:
+  name: claude_config
+  path: /home/claude/.config
+  agent: claude
+  external: true
+  external_name: claude_config_volume

@@ -74,7 +74,9 @@ class Task < ApplicationRecord
 
   def generate_task_name
     return unless user.auto_task_naming_agent
-    prompt = self.runs.first.prompt
+    return unless description == "#{agent.name} in #{project.name}"
+    prompt = self.runs.first&.prompt
+    return unless prompt
     AutoTaskNamingJob.perform_later(self, prompt)
   end
 
