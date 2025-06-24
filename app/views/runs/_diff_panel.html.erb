@@ -1,6 +1,6 @@
 <div data-controller="diff" 
-     data-diff-uncommitted-diff-value="<%= repo_state.uncommitted_diff.gsub('"', '&quot;') %>"
-     data-diff-target-branch-diff-value="<%= repo_state.target_branch_diff.to_s.gsub('"', '&quot;') %>"
+     data-diff-uncommitted-diff-value="<%= html_escape(repo_state.uncommitted_diff) %>"
+     data-diff-target-branch-diff-value="<%= html_escape(repo_state.target_branch_diff.to_s) %>"
      data-diff-has-target-branch-value="<%= repo_state.target_branch_diff.present? %>">
   <div class="diff-controls">
     <% if repo_state.target_branch_diff.present? %>
