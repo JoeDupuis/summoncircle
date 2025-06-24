@@ -10,6 +10,7 @@ class Task < ApplicationRecord
   has_many :volume_mounts, dependent: :destroy
 
   after_create :create_volume_mounts
+  after_create :generate_task_name
   before_validation :set_default_description, on: :create
   after_update_commit :broadcast_description_update, if: :saved_change_to_description?
 
@@ -19,11 +20,6 @@ class Task < ApplicationRecord
 
   def run(prompt)
     run_instance = runs.create(prompt: prompt)
-
-    if user.auto_task_naming_agent && description == "#{agent.name} in #{project.name}"
-      generate_auto_task_name_async(prompt)
-    end
-
     run_instance
   end
 
@@ -76,7 +72,9 @@ class Task < ApplicationRecord
     self.description ||= "#{agent.name} in #{project.name}" if agent && project
   end
 
-  def generate_auto_task_name_async(prompt)
+  def generate_task_name
+    return unless user.auto_task_naming_agent
+    prompt = self.runs.first.prompt
     AutoTaskNamingJob.perform_later(self, prompt)
   end
 

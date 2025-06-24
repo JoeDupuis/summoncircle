@@ -5,7 +5,6 @@
 
   env = {
     LD_LIBRARY_PATH = "${config.devenv.profile}/lib";
-    SOLID_QUEUE_IN_PUMA = "true";
   };
 
   packages = with pkgs; [

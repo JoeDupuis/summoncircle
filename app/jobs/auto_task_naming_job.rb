@@ -9,23 +9,16 @@ class AutoTaskNamingJob < ApplicationJob
     naming_agent = task.user.auto_task_naming_agent
     Rails.logger.info "Using naming agent: #{naming_agent.name} (#{naming_agent.id})"
 
-    temp_task = create_temporary_naming_task(task, naming_agent)
-
-    run = temp_task.runs.build(prompt: naming_prompt)
-    run.skip_agent = true
-    run.save!
-
     begin
-      run.execute!
-      generated_name = extract_name_from_run(run)
-
+      generated_name = generate_name_with_docker(naming_agent, naming_prompt)
+      
       if generated_name.present?
         task.update!(description: generated_name.strip)
+        Rails.logger.info "Updated task #{task.id} with new description: #{generated_name.strip}"
       end
     rescue => e
       Rails.logger.error "Auto task naming failed: #{e.message}"
-    ensure
-      temp_task.destroy
+      Rails.logger.error e.backtrace.join("\n")
     end
   end
 
@@ -35,19 +28,51 @@ class AutoTaskNamingJob < ApplicationJob
     "I need a name for a task. Keep it short, but multiple words and spaces are allowed. It needs to describe the prompt. Answer with the name but nothing else. Your answer will be set as the name automatically. Here's the prompt: #{original_prompt}"
   end
 
-  def create_temporary_naming_task(original_task, naming_agent)
-    Task.create!(
-      project: original_task.project,
-      agent: naming_agent,
-      user: original_task.user,
-      description: "temp-naming-task-#{Time.current.to_i}"
+  def generate_name_with_docker(agent, prompt)
+    # Prepare Docker command
+    command_template = agent.start_arguments
+    command = command_template.map { |arg| arg.gsub("{PROMPT}", prompt) }
+    
+    # Create and run container
+    container = Docker::Container.create(
+      "Image" => agent.docker_image,
+      "Cmd" => command,
+      "User" => agent.user_id.to_s,
+      "AttachStdout" => true,
+      "AttachStderr" => true
     )
+    
+    output = ""
+    container.tap(&:start).attach { |stream, chunk| output += chunk if stream == :stdout }
+    container.wait
+    
+    # Process output to extract the task name
+    # Assuming the agent outputs only the task name
+    extract_task_name_from_output(output, agent)
+  ensure
+    container&.delete(force: true)
   end
 
-  def extract_name_from_run(run)
-    text_steps = run.steps.where(type: "Step::Text")
-    return nil if text_steps.empty?
-
-    text_steps.last.content
+  def extract_task_name_from_output(output, agent)
+    # Handle different log processor types
+    case agent.log_processor
+    when "ClaudeJson", "ClaudeStreamingJson"
+      # Parse JSON response and extract text content
+      begin
+        json_lines = output.lines.select { |line| line.strip.start_with?("{") }
+        json_lines.each do |line|
+          data = JSON.parse(line)
+          if data["type"] == "content" && data["content"].is_a?(Array)
+            text_blocks = data["content"].select { |c| c["type"] == "text" }
+            return text_blocks.first["text"] if text_blocks.any?
+          end
+        end
+      rescue JSON::ParserError => e
+        Rails.logger.error "Failed to parse JSON output: #{e.message}"
+      end
+    else
+      # For Text processor, just return the output
+      output.strip
+    end
   end
 end
