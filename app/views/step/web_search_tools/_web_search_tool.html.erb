@@ -1,10 +1,8 @@
-<div class="websearch-tool">
+<div class="websearch-tool" data-tool-id="<%= web_search_tool.tool_id %>">
   <div class="tool-header">
     <span class="tool-icon">🔍</span>
-    <span class="tool-name">Web Search</span>
-  </div>
-  <div class="tool-query">
-    <%= web_search_tool.query %>
+    <span class="tool-label">Web Search</span>
+    <span class="query"><%= web_search_tool.query %></span>
   </div>
   
   <%= render "step/tool_calls/tool_result_section", tool_call: web_search_tool %>

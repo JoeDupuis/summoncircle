@@ -1,55 +1,40 @@
 .websearch-tool {
-  background-color: var(--bg-search, #f3e5f5);
-  color: var(--text-search, #1a1a1a);
+  background-color: var(--bg-websearch-tool);
+  color: var(--text);
   padding: 0.75rem 1rem;
   border-radius: 4px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 0.875rem;
   line-height: 1.6;
   margin: 0.5rem 0;
-  border-left: 3px solid var(--border-search, #9c27b0);
+  border-left: 3px solid var(--border-websearch);
 }
 
-@media (prefers-color-scheme: dark) {
-  .websearch-tool {
-    background-color: var(--bg-search-dark, #2e1a33);
-    color: var(--text-search-dark, #e6e6e6);
-    border-left: 3px solid var(--border-search-dark, #7b1fa2);
-  }
-}
-
-.websearch-tool .tool-header {
+.websearch-tool > .tool-header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: var(--label-search, #6a1b9a);
+  background-color: var(--bg-websearch-header);
+  margin: -0.75rem -1rem 0.75rem -1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 4px 4px 0 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  .websearch-tool .tool-header {
-    color: var(--label-search-dark, #ba68c8);
-  }
-}
-
-.websearch-tool .tool-icon {
+.websearch-tool > .tool-header > .tool-icon {
   font-size: 1.1rem;
+  color: var(--color-websearch-icon);
 }
 
-.websearch-tool .tool-query {
-  background-color: var(--bg-content, #fff);
-  padding: 0.5rem;
-  border-radius: 3px;
-  overflow-x: auto;
+.websearch-tool > .tool-header > .tool-label {
+  font-weight: 600;
+  color: var(--color-websearch-icon);
+}
+
+.websearch-tool > .tool-header > .query {
+  margin-left: auto;
   font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
   font-size: 0.8125rem;
-  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
   font-weight: 500;
-}
-
-@media (prefers-color-scheme: dark) {
-  .websearch-tool .tool-query {
-    background-color: var(--bg-content-dark, #1a0f1d);
-  }
 }

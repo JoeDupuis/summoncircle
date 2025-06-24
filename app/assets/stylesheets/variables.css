@@ -63,6 +63,26 @@
   --bg-grep-tool: #fff0f5;
   --bg-grep-header: #ffe5ed;
   --color-grep-icon: #ec4899;
+  
+  /* LS tool colors */
+  --bg-ls-tool: #f7f3e9;
+  --bg-ls-header: #ebe5d1;
+  --color-ls-icon: #8b6f47;
+  --border-ls: #d4a574;
+  
+  /* WebFetch tool colors */
+  --bg-webfetch-tool: #e8f4fd;
+  --bg-webfetch-header: #d1e9fc;
+  --color-webfetch-icon: #1565c0;
+  --border-webfetch: #2196f3;
+  --color-webfetch-url: #1565c0;
+  --bg-webfetch-prompt: #f5f5f5;
+  
+  /* WebSearch tool colors */
+  --bg-websearch-tool: #f3e5f5;
+  --bg-websearch-header: #e8d4ec;
+  --color-websearch-icon: #6a1b9a;
+  --border-websearch: #9c27b0;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -122,5 +142,25 @@
     --bg-grep-tool: #2e0f1a;
     --bg-grep-header: #4e1f2d;
     --color-grep-icon: #f472b6;
+    
+    /* LS tool colors - dark */
+    --bg-ls-tool: #2a2520;
+    --bg-ls-header: #3d3328;
+    --color-ls-icon: #d4a574;
+    --border-ls: #8b6f47;
+    
+    /* WebFetch tool colors - dark */
+    --bg-webfetch-tool: #1a2332;
+    --bg-webfetch-header: #243347;
+    --color-webfetch-icon: #64b5f6;
+    --border-webfetch: #1976d2;
+    --color-webfetch-url: #64b5f6;
+    --bg-webfetch-prompt: #1a1a1a;
+    
+    /* WebSearch tool colors - dark */
+    --bg-websearch-tool: #2e1a33;
+    --bg-websearch-header: #3d2444;
+    --color-websearch-icon: #ba68c8;
+    --border-websearch: #7b1fa2;
   }
 }
