@@ -49,12 +49,9 @@ class GitOperationsTest < ActiveSupport::TestCase
   end
 
   test "git operations do not use credentials for non-GitHub URLs" do
-    task = tasks(:without_runs)
-    user = task.user
-    user.update!(github_token: "test_token_123")
-
-    project = task.project
-    project.update!(repository_url: "https://gitlab.com/test/repo.git")
+    task = tasks(:no_github_access)
+    task.user.update!(github_token: "test_token_123")
+    task.project.update!(repository_url: "https://gitlab.com/test/repo.git")
 
     run = task.runs.create!(prompt: "test")
 

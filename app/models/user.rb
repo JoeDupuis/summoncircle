@@ -8,4 +8,10 @@ class User < ApplicationRecord
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
   enum :role, { standard: 0, admin: 1 }, allow_nil: true
+
+  def env_strings
+    vars = []
+    vars << "GITHUB_TOKEN=#{github_token}" if github_token.present? && allow_github_token_access
+    vars
+  end
 end
