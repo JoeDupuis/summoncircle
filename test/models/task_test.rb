@@ -30,27 +30,27 @@ class TaskTest < ActiveSupport::TestCase
     user = users(:one)
     agent = agents(:one)
     user.update!(auto_task_naming_agent: agent)
-    
+
     task = Task.create!(
       project: projects(:one),
       agent: agents(:two),
       user: user,
-      runs_attributes: [{ prompt: "Create a login system" }]
+      runs_attributes: [ { prompt: "Create a login system" } ]
     )
-    
-    assert_enqueued_with(job: AutoTaskNamingJob, args: [task, "Create a login system"])
+
+    assert_enqueued_with(job: AutoTaskNamingJob, args: [ task, "Create a login system" ])
   end
 
   test "does not enqueue AutoTaskNamingJob when user has no auto_task_naming_agent" do
     user = users(:one)
     user.update!(auto_task_naming_agent: nil)
-    
+
     assert_no_enqueued_jobs only: AutoTaskNamingJob do
       Task.create!(
         project: projects(:one),
         agent: agents(:two),
         user: user,
-        runs_attributes: [{ prompt: "Create a login system" }]
+        runs_attributes: [ { prompt: "Create a login system" } ]
       )
     end
   end
@@ -59,14 +59,14 @@ class TaskTest < ActiveSupport::TestCase
     user = users(:one)
     agent = agents(:one)
     user.update!(auto_task_naming_agent: agent)
-    
+
     assert_no_enqueued_jobs only: AutoTaskNamingJob do
       Task.create!(
         project: projects(:one),
         agent: agents(:two),
         user: user,
         description: "Custom task name",
-        runs_attributes: [{ prompt: "Create a login system" }]
+        runs_attributes: [ { prompt: "Create a login system" } ]
       )
     end
   end
