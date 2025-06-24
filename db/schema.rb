@@ -73,6 +73,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_24_023931) do
     t.datetime "completed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "container_id"
     t.index ["task_id"], name: "index_runs_on_task_id"
   end
 
