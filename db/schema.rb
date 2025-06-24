@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_22_234155) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_24_002241) do
   create_table "agent_specific_settings", force: :cascade do |t|
     t.integer "agent_id", null: false
     t.string "type", null: false
@@ -77,13 +77,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_22_234155) do
   end
 
   create_table "secrets", force: :cascade do |t|
-    t.integer "project_id", null: false
     t.string "key", null: false
     t.text "value"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["project_id", "key"], name: "index_secrets_on_project_id_and_key", unique: true
-    t.index ["project_id"], name: "index_secrets_on_project_id"
+    t.string "secretable_type", null: false
+    t.integer "secretable_id", null: false
+    t.index ["secretable_type", "secretable_id", "key"], name: "index_secrets_on_secretable_and_key", unique: true
+    t.index ["secretable_type", "secretable_id"], name: "index_secrets_on_secretable_type_and_secretable_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -180,7 +181,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_22_234155) do
   add_foreign_key "agent_specific_settings", "agents"
   add_foreign_key "repo_states", "steps"
   add_foreign_key "runs", "tasks"
-  add_foreign_key "secrets", "projects"
   add_foreign_key "sessions", "users"
   add_foreign_key "steps", "runs"
   add_foreign_key "tasks", "agents"

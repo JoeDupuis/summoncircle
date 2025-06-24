@@ -116,15 +116,7 @@ class DockerContainerBuilder
 
   def create_and_start_container(image_name, container_name)
     binds = @task.volume_mounts.includes(:volume).map(&:bind_string)
-    env_vars = []
-
-    if @task.project.secrets.any?
-      env_vars = @task.project.secrets.map { |s| "#{s.key}=#{s.value}" }
-    end
-
-    if @task.user.github_token.present? && @task.user.allow_github_token_access
-      env_vars << "GITHUB_TOKEN=#{@task.user.github_token}"
-    end
+    env_vars = @task.docker_env_strings
 
     container_port = @task.project.dev_container_port || 3000
 

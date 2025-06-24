@@ -42,6 +42,10 @@ class Task < ApplicationRecord
     }
   end
 
+  def docker_env_strings(additional_vars = [])
+    agent.env_strings + project.env_strings + user.env_strings + additional_vars
+  end
+
   def latest_repo_state
     RepoState
       .joins(step: :run)

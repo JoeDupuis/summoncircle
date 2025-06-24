@@ -58,10 +58,13 @@ class GitOperationsTest < ActiveSupport::TestCase
 
     run = task.runs.create!(prompt: "test")
 
-    # Expect two Docker commands - neither should have GitHub credentials
+    # Expect two Docker commands - GITHUB_TOKEN is included but GIT_ASKPASS is not
+    # (Git credentials setup is skipped for non-GitHub URLs)
     Docker::Container.expects(:create).twice.with do |config|
       env = config["Env"] || []
-      refute_includes env, "GITHUB_TOKEN=test_token_123"
+      # User's GITHUB_TOKEN is always included in env
+      assert_includes env, "GITHUB_TOKEN=test_token_123"
+      # But Git credential helper is not set up for non-GitHub URLs
       refute_includes env, "GIT_ASKPASS=/tmp/git-askpass.sh"
       true
     end.returns(mock_container).then.returns(mock_container_with_output("main"))

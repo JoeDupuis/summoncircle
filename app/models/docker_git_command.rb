@@ -50,7 +50,7 @@ class DockerGitCommand
       "Cmd" => [ "-c", command ],
       "WorkingDir" => git_working_dir,
       "User" => task.agent.user_id.to_s,
-      "Env" => task.agent.env_strings + task.project.secrets.map { |s| "#{s.key}=#{s.value}" },
+      "Env" => task.docker_env_strings,
       "HostConfig" => {
         "Binds" => task.volume_mounts.includes(:volume).map(&:bind_string)
       }
@@ -76,8 +76,7 @@ class DockerGitCommand
     return container_config unless platform_config
 
     container_config["Env"] ||= []
-    container_config["Env"] << "#{platform_config[:env_var]}=#{platform_config[:token]}"
-    container_config["Env"] << "GIT_ASKPASS=/tmp/git-askpass.sh"
+    container_config["Env"] += [ "#{platform_config[:env_var]}=#{platform_config[:token]}", "GIT_ASKPASS=/tmp/git-askpass.sh" ]
 
     container_config["Cmd"] = wrap_with_credential_setup(container_config["Cmd"], platform_config)
     container_config

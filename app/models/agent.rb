@@ -4,6 +4,7 @@ class Agent < ApplicationRecord
   has_many :tasks, dependent: :destroy
   has_many :volumes, dependent: :destroy
   has_many :agent_specific_settings, dependent: :destroy
+  has_many :secrets, as: :secretable, dependent: :destroy
 
   accepts_nested_attributes_for :agent_specific_settings, allow_destroy: true, reject_if: :reject_new_destroyed_settings
 
@@ -53,9 +54,10 @@ class Agent < ApplicationRecord
   end
 
   def env_strings
-    return [] if env_variables.blank?
-
-    env_variables.map { |key, value| "#{key}=#{value}" }
+    vars = []
+    vars += env_variables.map { |key, value| "#{key}=#{value}" } if env_variables.present?
+    vars += secrets.map { |secret| "#{secret.key}=#{secret.value}" }
+    vars
   end
 
   def start_arguments=(value)
