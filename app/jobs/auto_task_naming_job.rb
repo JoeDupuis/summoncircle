@@ -35,11 +35,11 @@ class AutoTaskNamingJob < ApplicationJob
     # Prepare Docker command
     command_template = agent.start_arguments
     command = command_template.map { |arg| arg.gsub("{PROMPT}", prompt) }
-    
+
     # Get environment variables (agent + task user)
     user = task.user
     env_vars = agent.env_strings + user.env_strings
-    
+
     # Get volume binds from agent
     binds = agent.volumes.map do |volume|
       if volume.external?
@@ -50,7 +50,7 @@ class AutoTaskNamingJob < ApplicationJob
         "#{volume_name}:#{volume.path}"
       end
     end
-    
+
     # Create and run container
     container = Docker::Container.create(
       "Image" => agent.docker_image,
@@ -64,43 +64,42 @@ class AutoTaskNamingJob < ApplicationJob
       "AttachStdout" => true,
       "AttachStderr" => true
     )
-    
+
     container.start
-    
+
     # Setup container files (git config, instructions, ssh key)
     setup_container_files(container, agent, user)
-    
+
     # Attach and collect output
     output = ""
     container.attach { |stream, chunk| output += chunk if stream == :stdout }
     container.wait
-    
+
     # Process output to extract the task name
     extract_task_name_from_output(output, agent)
   ensure
     container&.delete(force: true)
   end
-  
+
   def setup_container_files(container, agent, user)
-    
     if user.git_config.present? && agent.home_path.present?
       archive_file_to_container(container, user.git_config, File.join(agent.home_path, ".gitconfig"))
     end
-    
+
     if user.instructions.present? && agent.instructions_mount_path.present?
       archive_file_to_container(container, user.instructions, agent.instructions_mount_path)
     end
-    
+
     if user.ssh_key.present? && agent.ssh_mount_path.present?
       archive_file_to_container(container, user.ssh_key, agent.ssh_mount_path, 0o600)
     end
   end
-  
+
   def archive_file_to_container(container, content, destination_path, permissions = 0o644)
     target_dir = File.dirname(destination_path)
-    
+
     container.exec([ "mkdir", "-p", target_dir ])
-    
+
     encoded_content = Base64.strict_encode64(content)
     container.exec([ "sh", "-c", "echo '#{encoded_content}' | base64 -d > #{destination_path}" ])
     container.exec([ "chmod", permissions.to_s(8), destination_path ])
