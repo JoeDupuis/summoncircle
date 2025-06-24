@@ -3,6 +3,7 @@ require "test_helper"
 class RunTest < ActiveSupport::TestCase
   setup do
     Task.any_instance.stubs(:branches).returns([])
+    Rails.application.config.x.mcp.auth_token = "test-auth-token"
   end
   # Docker prefixes logs with 8 bytes of metadata
   DOCKER_LOG_HEADER = "\x01\x00\x00\x00\x00\x00\x00\x00"
@@ -362,9 +363,9 @@ class RunTest < ActiveSupport::TestCase
 
     # Mock MCP container
     expect_mcp_container(
-      cmd: [ 
+      cmd: [
         "mcp", "add", "summoncircle", "http://localhost:3000/mcp/sse", "-s", "user", "-t", "sse",
-        "-H", "Authorization: Bearer ab6968417d3b15e545b640412154679b9f22dff244b2621f6599bc04af0891d4",
+        "-H", "Authorization: Bearer test-auth-token",
         "-H", "X-Task-Id: #{task.id}"
       ],
       output: "MCP configured"
@@ -388,9 +389,9 @@ class RunTest < ActiveSupport::TestCase
 
     # Mock MCP container
     expect_mcp_container(
-      cmd: [ 
+      cmd: [
         "mcp", "add", "summoncircle", "http://localhost:3000/mcp/sse", "-s", "user", "-t", "sse",
-        "-H", "Authorization: Bearer ab6968417d3b15e545b640412154679b9f22dff244b2621f6599bc04af0891d4",
+        "-H", "Authorization: Bearer test-auth-token",
         "-H", "X-Task-Id: #{task.id}"
       ],
       output: "MCP configured"
@@ -414,9 +415,9 @@ class RunTest < ActiveSupport::TestCase
 
     # Mock MCP container
     expect_mcp_container(
-      cmd: [ 
+      cmd: [
         "mcp", "add", "summoncircle", "http://localhost:3000/mcp/sse", "-s", "user", "-t", "sse",
-        "-H", "Authorization: Bearer ab6968417d3b15e545b640412154679b9f22dff244b2621f6599bc04af0891d4",
+        "-H", "Authorization: Bearer test-auth-token",
         "-H", "X-Task-Id: #{task.id}"
       ],
       output: "MCP configured"
@@ -472,9 +473,9 @@ class RunTest < ActiveSupport::TestCase
 
     # Mock MCP container with failure
     expect_mcp_container(
-      cmd: [ 
+      cmd: [
         "mcp", "add", "summoncircle", "http://localhost:3000/mcp/sse", "-s", "user", "-t", "sse",
-        "-H", "Authorization: Bearer ab6968417d3b15e545b640412154679b9f22dff244b2621f6599bc04af0891d4",
+        "-H", "Authorization: Bearer test-auth-token",
         "-H", "X-Task-Id: #{task.id}"
       ],
       output: "MCP error: connection refused",
@@ -506,9 +507,9 @@ class RunTest < ActiveSupport::TestCase
     Docker::Container.expects(:create).with(
       has_entries(
         "Image" => "example/image:latest",
-        "Cmd" => [ 
+        "Cmd" => [
           "mcp", "add", "summoncircle", "http://localhost:3000/mcp/sse", "-s", "user", "-t", "sse",
-          "-H", "Authorization: Bearer ab6968417d3b15e545b640412154679b9f22dff244b2621f6599bc04af0891d4",
+          "-H", "Authorization: Bearer test-auth-token",
           "-H", "X-Task-Id: #{task.id}"
         ]
       )
