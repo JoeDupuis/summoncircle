@@ -1,0 +1,54 @@
+.ls-tool {
+  background-color: var(--bg-folder, #f7f3e9);
+  color: var(--text-folder, #333);
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin: 0.5rem 0;
+  border-left: 3px solid var(--border-folder, #d4a574);
+}
+
+@media (prefers-color-scheme: dark) {
+  .ls-tool {
+    background-color: var(--bg-folder-dark, #2a2520);
+    color: var(--text-folder-dark, #e6e6e6);
+    border-left: 3px solid var(--border-folder-dark, #8b6f47);
+  }
+}
+
+.ls-tool .tool-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--label-folder, #8b6f47);
+}
+
+@media (prefers-color-scheme: dark) {
+  .ls-tool .tool-header {
+    color: var(--label-folder-dark, #d4a574);
+  }
+}
+
+.ls-tool .tool-icon {
+  font-size: 1.1rem;
+}
+
+.ls-tool .tool-path {
+  background-color: var(--bg-content, #fff);
+  padding: 0.5rem;
+  border-radius: 3px;
+  overflow-x: auto;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+  font-size: 0.8125rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .ls-tool .tool-path {
+    background-color: var(--bg-content-dark, #1a1814);
+  }
+}

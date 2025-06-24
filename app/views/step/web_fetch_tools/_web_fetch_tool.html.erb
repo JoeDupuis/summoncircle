@@ -1,0 +1,16 @@
+<div class="webfetch-tool">
+  <div class="tool-header">
+    <span class="tool-icon">🌐</span>
+    <span class="tool-name">Web Fetch</span>
+  </div>
+  <div class="tool-url">
+    <%= web_fetch_tool.url %>
+  </div>
+  <% if web_fetch_tool.prompt.present? %>
+    <div class="tool-prompt">
+      <%= web_fetch_tool.prompt %>
+    </div>
+  <% end %>
+  
+  <%= render "step/tool_calls/tool_result_section", tool_call: web_fetch_tool %>
+</div>

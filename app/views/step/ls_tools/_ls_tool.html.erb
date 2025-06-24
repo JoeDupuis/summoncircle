@@ -1,0 +1,11 @@
+<div class="ls-tool">
+  <div class="tool-header">
+    <span class="tool-icon">📋</span>
+    <span class="tool-name">List Directory</span>
+  </div>
+  <div class="tool-path">
+    <%= ls_tool.path %>
+  </div>
+  
+  <%= render "step/tool_calls/tool_result_section", tool_call: ls_tool %>
+</div>

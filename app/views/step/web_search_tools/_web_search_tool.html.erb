@@ -1,0 +1,11 @@
+<div class="websearch-tool">
+  <div class="tool-header">
+    <span class="tool-icon">🔍</span>
+    <span class="tool-name">Web Search</span>
+  </div>
+  <div class="tool-query">
+    <%= web_search_tool.query %>
+  </div>
+  
+  <%= render "step/tool_calls/tool_result_section", tool_call: web_search_tool %>
+</div>
