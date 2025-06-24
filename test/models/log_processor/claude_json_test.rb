@@ -86,8 +86,8 @@ class LogProcessor::ClaudeJsonTest < ActiveSupport::TestCase
     result = processor.process(logs)
 
     assert_equal 1, result.size
-    assert_equal "Step::ToolCall", result[0][:type]
-    expected_content = "name: WebFetch\ninputs: {\"url\":\"https://example.com\",\"prompt\":\"What is the title?\"}"
+    assert_equal "Step::WebFetchTool", result[0][:type]
+    expected_content = "https://example.com"
     assert_equal expected_content, result[0][:content]
   end
 

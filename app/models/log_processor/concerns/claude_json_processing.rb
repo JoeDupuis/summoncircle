@@ -35,6 +35,12 @@ module LogProcessor::Concerns::ClaudeJsonProcessing
           { raw_response: item_json, type: "Step::GlobTool", content: extract_content(item), tool_use_id: tool_use_id }
         elsif tool_use && tool_use["name"] == "Grep"
           { raw_response: item_json, type: "Step::GrepTool", content: extract_content(item), tool_use_id: tool_use_id }
+        elsif tool_use && tool_use["name"] == "LS"
+          { raw_response: item_json, type: "Step::LsTool", content: extract_content(item), tool_use_id: tool_use_id }
+        elsif tool_use && tool_use["name"] == "WebFetch"
+          { raw_response: item_json, type: "Step::WebFetchTool", content: extract_content(item), tool_use_id: tool_use_id }
+        elsif tool_use && tool_use["name"] == "WebSearch"
+          { raw_response: item_json, type: "Step::WebSearchTool", content: extract_content(item), tool_use_id: tool_use_id }
         else
           { raw_response: item_json, type: "Step::ToolCall", content: extract_content(item), tool_use_id: tool_use_id }
         end
@@ -105,6 +111,12 @@ module LogProcessor::Concerns::ClaudeJsonProcessing
               tool_use["input"]["pattern"] || tool_use["input"].to_json
             elsif tool_use["name"] == "Grep"
               tool_use["input"]["pattern"] || tool_use["input"].to_json
+            elsif tool_use["name"] == "LS"
+              tool_use["input"]["path"] || tool_use["input"].to_json
+            elsif tool_use["name"] == "WebFetch"
+              tool_use["input"]["url"] || tool_use["input"].to_json
+            elsif tool_use["name"] == "WebSearch"
+              tool_use["input"]["query"] || tool_use["input"].to_json
             else
               "name: #{tool_use['name']}\ninputs: #{tool_use['input'].to_json}"
             end
