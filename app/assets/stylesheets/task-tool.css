@@ -1,0 +1,58 @@
+.task-tool {
+  background-color: var(--bg-task-tool);
+  color: var(--text);
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin: 0.5rem 0;
+  border-left: 3px solid var(--border-task);
+}
+
+.task-tool > .tool-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  background-color: var(--bg-task-header);
+  margin: -0.75rem -1rem 0.75rem -1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 4px 4px 0 0;
+}
+
+.task-tool > .tool-header > .tool-icon {
+  font-size: 1.2rem;
+  color: var(--color-task-icon);
+}
+
+.task-tool > .tool-header > .tool-label {
+  font-weight: 600;
+  color: var(--color-task-icon);
+}
+
+.task-tool > .tool-header > .description {
+  margin-left: auto;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.task-tool > .prompt {
+  background-color: var(--bg-task-prompt);
+  padding: 0.75rem;
+  border-radius: 3px;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--border);
+}
+
+.task-tool > .prompt > .prompt-label {
+  display: block;
+  font-weight: 600;
+  color: var(--color-task-prompt-label);
+  margin-bottom: 0.25rem;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

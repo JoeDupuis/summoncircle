@@ -41,6 +41,8 @@ module LogProcessor::Concerns::ClaudeJsonProcessing
           { raw_response: item_json, type: "Step::WebFetchTool", content: extract_content(item), tool_use_id: tool_use_id }
         elsif tool_use && tool_use["name"] == "WebSearch"
           { raw_response: item_json, type: "Step::WebSearchTool", content: extract_content(item), tool_use_id: tool_use_id }
+        elsif tool_use && tool_use["name"] == "Task"
+          { raw_response: item_json, type: "Step::TaskTool", content: extract_content(item), tool_use_id: tool_use_id }
         else
           { raw_response: item_json, type: "Step::ToolCall", content: extract_content(item), tool_use_id: tool_use_id }
         end
@@ -117,6 +119,8 @@ module LogProcessor::Concerns::ClaudeJsonProcessing
               tool_use["input"]["url"] || tool_use["input"].to_json
             elsif tool_use["name"] == "WebSearch"
               tool_use["input"]["query"] || tool_use["input"].to_json
+            elsif tool_use["name"] == "Task"
+              tool_use["input"]["description"] || tool_use["input"].to_json
             else
               "name: #{tool_use['name']}\ninputs: #{tool_use['input'].to_json}"
             end
