@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_24_002241) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_24_023931) do
   create_table "agent_specific_settings", force: :cascade do |t|
     t.integer "agent_id", null: false
     t.string "type", null: false
@@ -110,6 +110,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_24_002241) do
     t.integer "output_tokens"
     t.integer "cache_creation_tokens"
     t.integer "cache_read_tokens"
+    t.string "parent_tool_use_id"
     t.index ["run_id", "tool_use_id"], name: "index_steps_on_run_id_and_tool_use_id"
     t.index ["run_id"], name: "index_steps_on_run_id"
     t.index ["tool_call_id"], name: "index_steps_on_tool_call_id"

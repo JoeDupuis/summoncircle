@@ -120,3 +120,49 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+.task-tool .task-execution {
+  margin-top: 1rem;
+  background-color: var(--surface-secondary);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.task-tool .task-execution > .execution-header {
+  background-color: var(--bg-task-header);
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.task-tool .task-execution > .execution-header > .execution-icon {
+  color: var(--color-task-icon);
+  font-size: 1rem;
+}
+
+.task-tool .task-execution > .execution-header > .execution-label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--color-task-icon);
+}
+
+.task-tool .task-execution > .execution-steps {
+  padding: 0.5rem;
+  background-color: var(--bg-code);
+}
+
+.task-tool .task-execution .execution-steps > * {
+  margin: 0.5rem 0;
+  font-size: 0.8125rem;
+}
+
+.task-tool .task-execution .execution-steps > *:first-child {
+  margin-top: 0;
+}
+
+.task-tool .task-execution .execution-steps > *:last-child {
+  margin-bottom: 0;
+}

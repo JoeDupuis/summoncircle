@@ -1,3 +1,18 @@
+<% child_steps = task_tool.child_steps %>
+<% if child_steps.any? %>
+  <div class="task-execution">
+    <div class="execution-header">
+      <span class="execution-icon">⚙️</span>
+      <span class="execution-label">Sub-Agent Execution</span>
+    </div>
+    <div class="execution-steps">
+      <% child_steps.each do |child_step| %>
+        <%= render child_step %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
 <% if task_tool.tool_result %>
   <div class="task-result">
     <div class="result-header">
@@ -24,7 +39,7 @@
       <% end %>
     </div>
   </div>
-<% else %>
+<% elsif child_steps.empty? %>
   <div class="task-result -pending">
     <div class="spinner"></div>
     <span>Sub-agent is working...</span>

@@ -3,57 +3,65 @@ module LogProcessor::Concerns::ClaudeJsonProcessing
 
   private
 
+  def build_step_data(item_json, type, content, tool_use_id = nil, parent_tool_use_id = nil)
+    data = { raw_response: item_json, type: type, content: content }
+    data[:tool_use_id] = tool_use_id if tool_use_id
+    data[:parent_tool_use_id] = parent_tool_use_id if parent_tool_use_id
+    data
+  end
+
   def process_item(item)
     item_json = item.to_json
+    parent_tool_use_id = item["parent_tool_use_id"]
 
     case item["type"]
     when "system"
       if item["subtype"] == "init"
-        { raw_response: item_json, type: "Step::Init", content: extract_content(item) }
+        build_step_data(item_json, "Step::Init", extract_content(item), nil, parent_tool_use_id)
       else
-        { raw_response: item_json, type: "Step::System", content: extract_content(item) }
+        build_step_data(item_json, "Step::System", extract_content(item), nil, parent_tool_use_id)
       end
     when "assistant"
       if has_thinking?(item)
-        { raw_response: item_json, type: "Step::Thinking", content: extract_content(item) }
+        build_step_data(item_json, "Step::Thinking", extract_content(item), nil, parent_tool_use_id)
       elsif has_tool_use?(item)
         tool_use_id = extract_tool_use_id(item)
         tool_use = item["message"]["content"].find { |c| c["type"] == "tool_use" }
         if tool_use && tool_use["name"] == "Bash"
-          { raw_response: item_json, type: "Step::BashTool", content: extract_content(item), tool_use_id: tool_use_id }
+          build_step_data(item_json, "Step::BashTool", extract_content(item), tool_use_id, parent_tool_use_id)
         elsif tool_use && tool_use["name"] == "TodoWrite"
-          { raw_response: item_json, type: "Step::TodoWrite", content: extract_content(item), tool_use_id: tool_use_id }
+          build_step_data(item_json, "Step::TodoWrite", extract_content(item), tool_use_id, parent_tool_use_id)
         elsif tool_use && tool_use["name"] == "Read"
-          { raw_response: item_json, type: "Step::ReadTool", content: extract_content(item), tool_use_id: tool_use_id }
+          build_step_data(item_json, "Step::ReadTool", extract_content(item), tool_use_id, parent_tool_use_id)
         elsif tool_use && tool_use["name"] == "Edit"
-          { raw_response: item_json, type: "Step::EditTool", content: extract_content(item), tool_use_id: tool_use_id }
+          build_step_data(item_json, "Step::EditTool", extract_content(item), tool_use_id, parent_tool_use_id)
         elsif tool_use && tool_use["name"] == "MultiEdit"
-          { raw_response: item_json, type: "Step::MultiEditTool", content: extract_content(item), tool_use_id: tool_use_id }
+          build_step_data(item_json, "Step::MultiEditTool", extract_content(item), tool_use_id, parent_tool_use_id)
         elsif tool_use && tool_use["name"] == "Write"
-          { raw_response: item_json, type: "Step::WriteTool", content: extract_content(item), tool_use_id: tool_use_id }
+          build_step_data(item_json, "Step::WriteTool", extract_content(item), tool_use_id, parent_tool_use_id)
         elsif tool_use && tool_use["name"] == "Glob"
-          { raw_response: item_json, type: "Step::GlobTool", content: extract_content(item), tool_use_id: tool_use_id }
+          build_step_data(item_json, "Step::GlobTool", extract_content(item), tool_use_id, parent_tool_use_id)
         elsif tool_use && tool_use["name"] == "Grep"
-          { raw_response: item_json, type: "Step::GrepTool", content: extract_content(item), tool_use_id: tool_use_id }
+          build_step_data(item_json, "Step::GrepTool", extract_content(item), tool_use_id, parent_tool_use_id)
         elsif tool_use && tool_use["name"] == "LS"
-          { raw_response: item_json, type: "Step::LsTool", content: extract_content(item), tool_use_id: tool_use_id }
+          build_step_data(item_json, "Step::LsTool", extract_content(item), tool_use_id, parent_tool_use_id)
         elsif tool_use && tool_use["name"] == "WebFetch"
-          { raw_response: item_json, type: "Step::WebFetchTool", content: extract_content(item), tool_use_id: tool_use_id }
+          build_step_data(item_json, "Step::WebFetchTool", extract_content(item), tool_use_id, parent_tool_use_id)
         elsif tool_use && tool_use["name"] == "WebSearch"
-          { raw_response: item_json, type: "Step::WebSearchTool", content: extract_content(item), tool_use_id: tool_use_id }
+          build_step_data(item_json, "Step::WebSearchTool", extract_content(item), tool_use_id, parent_tool_use_id)
         elsif tool_use && tool_use["name"] == "Task"
-          { raw_response: item_json, type: "Step::TaskTool", content: extract_content(item), tool_use_id: tool_use_id }
+          build_step_data(item_json, "Step::TaskTool", extract_content(item), tool_use_id, parent_tool_use_id)
         else
-          { raw_response: item_json, type: "Step::ToolCall", content: extract_content(item), tool_use_id: tool_use_id }
+          build_step_data(item_json, "Step::ToolCall", extract_content(item), tool_use_id, parent_tool_use_id)
         end
       else
-        { raw_response: item_json, type: "Step::Text", content: extract_content(item) }
+        build_step_data(item_json, "Step::Text", extract_content(item), nil, parent_tool_use_id)
       end
     when "user"
       tool_use_id = extract_tool_result_id(item)
-      { raw_response: item_json, type: "Step::ToolResult", content: extract_content(item), tool_use_id: tool_use_id }
+      build_step_data(item_json, "Step::ToolResult", extract_content(item), tool_use_id, parent_tool_use_id)
     when "result"
-      step_data = { raw_response: item_json, type: "Step::Result", content: item["result"] || extract_content(item) }
+      step_data = build_step_data(item_json, "Step::Result", item["result"] || extract_content(item), nil, parent_tool_use_id)
       if item["total_cost_usd"]
         step_data[:cost_usd] = item["total_cost_usd"]
       end
@@ -65,7 +73,7 @@ module LogProcessor::Concerns::ClaudeJsonProcessing
       end
       step_data
     else
-      { raw_response: item_json, type: "Step::Text", content: extract_content(item) }
+      build_step_data(item_json, "Step::Text", extract_content(item), nil, parent_tool_use_id)
     end
   end
 

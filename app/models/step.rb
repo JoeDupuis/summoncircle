@@ -1,6 +1,7 @@
 class Step < ApplicationRecord
   belongs_to :run
   has_many :repo_states, dependent: :destroy
+  has_many :child_steps, -> { order(:id) }, class_name: "Step", primary_key: :tool_use_id, foreign_key: :parent_tool_use_id
 
   validates :raw_response, presence: true
 
