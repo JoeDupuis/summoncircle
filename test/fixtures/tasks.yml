@@ -122,3 +122,11 @@ with_mcp_endpoint_has_runs:
   description: "Task with MCP endpoint has runs"
   status: active
   started_at: 2025-05-24 19:14:19
+
+no_github_access:
+  project: one
+  agent: one
+  user: no_github_access
+  description: "Task with user that has GitHub access disabled"
+  status: active
+  started_at: 2025-05-24 19:14:19
