@@ -49,22 +49,28 @@ class GitOperationsTest < ActiveSupport::TestCase
   end
 
   test "git operations do not use credentials for non-GitHub URLs" do
-    task = tasks(:without_runs)
-    user = task.user
+    # Create task with user that has github token access disabled
+    user = users(:no_github_access)
     user.update!(github_token: "test_token_123")
-
-    project = task.project
+    
+    project = projects(:one)
     project.update!(repository_url: "https://gitlab.com/test/repo.git")
+    
+    task = Task.create!(
+      user: user,
+      project: project,
+      agent: agents(:one),
+      description: "Test task"
+    )
 
     run = task.runs.create!(prompt: "test")
 
-    # Expect two Docker commands - GITHUB_TOKEN is included but GIT_ASKPASS is not
-    # (Git credentials setup is skipped for non-GitHub URLs)
+    # Expect two Docker commands - neither should have GitHub credentials
     Docker::Container.expects(:create).twice.with do |config|
       env = config["Env"] || []
-      # User's GITHUB_TOKEN is always included in env
-      assert_includes env, "GITHUB_TOKEN=test_token_123"
-      # But Git credential helper is not set up for non-GitHub URLs
+      # GITHUB_TOKEN should not be included when allow_github_token_access is false
+      refute_includes env, "GITHUB_TOKEN=test_token_123"
+      # Git credential helper is not set up for non-GitHub URLs
       refute_includes env, "GIT_ASKPASS=/tmp/git-askpass.sh"
       true
     end.returns(mock_container).then.returns(mock_container_with_output("main"))
