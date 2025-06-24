@@ -1,5 +1,14 @@
 # frozen_string_literal: true
 
+auth_token = ENV["MCP_AUTH_TOKEN"] ||
+             Rails.application.credentials.dig(:fast_mcp, :auth_token)
+
+if auth_token.blank?
+  raise "MCP auth token not found. Set MCP_AUTH_TOKEN environment variable or configure fast_mcp.auth_token in Rails credentials."
+end
+
+Rails.application.config.x.mcp.auth_token = auth_token
+
 # FastMcp - Model Context Protocol for Rails
 # This initializer sets up the MCP middleware in your Rails application.
 #
@@ -25,9 +34,9 @@ FastMcp.mount_in_rails(
   # allowed_origins: ['localhost', '127.0.0.1', '[::1]', 'example.com', /.*\.example\.com/],
   # localhost_only: true, # Set to false to allow connections from other hosts
   # whitelist specific ips to if you want to run on localhost and allow connections from other IPs
-  allowed_ips: [ "127.0.0.1", "::1", "172.18.0.1" ],
-  authenticate: Rails.application.credentials.dig(:fast_mcp, :auth_token).present?,
-  auth_token: Rails.application.credentials.dig(:fast_mcp, :auth_token) || "dummy-token-for-precompile"
+  allowed_ips: [ "127.0.0.1", "::1", "172.18.0.1", "172.17.0.1" ],
+  authenticate: Rails.application.config.x.mcp.auth_token.present?,
+  auth_token: Rails.application.config.x.mcp.auth_token
 ) do |server|
   Rails.application.config.after_initialize do
     # FastMcp will automatically discover and register:

@@ -146,9 +146,15 @@ class Run < ApplicationRecord
     agent = task.agent
     full_url = agent.mcp_sse_endpoint.end_with?("/mcp/sse") ? agent.mcp_sse_endpoint : "#{agent.mcp_sse_endpoint.chomp('/')}/mcp/sse"
 
+    auth_token = Rails.application.config.x.mcp.auth_token
+
     mcp_container = Docker::Container.create(
       "Image" => agent.docker_image,
-      "Cmd" => [ "mcp", "add", "summoncircle", full_url, "-s", "user", "-t", "sse" ],
+      "Cmd" => [
+        "mcp", "add", "summoncircle", full_url, "-s", "user", "-t", "sse",
+        "-H", "Authorization: Bearer #{auth_token}",
+        "-H", "X-Task-Id: #{task.id}"
+      ],
       "Env" => task.docker_env_strings,
       "User" => agent.user_id.to_s,
       "WorkingDir" => task.agent.workplace_path,
