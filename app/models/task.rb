@@ -1,6 +1,7 @@
 class Task < ApplicationRecord
   include Discard::Model
   include GitOperations
+  include ActionView::RecordIdentifier
 
   belongs_to :project
   belongs_to :agent
@@ -10,6 +11,7 @@ class Task < ApplicationRecord
 
   after_create :create_volume_mounts
   before_validation :set_default_description, on: :create
+  after_update_commit :broadcast_description_update, if: :saved_change_to_description?
 
   validates :description, presence: true
 
@@ -66,5 +68,16 @@ class Task < ApplicationRecord
 
   def set_default_description
     self.description ||= "#{agent.name} in #{project.name}" if agent && project
+  end
+
+  def broadcast_description_update
+    Rails.logger.info "Broadcasting description update for task #{id} to target: task_#{id}_description"
+
+    # Try broadcasting to self (the task) as the stream source
+    broadcast_replace_to(self, target: "task_#{id}_description", partial: "tasks/description", locals: { task: self })
+
+    Rails.logger.info "Broadcast completed"
+  rescue => e
+    Rails.logger.error "Broadcast failed: #{e.message}"
   end
 end
