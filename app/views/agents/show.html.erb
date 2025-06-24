@@ -49,6 +49,12 @@
   </ul>
 <% end %>
 
+<% if @agent.secrets.any? %>
+<h2>Agent Secrets</h2>
+<p>Configured secret keys: <strong><%= @agent.secrets.pluck(:key).join(', ') %></strong></p>
+<p><small>Values are encrypted and hidden for security.</small></p>
+<% end %>
+
 <h2>User Instructions</h2>
 <% if Current.user.instructions.present? && @agent.instructions_mount_path.present? %>
   <p>

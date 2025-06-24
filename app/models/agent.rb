@@ -60,6 +60,26 @@ class Agent < ApplicationRecord
     vars
   end
 
+  def update_secrets(secrets_hash)
+    return unless secrets_hash.is_a?(Hash)
+
+    secrets_hash.each do |key, value|
+      next if key.blank? || value.blank?
+
+      secret = secrets.find_or_initialize_by(key: key)
+      secret.value = value
+      secret.save!
+    end
+  end
+
+  def secrets_hash
+    secrets.pluck(:key, :value).to_h
+  end
+
+  def secret_values
+    secrets.pluck(:value)
+  end
+
   def start_arguments=(value)
     parsed = value.is_a?(String) && value.present? ? JSON.parse(value) : value
     super(parsed)
