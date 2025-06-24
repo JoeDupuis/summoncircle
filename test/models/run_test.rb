@@ -577,6 +577,7 @@ class RunTest < ActiveSupport::TestCase
 
   def mock_container_with_output(output)
     mock_container = mock("container")
+    mock_container.expects(:id).returns("test-container-id-123")
     mock_container.expects(:start)
     mock_container.expects(:wait).returns({ "StatusCode" => 0 })
     mock_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + output)
