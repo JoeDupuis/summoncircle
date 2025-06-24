@@ -116,15 +116,13 @@ class DockerContainerBuilder
 
   def create_and_start_container(image_name, container_name)
     binds = @task.volume_mounts.includes(:volume).map(&:bind_string)
-    env_vars = @task.docker_env_strings
-
     container_port = @task.project.dev_container_port || 3000
 
     container_config = {
       "name" => container_name,
       "Image" => image_name,
       "WorkingDir" => @task.agent.workplace_path,
-      "Env" => env_vars,
+      "Env" => @task.docker_env_strings,
       "ExposedPorts" => {
         "#{container_port}/tcp" => {}
       },
