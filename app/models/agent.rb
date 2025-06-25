@@ -5,9 +5,11 @@ class Agent < ApplicationRecord
   has_many :volumes, dependent: :destroy
   has_many :agent_specific_settings, dependent: :destroy
   has_many :secrets, as: :secretable, dependent: :destroy
+  has_many :env_variables, as: :envable, dependent: :destroy, class_name: "EnvVariable"
 
   accepts_nested_attributes_for :agent_specific_settings, allow_destroy: true, reject_if: :reject_new_destroyed_settings
   accepts_nested_attributes_for :secrets, allow_destroy: true, reject_if: :all_blank
+  accepts_nested_attributes_for :env_variables, allow_destroy: true, reject_if: :all_blank
 
   validates :name, presence: true
   validates :docker_image, presence: true
@@ -15,9 +17,8 @@ class Agent < ApplicationRecord
   validates :user_id, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
   before_save :update_agent_specific_setting
-  before_save :process_env_variables_fields
 
-  attr_accessor :volumes_config, :env_variables_json, :agent_specific_setting_type, :env_variables_fields
+  attr_accessor :volumes_config, :env_variables_json, :agent_specific_setting_type
 
   def volumes_config
     return @volumes_config if @volumes_config.present?
@@ -38,9 +39,9 @@ class Agent < ApplicationRecord
 
   def env_variables_json
     return @env_variables_json if @env_variables_json.present?
-    return "" if env_variables.blank?
+    return "" if env_variables.empty?
 
-    env_variables.to_json
+    env_variables.pluck(:key, :value).to_h.to_json
   end
 
   def env_variables_json=(value)
@@ -49,7 +50,10 @@ class Agent < ApplicationRecord
 
     begin
       parsed = JSON.parse(value)
-      self.env_variables = parsed
+      env_variables.destroy_all
+      parsed.each do |key, val|
+        env_variables.build(key: key, value: val)
+      end
     rescue JSON::ParserError
       errors.add(:env_variables_json, "must be valid JSON")
     end
@@ -57,7 +61,7 @@ class Agent < ApplicationRecord
 
   def env_strings
     vars = []
-    vars += env_variables.map { |key, value| "#{key}=#{value}" } if env_variables.present?
+    vars += env_variables.map { |env_var| "#{env_var.key}=#{env_var.value}" }
     vars += secrets.map { |secret| "#{secret.key}=#{secret.value}" }
     vars
   end
@@ -84,22 +88,6 @@ class Agent < ApplicationRecord
 
   def log_processor_class
     "LogProcessor::#{log_processor}".constantize
-  end
-
-  def env_variables_fields=(fields_hash)
-    @env_variables_fields = fields_hash
-  end
-
-  def env_variables_fields
-    return @env_variables_fields if @env_variables_fields.present?
-
-    if env_variables.present?
-      env_variables.map.with_index { |(key, value), index|
-        { "#{index}" => { "key" => key, "value" => value } }
-      }.reduce({}, :merge)
-    else
-      {}
-    end
   end
 
   private
@@ -131,17 +119,5 @@ class Agent < ApplicationRecord
 
   def agent_specific_setting_type_changed?
     @agent_specific_setting_type != agent_specific_settings.first&.type
-  end
-
-  def process_env_variables_fields
-    return unless @env_variables_fields.present?
-
-    new_env_vars = {}
-    @env_variables_fields.each do |_, field|
-      next if field["_destroy"] == "1" || field["key"].blank?
-      new_env_vars[field["key"]] = field["value"]
-    end
-
-    self.env_variables = new_env_vars
   end
 end

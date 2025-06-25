@@ -48,7 +48,6 @@ with_env_vars:
   docker_image: example/image:latest
   workplace_path: "/workspace"
   start_arguments: [ "echo", "{PROMPT}" ]
-  env_variables: { "NODE_ENV": "development", "DEBUG": "true" }
   user_id: 1000
 
 with_mcp_endpoint:

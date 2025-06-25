@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_24_044111) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_25_002158) do
   create_table "agent_specific_settings", force: :cascade do |t|
     t.integer "agent_id", null: false
     t.string "type", null: false
@@ -29,7 +29,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_24_044111) do
     t.datetime "updated_at", null: false
     t.string "log_processor", default: "Text"
     t.string "workplace_path"
-    t.json "env_variables"
     t.datetime "discarded_at"
     t.integer "user_id", default: 1000, null: false
     t.string "instructions_mount_path"
@@ -37,6 +36,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_24_044111) do
     t.string "home_path"
     t.string "mcp_sse_endpoint"
     t.index ["discarded_at"], name: "index_agents_on_discarded_at"
+  end
+
+  create_table "env_variables", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "value"
+    t.string "envable_type", null: false
+    t.integer "envable_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["envable_type", "envable_id", "key"], name: "index_env_vars_on_envable_and_key", unique: true
+    t.index ["envable_type", "envable_id"], name: "index_env_variables_on_envable"
   end
 
   create_table "projects", force: :cascade do |t|

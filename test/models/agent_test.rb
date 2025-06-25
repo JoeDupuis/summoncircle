@@ -37,22 +37,26 @@ class AgentTest < ActiveSupport::TestCase
     assert_raises(NameError) { agent.log_processor_class }
   end
 
-  test "env_variables can store JSON data" do
+  test "env_variables can store data through association" do
     agent = Agent.new(name: "Name", docker_image: "img", workplace_path: "/workspace")
-    env_vars = { "NODE_ENV" => "development", "DEBUG" => "true" }
-    agent.env_variables = env_vars
+    agent.env_variables.build(key: "NODE_ENV", value: "development")
+    agent.env_variables.build(key: "DEBUG", value: "true")
     agent.save!
 
     agent.reload
-    assert_equal env_vars, agent.env_variables
+    assert_equal 2, agent.env_variables.count
+    assert_equal "development", agent.env_variables.find_by(key: "NODE_ENV").value
+    assert_equal "true", agent.env_variables.find_by(key: "DEBUG").value
   end
 
   test "env_variables_json returns JSON string" do
-    agent = Agent.new(name: "Name", docker_image: "img")
-    env_vars = { "NODE_ENV" => "development", "DEBUG" => "true" }
-    agent.env_variables = env_vars
+    agent = Agent.new(name: "Name", docker_image: "img", workplace_path: "/workspace")
+    agent.env_variables.build(key: "NODE_ENV", value: "development")
+    agent.env_variables.build(key: "DEBUG", value: "true")
+    agent.save!
 
-    assert_equal env_vars.to_json, agent.env_variables_json
+    expected = { "NODE_ENV" => "development", "DEBUG" => "true" }
+    assert_equal expected.to_json, agent.env_variables_json
   end
 
   test "env_variables_json returns empty string when nil" do
@@ -61,12 +65,14 @@ class AgentTest < ActiveSupport::TestCase
   end
 
   test "env_variables_json= parses JSON and sets env_variables" do
-    agent = Agent.new(name: "Name", docker_image: "img")
+    agent = Agent.new(name: "Name", docker_image: "img", workplace_path: "/workspace")
     json_string = '{"NODE_ENV": "development", "DEBUG": "true"}'
     agent.env_variables_json = json_string
+    agent.save!
 
-    expected = { "NODE_ENV" => "development", "DEBUG" => "true" }
-    assert_equal expected, agent.env_variables
+    assert_equal 2, agent.env_variables.count
+    assert_equal "development", agent.env_variables.find_by(key: "NODE_ENV").value
+    assert_equal "true", agent.env_variables.find_by(key: "DEBUG").value
   end
 
   test "env_variables_json= adds error for invalid JSON" do
@@ -77,8 +83,9 @@ class AgentTest < ActiveSupport::TestCase
   end
 
   test "env_strings returns Docker-formatted environment variables" do
-    agent = Agent.new(name: "Name", docker_image: "img")
-    agent.env_variables = { "NODE_ENV" => "development", "DEBUG" => "true" }
+    agent = Agent.new(name: "Name", docker_image: "img", workplace_path: "/workspace")
+    agent.env_variables.build(key: "NODE_ENV", value: "development")
+    agent.env_variables.build(key: "DEBUG", value: "true")
 
     expected = [ "NODE_ENV=development", "DEBUG=true" ]
     assert_equal expected, agent.env_strings
