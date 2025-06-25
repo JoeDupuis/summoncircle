@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   resource :session
   resources :passwords, param: :token
   resource :user_settings, only: %i[show edit update]
+  resource :account_settings, only: %i[edit update]
   resources :agents do
     member do
       get "oauth/login_start", to: "claude_oauth#login_start", as: :oauth_login_start
