@@ -64,7 +64,7 @@ class ProjectTest < ActiveSupport::TestCase
 
   test "nested attributes creates new secrets" do
     project = projects(:one)
-    
+
     project.update(secrets_attributes: [
       { key: "API_KEY", value: "secret_value" },
       { key: "DB_PASSWORD", value: "db_secret" }
@@ -89,7 +89,7 @@ class ProjectTest < ActiveSupport::TestCase
 
   test "nested attributes rejects all blank entries" do
     project = projects(:one)
-    
+
     project.update(secrets_attributes: [
       { key: "", value: "" },  # This will be rejected
       { key: "VALID_KEY", value: "valid_value" }
