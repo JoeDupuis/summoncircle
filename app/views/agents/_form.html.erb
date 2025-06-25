@@ -32,18 +32,12 @@
     <%= form.text_field :workplace_path %>
   </div>
 
-  <div>
-    <%= form.label :volumes_config, "Volumes (JSON format)" %><br>
-    <%= form.text_area :volumes_config, readonly: !agent.new_record? %>
-    <% unless agent.new_record? %>
-      <small class="form-help">Volumes cannot be edited after creation</small>
-    <% else %>
-      <small class="form-help">
-        Format: <code>{"volume_name": "/path"}</code> for managed volumes<br>
-        or <code>{"volume_name": {"path": "/path", "external": true, "external_name": "docker_volume_name"}}</code> for external Docker volumes
-      </small>
-    <% end %>
-  </div>
+  <%= render "shared/volumes_fields", 
+             form: form, 
+             parent: agent, 
+             title: "Volumes",
+             singular_name: "Volume",
+             help_text: "Define volumes to mount in the container. External volumes use existing Docker volumes." %>
 
   <%= render "shared/env_variables_fields", 
              form: form, 

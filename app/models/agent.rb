@@ -10,6 +10,7 @@ class Agent < ApplicationRecord
   accepts_nested_attributes_for :agent_specific_settings, allow_destroy: true, reject_if: :reject_new_destroyed_settings
   accepts_nested_attributes_for :secrets, allow_destroy: true, reject_if: :all_blank
   accepts_nested_attributes_for :env_variables, allow_destroy: true, reject_if: :all_blank
+  accepts_nested_attributes_for :volumes, allow_destroy: true, reject_if: :all_blank
 
   validates :name, presence: true
   validates :docker_image, presence: true
@@ -18,24 +19,7 @@ class Agent < ApplicationRecord
 
   before_save :update_agent_specific_setting
 
-  attr_accessor :volumes_config, :env_variables_json, :agent_specific_setting_type
-
-  def volumes_config
-    return @volumes_config if @volumes_config.present?
-    return "" if volumes.empty?
-
-    volumes.map do |volume|
-      if volume.external?
-        [ volume.name, {
-          "path" => volume.path,
-          "external" => true,
-          "external_name" => volume.external_name
-        } ]
-      else
-        [ volume.name, volume.path ]
-      end
-    end.to_h.to_json
-  end
+  attr_accessor :env_variables_json, :agent_specific_setting_type
 
   def env_variables_json
     return @env_variables_json if @env_variables_json.present?

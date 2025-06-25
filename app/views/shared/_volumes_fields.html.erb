@@ -1,0 +1,68 @@
+<div data-controller="nested-fields">
+  <h3><%= title %></h3>
+  <% if local_assigns[:help_text] %>
+    <small class="form-help" style="display: block; margin-bottom: 10px;"><%= help_text %></small>
+  <% end %>
+  <div data-nested-fields-target="fields">
+    <% parent.volumes.each do |volume| %>
+      <div class="nested-field" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px;">
+        <%= form.fields_for :volumes, volume do |volume_field| %>
+          <%= volume_field.hidden_field :id %>
+          <%= volume_field.hidden_field :_destroy %>
+          
+          <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <%= volume_field.text_field :name, placeholder: "Volume name", style: "flex: 1;" %>
+            <%= volume_field.text_field :path, placeholder: "Container path", style: "flex: 1;" %>
+          </div>
+          
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <label style="display: flex; align-items: center; gap: 5px;">
+              <%= volume_field.check_box :external %>
+              External Docker volume
+            </label>
+            <div data-volume-external-field style="display: <%= volume.external? ? 'block' : 'none' %>; flex: 1;">
+              <%= volume_field.text_field :external_name, placeholder: "External volume name", style: "width: 100%;" %>
+            </div>
+            <button type="button" data-action="click->nested-fields#remove" style="padding: 5px 10px; margin-left: auto;">Remove</button>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+  
+  <button type="button" data-action="click->nested-fields#add" style="margin-top: 10px;">Add <%= singular_name %></button>
+  
+  <template data-nested-fields-target="template">
+    <div class="nested-field" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px;">
+      <%= form.fields_for :volumes, parent.volumes.build, child_index: "__INDEX__" do |volume_field| %>
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+          <%= volume_field.text_field :name, placeholder: "Volume name", style: "flex: 1;" %>
+          <%= volume_field.text_field :path, placeholder: "Container path", style: "flex: 1;" %>
+        </div>
+        
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <label style="display: flex; align-items: center; gap: 5px;">
+            <%= volume_field.check_box :external %>
+            External Docker volume
+          </label>
+          <div data-volume-external-field style="display: none; flex: 1;">
+            <%= volume_field.text_field :external_name, placeholder: "External volume name", style: "width: 100%;" %>
+          </div>
+          <button type="button" data-action="click->nested-fields#remove" style="padding: 5px 10px; margin-left: auto;">Remove</button>
+        </div>
+      <% end %>
+    </div>
+  </template>
+</div>
+
+<script>
+  document.addEventListener('change', function(event) {
+    if (event.target.type === 'checkbox' && event.target.name.includes('[external]')) {
+      const field = event.target.closest('.nested-field');
+      const externalField = field.querySelector('[data-volume-external-field]');
+      if (externalField) {
+        externalField.style.display = event.target.checked ? 'block' : 'none';
+      }
+    }
+  });
+</script>
