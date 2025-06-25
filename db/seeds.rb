@@ -135,5 +135,111 @@ if Rails.env.development?
   end
 end
 
+if Rails.env.production?
+  admin_password = SecureRandom.alphanumeric(16)
+  admin_user = User.find_or_create_by!(email_address: "admin@example.com") do |user|
+    user.password = admin_password
+    user.password_confirmation = admin_password
+    user.role = "admin"
+  end
 
-raise "ah"
+  if admin_user.persisted? && admin_user.created_at > 5.seconds.ago
+    Rails.logger.info "Created admin user with email: admin@example.com and password: #{admin_password}"
+    puts "Created admin user with email: admin@example.com and password: #{admin_password}"
+  end
+
+  mcp_endpoint = ENV.fetch("MCP_SSE_ENDPOINT", "http://host.docker.internal:3000")
+
+  task_agent = Agent.find_or_create_by!(name: "Task namer") do |agent|
+    agent.docker_image = "joedupuis/claude_oauth:latest"
+    agent.workplace_path = "/workspace"
+    agent.home_path = "/home/claude"
+    agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
+    agent.ssh_mount_path = "/home/claude/.ssh/id_rsa"
+    agent.mcp_sse_endpoint = mcp_endpoint
+    agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ]
+    agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ]
+  end
+
+  Volume.find_or_create_by!(agent: task_agent, name: "home") do |volume|
+    volume.path = "/home/claude"
+  end
+
+  Volume.find_or_create_by!(agent: task_agent, name: "claude_projects") do |volume|
+    volume.path = "/home/claude/.claude/projects"
+  end
+
+  sonnet_agent = Agent.find_or_create_by!(name: "Sonnet") do |agent|
+    agent.docker_image = "joedupuis/claude_oauth:latest"
+    agent.workplace_path = "/workspace"
+    agent.home_path = "/home/claude"
+    agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
+    agent.ssh_mount_path = "/home/claude/.ssh/id_rsa"
+    agent.mcp_sse_endpoint = mcp_endpoint
+    agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "stream-json", "--verbose", "-p", "{PROMPT}" ]
+    agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "stream-json", "--verbose", "-p", "{PROMPT}" ]
+    agent.log_processor = "ClaudeStreamingJson"
+  end
+
+  Volume.find_or_create_by!(agent: sonnet_agent, name: "home") do |volume|
+    volume.path = "/home/claude"
+  end
+
+  Volume.find_or_create_by!(agent: sonnet_agent, name: "claude_projects") do |volume|
+    volume.path = "/home/claude/.claude/projects"
+  end
+
+  opus_agent = Agent.find_or_create_by!(name: "Opus") do |agent|
+    agent.docker_image = "joedupuis/claude_oauth:latest"
+    agent.workplace_path = "/workspace"
+    agent.home_path = "/home/claude"
+    agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
+    agent.ssh_mount_path = "/home/claude/.ssh/id_rsa"
+    agent.mcp_sse_endpoint = mcp_endpoint
+    agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "opus", "--output-format", "stream-json", "--verbose", "-p", "{PROMPT}" ]
+    agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "opus", "--output-format", "stream-json", "--verbose", "-p", "{PROMPT}" ]
+    agent.log_processor = "ClaudeStreamingJson"
+  end
+
+  Volume.find_or_create_by!(agent: opus_agent, name: "home") do |volume|
+    volume.path = "/home/claude"
+  end
+
+  Volume.find_or_create_by!(agent: opus_agent, name: "claude_projects") do |volume|
+    volume.path = "/home/claude/.claude/projects"
+  end
+
+  if ENV["ANTHROPIC_API_KEY"].present?
+    # When using API key, create secrets for each agent
+    agents = [task_agent, sonnet_agent, opus_agent]
+    agents.each do |agent|
+      Secret.find_or_create_by!(secretable: agent, key: "ANTHROPIC_API_KEY") do |secret|
+        secret.value = ENV["ANTHROPIC_API_KEY"]
+      end
+    end
+    Rails.logger.info "Set ANTHROPIC_API_KEY as secret for all agents"
+  else
+    # When using OAuth, create claude_config volumes and OAuth settings
+    Volume.find_or_create_by!(agent: task_agent, name: "claude_config") do |volume|
+      volume.path = "/home/claude/.claude"
+      volume.external = true
+      volume.external_name = "claude_config"
+    end
+
+    Volume.find_or_create_by!(agent: sonnet_agent, name: "claude_config") do |volume|
+      volume.path = "/home/claude/.claude"
+      volume.external = true
+      volume.external_name = "claude_config"
+    end
+
+    Volume.find_or_create_by!(agent: opus_agent, name: "claude_config") do |volume|
+      volume.path = "/home/claude/.claude"
+      volume.external = true
+      volume.external_name = "claude_config"
+    end
+
+    ClaudeOauthSetting.find_or_create_by!(agent: task_agent)
+    ClaudeOauthSetting.find_or_create_by!(agent: sonnet_agent)
+    ClaudeOauthSetting.find_or_create_by!(agent: opus_agent)
+  end
+end
