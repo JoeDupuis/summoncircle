@@ -1,0 +1,31 @@
+<div data-controller="nested-fields">
+  <h3><%= title %></h3>
+  <% if local_assigns[:help_text] %>
+    <small class="form-help" style="display: block; margin-bottom: 10px;"><%= help_text %></small>
+  <% end %>
+  <div data-nested-fields-target="fields">
+    <% parent.send(association_name).each do |argument| %>
+      <div class="nested-field" style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <%= form.fields_for association_name, argument do |arg_field| %>
+          <%= arg_field.hidden_field :id %>
+          <%= arg_field.hidden_field :_destroy %>
+          <%= arg_field.hidden_field :position, value: arg_field.index %>
+          <%= arg_field.text_field :value, placeholder: "Argument", style: "flex: 1;" %>
+          <button type="button" data-action="click->nested-fields#remove" style="padding: 5px 10px;">Remove</button>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+  
+  <button type="button" data-action="click->nested-fields#add" style="margin-top: 10px;">Add <%= singular_name %></button>
+  
+  <template data-nested-fields-target="template">
+    <div class="nested-field" style="display: flex; gap: 10px; margin-bottom: 10px;">
+      <%= form.fields_for association_name, parent.send(association_name).build, child_index: "__INDEX__" do |arg_field| %>
+        <%= arg_field.hidden_field :position, value: "__INDEX__" %>
+        <%= arg_field.text_field :value, placeholder: "Argument", style: "flex: 1;" %>
+        <button type="button" data-action="click->nested-fields#remove" style="padding: 5px 10px;">Remove</button>
+      <% end %>
+    </div>
+  </template>
+</div>

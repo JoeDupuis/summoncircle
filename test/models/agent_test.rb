@@ -7,7 +7,7 @@ class AgentTest < ActiveSupport::TestCase
   end
 
   test "requires name, docker image, and workplace_path" do
-    agent = Agent.new(start_arguments: {}, continue_arguments: {})
+    agent = Agent.new
     assert_not agent.valid?
     assert_includes agent.errors[:name], "can't be blank"
     assert_includes agent.errors[:docker_image], "can't be blank"
@@ -117,5 +117,53 @@ class AgentTest < ActiveSupport::TestCase
     agent.user_id = 1.5
     assert_not agent.valid?
     assert_includes agent.errors[:user_id], "must be an integer"
+  end
+
+  test "start_arguments returns array of values" do
+    agent = Agent.create!(name: "Name", docker_image: "img", workplace_path: "/workspace")
+    agent.start_arguments_records.create!(value: "arg1", position: 0)
+    agent.start_arguments_records.create!(value: "arg2", position: 1)
+
+    assert_equal [ "arg1", "arg2" ], agent.start_arguments
+  end
+
+  test "continue_arguments returns array of values" do
+    agent = Agent.create!(name: "Name", docker_image: "img", workplace_path: "/workspace")
+    agent.continue_arguments_records.create!(value: "continue1", position: 0)
+    agent.continue_arguments_records.create!(value: "continue2", position: 1)
+
+    assert_equal [ "continue1", "continue2" ], agent.continue_arguments
+  end
+
+  test "accepts nested attributes for start_arguments_records" do
+    agent = Agent.new(
+      name: "Name",
+      docker_image: "img",
+      workplace_path: "/workspace",
+      start_arguments_records_attributes: {
+        "0" => { value: "arg1", position: 0 },
+        "1" => { value: "arg2", position: 1 }
+      }
+    )
+
+    assert agent.save
+    assert_equal 2, agent.start_arguments_records.count
+    assert_equal [ "arg1", "arg2" ], agent.start_arguments
+  end
+
+  test "accepts nested attributes for continue_arguments_records" do
+    agent = Agent.new(
+      name: "Name",
+      docker_image: "img",
+      workplace_path: "/workspace",
+      continue_arguments_records_attributes: {
+        "0" => { value: "continue1", position: 0 },
+        "1" => { value: "continue2", position: 1 }
+      }
+    )
+
+    assert agent.save
+    assert_equal 2, agent.continue_arguments_records.count
+    assert_equal [ "continue1", "continue2" ], agent.continue_arguments
   end
 end

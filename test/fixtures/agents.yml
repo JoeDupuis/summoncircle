@@ -4,58 +4,47 @@ one:
   name: Example Agent
   docker_image: example/image:latest
   workplace_path: "/workspace"
-  start_arguments: ["echo", "STARTING: {PROMPT}"]
-  continue_arguments: ["{PROMPT}"]
   user_id: 1000
 
 two:
   name: Other Agent
   docker_image: other/image:latest
   workplace_path: "/workspace"
-  start_arguments: ["echo", "{PROMPT}"]
-  continue_arguments: ["echo", "CONTINUE: {PROMPT}"]
   user_id: 1001
 
 with_docker_host:
   name: Test Agent with Docker Host
   docker_image: example/image:latest
   workplace_path: "/workspace"
-  start_arguments: [ "echo", "{PROMPT}" ]
 
 with_text_processor:
   name: Text Agent
   docker_image: example/image:latest
   workplace_path: "/workspace"
   log_processor: "Text"
-  start_arguments: [ "echo", "test" ]
 
 with_claude_json_processor:
   name: JSON Agent
   docker_image: example/image:latest
   workplace_path: "/workspace"
   log_processor: "ClaudeJson"
-  start_arguments: [ "echo", "test" ]
 
 with_claude_streaming_json_processor:
   name: Streaming JSON Agent
   docker_image: example/image:latest
   workplace_path: "/workspace"
   log_processor: "ClaudeStreamingJson"
-  start_arguments: [ "echo", "test" ]
 
 with_env_vars:
   name: Test Agent with Env Vars
   docker_image: example/image:latest
   workplace_path: "/workspace"
-  start_arguments: [ "echo", "{PROMPT}" ]
   user_id: 1000
 
 with_mcp_endpoint:
   name: Test Agent with MCP
   docker_image: example/image:latest
   workplace_path: "/workspace"
-  start_arguments: [ "echo", "{PROMPT}" ]
-  continue_arguments: [ "echo hello" ]
   user_id: 1000
   mcp_sse_endpoint: "http://localhost:3000"
 
@@ -63,8 +52,6 @@ with_mcp_endpoint_full_url:
   name: Test Agent with MCP Full URL
   docker_image: example/image:latest
   workplace_path: "/workspace"
-  start_arguments: [ "echo", "{PROMPT}" ]
-  continue_arguments: [ "echo hello" ]
   user_id: 1000
   mcp_sse_endpoint: "http://localhost:3000/mcp/sse"
 
@@ -72,7 +59,5 @@ claude:
   name: Claude
   docker_image: anthropic/claude:latest
   workplace_path: "/workspace"
-  start_arguments: [ "claude", "--prompt", "{PROMPT}" ]
-  continue_arguments: [ "claude", "--continue", "{PROMPT}" ]
   user_id: 1000
   log_processor: "ClaudeJson"

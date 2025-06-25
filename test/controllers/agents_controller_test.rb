@@ -35,12 +35,25 @@ class AgentsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to agent_path(Agent.last)
   end
 
-  test "create persists json arguments" do
+  test "create persists nested arguments" do
     login @user
-    post agents_url, params: { agent: { name: "Args", docker_image: "img", workplace_path: "/workspace", start_arguments: "[\"a\", \"b\"]", continue_arguments: "[1]" } }
+    post agents_url, params: {
+      agent: {
+        name: "Args",
+        docker_image: "img",
+        workplace_path: "/workspace",
+        start_arguments_records_attributes: {
+          "0" => { value: "a", position: 0 },
+          "1" => { value: "b", position: 1 }
+        },
+        continue_arguments_records_attributes: {
+          "0" => { value: "1", position: 0 }
+        }
+      }
+    }
     agent = Agent.last
     assert_equal [ "a", "b" ], agent.start_arguments
-    assert_equal [ 1 ], agent.continue_arguments
+    assert_equal [ "1" ], agent.continue_arguments
   end
 
   test "create persists environment variables" do
