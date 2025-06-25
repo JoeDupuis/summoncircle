@@ -12,3 +12,61 @@
 ._hidden {
   display: none !important;
 }
+
+.errors {
+  color: #dc3545;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.errors h2 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: #dc3545;
+}
+
+.errors ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin: 0;
+}
+
+.errors li {
+  margin-bottom: 0.25rem;
+}
+
+#error_explanation {
+  color: #dc3545;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+#error_explanation h2 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: #dc3545;
+}
+
+#error_explanation ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin: 0;
+}
+
+#error_explanation li {
+  margin-bottom: 0.25rem;
+}
+
+.field_with_errors {
+  display: inline;
+}
+
+.field_with_errors label {
+  color: #dc3545;
+}
+
+.field_with_errors input,
+.field_with_errors textarea,
+.field_with_errors select {
+  border-color: #dc3545;
+}
