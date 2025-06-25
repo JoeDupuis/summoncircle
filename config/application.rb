@@ -26,5 +26,9 @@ module Summoncircle
 
     # Disable Mission Control Jobs default HTTP basic auth
     config.mission_control.jobs.http_basic_auth_enabled = false
+
+    config.active_record.encryption.primary_key = ENV["ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY"]
+    config.active_record.encryption.deterministic_key = ENV["ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY"]
+    config.active_record.encryption.key_derivation_salt = ENV["ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT"]
   end
 end
