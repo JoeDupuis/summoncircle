@@ -45,6 +45,7 @@ class Run < ApplicationRecord
       processor = task.agent.log_processor_class.new
       processor.process_container(container, self)
       capture_repository_state(self)
+      broadcast_refresh_task_actions_header
       push_changes_if_enabled
       completed!
       broadcast_refresh_auto_push_form
@@ -79,6 +80,14 @@ class Run < ApplicationRecord
     broadcast_replace_to(task,
       target: "auto_push_form",
       partial: "tasks/auto_push_form",
+      locals: { task: task })
+  end
+
+  def broadcast_refresh_task_actions_header
+    task.reload
+    broadcast_replace_later_to(task,
+      target: "task-actions-header",
+      partial: "tasks/actions_header",
       locals: { task: task })
   end
 
