@@ -5,8 +5,11 @@ class Agent < ApplicationRecord
   has_many :volumes, dependent: :destroy
   has_many :agent_specific_settings, dependent: :destroy
   has_many :secrets, as: :secretable, dependent: :destroy
+  has_many :env_variables, as: :envable, dependent: :destroy, class_name: "EnvVariable"
 
   accepts_nested_attributes_for :agent_specific_settings, allow_destroy: true, reject_if: :reject_new_destroyed_settings
+  accepts_nested_attributes_for :secrets, allow_destroy: true, reject_if: :all_blank
+  accepts_nested_attributes_for :env_variables, allow_destroy: true, reject_if: :all_blank
 
   validates :name, presence: true
   validates :docker_image, presence: true
@@ -36,9 +39,9 @@ class Agent < ApplicationRecord
 
   def env_variables_json
     return @env_variables_json if @env_variables_json.present?
-    return "" if env_variables.blank?
+    return "" if env_variables.empty?
 
-    env_variables.to_json
+    env_variables.pluck(:key, :value).to_h.to_json
   end
 
   def env_variables_json=(value)
@@ -47,7 +50,10 @@ class Agent < ApplicationRecord
 
     begin
       parsed = JSON.parse(value)
-      self.env_variables = parsed
+      env_variables.destroy_all
+      parsed.each do |key, val|
+        env_variables.build(key: key, value: val)
+      end
     rescue JSON::ParserError
       errors.add(:env_variables_json, "must be valid JSON")
     end
@@ -55,22 +61,11 @@ class Agent < ApplicationRecord
 
   def env_strings
     vars = []
-    vars += env_variables.map { |key, value| "#{key}=#{value}" } if env_variables.present?
+    vars += env_variables.map { |env_var| "#{env_var.key}=#{env_var.value}" }
     vars += secrets.map { |secret| "#{secret.key}=#{secret.value}" }
     vars
   end
 
-  def update_secrets(secrets_hash)
-    return unless secrets_hash.is_a?(Hash)
-
-    secrets_hash.each do |key, value|
-      next if key.blank? || value.blank?
-
-      secret = secrets.find_or_initialize_by(key: key)
-      secret.value = value
-      secret.save!
-    end
-  end
 
   def secrets_hash
     secrets.pluck(:key, :value).to_h

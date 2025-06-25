@@ -48,8 +48,6 @@ class AgentsController < ApplicationController
         create_volumes_from_config(@agent, volumes_config)
       end
 
-      update_agent_secrets if params[:agent][:secrets].present?
-
       redirect_to @agent, notice: "Agent was successfully updated."
     else
       render :edit, status: :unprocessable_entity
@@ -69,7 +67,9 @@ class AgentsController < ApplicationController
     def agent_params
       params.require(:agent)
             .permit(:name, :docker_image, :workplace_path, :start_arguments, :continue_arguments, :volumes_config, :env_variables_json, :log_processor, :user_id, :instructions_mount_path, :ssh_mount_path, :home_path, :mcp_sse_endpoint, :agent_specific_setting_type,
-                    agent_specific_settings_attributes: [ :id, :type, :_destroy ])
+                    agent_specific_settings_attributes: [ :id, :type, :_destroy ],
+                    env_variables_attributes: [ :id, :key, :value, :_destroy ],
+                    secrets_attributes: [ :id, :key, :value, :_destroy ])
     end
 
     def create_volumes_from_config(agent, volumes_config)
@@ -90,17 +90,5 @@ class AgentsController < ApplicationController
       end
     rescue JSON::ParserError
       Rails.logger.error "Invalid JSON in volumes_config"
-    end
-
-    def update_agent_secrets
-      secrets_json = params[:agent][:secrets]
-      return if secrets_json.blank?
-
-      begin
-        secrets_hash = JSON.parse(secrets_json)
-        @agent.update_secrets(secrets_hash)
-      rescue JSON::ParserError
-        flash[:alert] = "Invalid JSON format for secrets"
-      end
     end
 end

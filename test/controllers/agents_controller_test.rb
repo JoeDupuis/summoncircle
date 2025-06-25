@@ -48,7 +48,9 @@ class AgentsControllerTest < ActionDispatch::IntegrationTest
     env_config = '{"NODE_ENV": "development", "DEBUG": "true"}'
     post agents_url, params: { agent: { name: "EnvTest", docker_image: "img", workplace_path: "/workspace", env_variables_json: env_config } }
     agent = Agent.last
-    assert_equal({ "NODE_ENV" => "development", "DEBUG" => "true" }, agent.env_variables)
+    assert_equal 2, agent.env_variables.count
+    assert_equal "development", agent.env_variables.find_by(key: "NODE_ENV").value
+    assert_equal "true", agent.env_variables.find_by(key: "DEBUG").value
   end
 
   test "create persists mcp_sse_endpoint" do

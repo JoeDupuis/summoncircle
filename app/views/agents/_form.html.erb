@@ -45,17 +45,18 @@
     <% end %>
   </div>
 
-  <div>
-    <%= form.label :env_variables_json, "Environment Variables (JSON format)" %><br>
-    <%= form.text_area :env_variables_json %>
-    <small class="form-help">Example: {"NODE_ENV": "development", "DEBUG": "true"}</small>
-  </div>
+  <%= render "shared/env_variables_fields", 
+             form: form, 
+             parent: agent, 
+             title: "Environment Variables",
+             singular_name: "Environment Variable" %>
 
-  <div>
-    <%= form.label :secrets, "Secrets (JSON)" %><br>
-    <%= text_area_tag "agent[secrets]", "", placeholder: '{"API_KEY": "secret", "DATABASE_PASSWORD": "password"}', rows: 3 %>
-    <small class="form-help">JSON format. Leave empty to keep existing secrets. Values are encrypted and hidden after saving.</small>
-  </div>
+  <%= render "shared/secrets_fields", 
+             form: form, 
+             parent: agent, 
+             title: "Secrets",
+             singular_name: "Secret",
+             help_text: "Values are encrypted and hidden after saving. Existing secrets show as \"[ENCRYPTED]\"." %>
 
   <div>
     <%= form.label :log_processor %><br>

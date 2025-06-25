@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+with_env_vars_node_env:
+  key: NODE_ENV
+  value: development
+  envable: with_env_vars
+  envable_type: Agent
+
+with_env_vars_debug:
+  key: DEBUG
+  value: "true"
+  envable: with_env_vars
+  envable_type: Agent

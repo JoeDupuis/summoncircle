@@ -62,32 +62,38 @@ class ProjectTest < ActiveSupport::TestCase
     assert_equal "myapp", project.repo_path
   end
 
-  test "update_secrets creates new secrets" do
+  test "nested attributes creates new secrets" do
     project = projects(:one)
-    secrets_hash = { "API_KEY" => "secret_value", "DB_PASSWORD" => "db_secret" }
 
-    project.update_secrets(secrets_hash)
+    project.update(secrets_attributes: [
+      { key: "API_KEY", value: "secret_value" },
+      { key: "DB_PASSWORD", value: "db_secret" }
+    ])
 
     assert_equal 2, project.secrets.count
     assert_equal "secret_value", project.secrets.find_by(key: "API_KEY").value
     assert_equal "db_secret", project.secrets.find_by(key: "DB_PASSWORD").value
   end
 
-  test "update_secrets updates existing secrets" do
+  test "nested attributes updates existing secrets" do
     project = projects(:one)
-    project.secrets.create!(key: "API_KEY", value: "old_value")
+    secret = project.secrets.create!(key: "API_KEY", value: "old_value")
 
-    project.update_secrets({ "API_KEY" => "new_value" })
+    project.update(secrets_attributes: [
+      { id: secret.id, key: "API_KEY", value: "new_value" }
+    ])
 
     assert_equal 1, project.secrets.count
     assert_equal "new_value", project.secrets.find_by(key: "API_KEY").value
   end
 
-  test "update_secrets ignores blank keys and values" do
+  test "nested attributes rejects all blank entries" do
     project = projects(:one)
-    secrets_hash = { "" => "value", "KEY" => "", "VALID_KEY" => "valid_value" }
 
-    project.update_secrets(secrets_hash)
+    project.update(secrets_attributes: [
+      { key: "", value: "" },  # This will be rejected
+      { key: "VALID_KEY", value: "valid_value" }
+    ])
 
     assert_equal 1, project.secrets.count
     assert_equal "valid_value", project.secrets.find_by(key: "VALID_KEY").value

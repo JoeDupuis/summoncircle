@@ -40,11 +40,12 @@
     <small class="form-help">Container port to publish. Docker will assign an available host port automatically (default: 3000)</small>
   </div>
 
-  <div>
-    <%= form.label :secrets, "Secrets (JSON)" %><br>
-    <%= text_area_tag "project[secrets]", "", placeholder: '{"ENV_VAR": "value", "API_KEY": "secret"}', rows: 3 %>
-    <small class="form-help">JSON format. Leave empty to keep existing secrets. Values are encrypted and hidden after saving.</small>
-  </div>
+  <%= render "shared/secrets_fields", 
+             form: form, 
+             parent: @project, 
+             title: "Project Secrets",
+             singular_name: "Secret",
+             help_text: "Values are encrypted and hidden after saving. Existing secrets show as \"[ENCRYPTED]\"." %>
 
   <div>
     <%= form.submit %>
