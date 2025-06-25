@@ -1,0 +1,27 @@
+<h1>Change Email/Password</h1>
+
+<%= form_with(model: @user, url: account_settings_path, method: :patch) do |form| %>
+  <%= form_errors(@user) %>
+
+  <div>
+    <%= form.label :email_address, "Email Address" %><br>
+    <%= form.email_field :email_address %>
+  </div>
+
+  <div>
+    <%= form.label :password, "New Password" %><br>
+    <%= form.password_field :password, placeholder: "Leave blank to keep current password" %>
+    <small>Minimum 12 characters</small>
+  </div>
+
+  <div>
+    <%= form.label :password_confirmation, "Confirm New Password" %><br>
+    <%= form.password_field :password_confirmation %>
+  </div>
+
+  <div>
+    <%= form.submit "Update Account", class: "button" %>
+  </div>
+<% end %>
+
+<%= link_to 'Cancel', user_settings_path %>
