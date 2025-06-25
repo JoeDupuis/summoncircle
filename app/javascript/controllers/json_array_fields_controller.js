@@ -15,23 +15,17 @@ export default class extends Controller {
     const clone = template.content.cloneNode(true)
     
     this.fieldsTarget.appendChild(clone)
-    this.reindexFields()
     this.updateHiddenField()
   }
 
   remove(event) {
     event.preventDefault()
     event.target.closest('.nested-field').remove()
-    this.reindexFields()
     this.updateHiddenField()
   }
 
   updateValue() {
     this.updateHiddenField()
-  }
-
-  reindexFields() {
-    // No longer needed since we don't use index attributes
   }
 
   updateHiddenField() {
