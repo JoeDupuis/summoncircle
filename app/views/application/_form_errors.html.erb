@@ -1,6 +1,6 @@
 <% if instance.errors.any? %>
-  <div class="errors">
-    <h2>
+  <div class="form-errors">
+    <h2 class="title">
       <%= t(
           ".title",
           count: instance.errors.count,
@@ -8,9 +8,9 @@
       ) %>
     </h2>
 
-    <ul>
+    <ul class="list">
       <% instance.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
+        <li class="item"><%= message %></li>
       <% end %>
     </ul>
   </div>
