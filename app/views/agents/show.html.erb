@@ -35,7 +35,12 @@
   <h2>Volumes</h2>
   <ul>
     <% @agent.volumes.each do |volume| %>
-      <li><strong><%= volume.name %>:</strong> <%= volume.path %></li>
+      <li>
+        <strong><%= volume.name %>:</strong> <%= volume.path %>
+        <% if volume.external? %>
+          <span class="status-indicator -info">External: <%= volume.external_name %></span>
+        <% end %>
+      </li>
     <% end %>
   </ul>
 <% end %>

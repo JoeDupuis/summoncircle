@@ -16,7 +16,9 @@ class AgentsController < ApplicationController
       @agent = source_agent.dup
       @agent.name = "Copy of #{source_agent.name}"
 
-      @agent.volumes_config = source_agent.volumes_config
+      source_agent.volumes.each do |volume|
+        @agent.volumes.build(volume.attributes.except("id", "agent_id", "created_at", "updated_at"))
+      end
 
       if source_agent.agent_specific_settings.any?
         source_setting = source_agent.agent_specific_settings.first
@@ -27,9 +29,8 @@ class AgentsController < ApplicationController
   end
 
   def create
-    @agent = Agent.new(agent_params.except(:volumes_config))
+    @agent = Agent.new(agent_params)
     if @agent.save
-      create_volumes_from_config(@agent, params[:agent][:volumes_config])
       redirect_to @agent, notice: "Agent was successfully created."
     else
       render :new, status: :unprocessable_entity
@@ -40,14 +41,7 @@ class AgentsController < ApplicationController
   end
 
   def update
-    if @agent.update(agent_params.except(:volumes_config))
-      volumes_config = params[:agent][:volumes_config]
-      # Only update volumes if volumes_config is present and different from current
-      if volumes_config.present? && volumes_config != @agent.volumes_config
-        @agent.volumes.destroy_all
-        create_volumes_from_config(@agent, volumes_config)
-      end
-
+    if @agent.update(agent_params)
       redirect_to @agent, notice: "Agent was successfully updated."
     else
       render :edit, status: :unprocessable_entity
@@ -66,29 +60,10 @@ class AgentsController < ApplicationController
 
     def agent_params
       params.require(:agent)
-            .permit(:name, :docker_image, :workplace_path, :start_arguments, :continue_arguments, :volumes_config, :env_variables_json, :log_processor, :user_id, :instructions_mount_path, :ssh_mount_path, :home_path, :mcp_sse_endpoint, :agent_specific_setting_type,
+            .permit(:name, :docker_image, :workplace_path, :start_arguments, :continue_arguments, :env_variables_json, :log_processor, :user_id, :instructions_mount_path, :ssh_mount_path, :home_path, :mcp_sse_endpoint, :agent_specific_setting_type,
                     agent_specific_settings_attributes: [ :id, :type, :_destroy ],
                     env_variables_attributes: [ :id, :key, :value, :_destroy ],
-                    secrets_attributes: [ :id, :key, :value, :_destroy ])
-    end
-
-    def create_volumes_from_config(agent, volumes_config)
-      return unless volumes_config.present?
-
-      volumes_data = JSON.parse(volumes_config)
-      volumes_data.each do |volume_name, config|
-        if config.is_a?(Hash)
-          agent.volumes.create!(
-            name: volume_name,
-            path: config["path"],
-            external: config["external"] == true,
-            external_name: config["external_name"]
-          )
-        else
-          agent.volumes.create!(name: volume_name, path: config)
-        end
-      end
-    rescue JSON::ParserError
-      Rails.logger.error "Invalid JSON in volumes_config"
+                    secrets_attributes: [ :id, :key, :value, :_destroy ],
+                    volumes_attributes: [ :id, :name, :path, :external, :external_name, :_destroy ])
     end
 end
