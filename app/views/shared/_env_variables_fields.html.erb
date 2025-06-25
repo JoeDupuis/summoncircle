@@ -1,0 +1,31 @@
+<div data-controller="nested-fields">
+  <h3><%= title %></h3>
+  <% if local_assigns[:help_text] %>
+    <small class="form-help" style="display: block; margin-bottom: 10px;"><%= help_text %></small>
+  <% end %>
+  <div data-nested-fields-target="fields">
+    <% parent.env_variables.each do |env_variable| %>
+      <div class="nested-field" style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <%= form.fields_for :env_variables, env_variable do |env_field| %>
+          <%= env_field.hidden_field :id %>
+          <%= env_field.hidden_field :_destroy %>
+          <%= env_field.text_field :key, placeholder: "Key", style: "flex: 1;" %>
+          <%= env_field.text_field :value, placeholder: "Value", style: "flex: 2;" %>
+          <button type="button" data-action="click->nested-fields#remove" style="padding: 5px 10px;">Remove</button>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+  
+  <button type="button" data-action="click->nested-fields#add" style="margin-top: 10px;">Add <%= singular_name %></button>
+  
+  <template data-nested-fields-target="template">
+    <div class="nested-field" style="display: flex; gap: 10px; margin-bottom: 10px;">
+      <%= form.fields_for :env_variables, parent.env_variables.build, child_index: "__INDEX__" do |env_field| %>
+        <%= env_field.text_field :key, placeholder: "Key", style: "flex: 1;" %>
+        <%= env_field.text_field :value, placeholder: "Value", style: "flex: 2;" %>
+        <button type="button" data-action="click->nested-fields#remove" style="padding: 5px 10px;">Remove</button>
+      <% end %>
+    </div>
+  </template>
+</div>

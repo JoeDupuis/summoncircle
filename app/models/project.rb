@@ -3,20 +3,12 @@ class Project < ApplicationRecord
 
   has_many :tasks, dependent: :destroy
   has_many :secrets, as: :secretable, dependent: :destroy
+
+  accepts_nested_attributes_for :secrets, allow_destroy: true, reject_if: :all_blank
+
   validates :name, presence: true
   validate :valid_repository_url
 
-  def update_secrets(secrets_hash)
-    return unless secrets_hash.is_a?(Hash)
-
-    secrets_hash.each do |key, value|
-      next if key.blank? || value.blank?
-
-      secret = secrets.find_or_initialize_by(key: key)
-      secret.value = value
-      secret.save!
-    end
-  end
 
   def secrets_hash
     secrets.pluck(:key, :value).to_h

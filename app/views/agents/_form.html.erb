@@ -45,64 +45,18 @@
     <% end %>
   </div>
 
-  <div data-controller="nested-fields">
-    <h3>Environment Variables</h3>
-    <div data-nested-fields-target="fields">
-      <% agent.env_variables.each do |env_variable| %>
-        <div class="nested-field" style="display: flex; gap: 10px; margin-bottom: 10px;">
-          <%= form.fields_for :env_variables, env_variable do |env_field| %>
-            <%= env_field.hidden_field :id %>
-            <%= env_field.hidden_field :_destroy %>
-            <%= env_field.text_field :key, placeholder: "Key", style: "flex: 1;" %>
-            <%= env_field.text_field :value, placeholder: "Value", style: "flex: 2;" %>
-            <button type="button" data-action="click->nested-fields#remove" style="padding: 5px 10px;">Remove</button>
-          <% end %>
-        </div>
-      <% end %>
-    </div>
-    
-    <button type="button" data-action="click->nested-fields#add" style="margin-top: 10px;">Add Environment Variable</button>
-    
-    <template data-nested-fields-target="template">
-      <div class="nested-field" style="display: flex; gap: 10px; margin-bottom: 10px;">
-        <%= form.fields_for :env_variables, agent.env_variables.build, child_index: "__INDEX__" do |env_field| %>
-          <%= env_field.text_field :key, placeholder: "Key", style: "flex: 1;" %>
-          <%= env_field.text_field :value, placeholder: "Value", style: "flex: 2;" %>
-          <button type="button" data-action="click->nested-fields#remove" style="padding: 5px 10px;">Remove</button>
-        <% end %>
-      </div>
-    </template>
-  </div>
+  <%= render "shared/env_variables_fields", 
+             form: form, 
+             parent: agent, 
+             title: "Environment Variables",
+             singular_name: "Environment Variable" %>
 
-  <div data-controller="nested-fields">
-    <h3>Secrets</h3>
-    <small class="form-help" style="display: block; margin-bottom: 10px;">Values are encrypted and hidden after saving. Existing secrets show as "[ENCRYPTED]".</small>
-    <div data-nested-fields-target="fields">
-      <% agent.secrets.each do |secret| %>
-        <div class="nested-field" style="display: flex; gap: 10px; margin-bottom: 10px;">
-          <%= form.fields_for :secrets, secret do |secret_field| %>
-            <%= secret_field.hidden_field :id %>
-            <%= secret_field.hidden_field :_destroy %>
-            <%= secret_field.text_field :key, placeholder: "Key", style: "flex: 1;" %>
-            <%= secret_field.password_field :value, placeholder: secret.persisted? ? "[ENCRYPTED]" : "Value", style: "flex: 2;" %>
-            <button type="button" data-action="click->nested-fields#remove" style="padding: 5px 10px;">Remove</button>
-          <% end %>
-        </div>
-      <% end %>
-    </div>
-    
-    <button type="button" data-action="click->nested-fields#add" style="margin-top: 10px;">Add Secret</button>
-    
-    <template data-nested-fields-target="template">
-      <div class="nested-field" style="display: flex; gap: 10px; margin-bottom: 10px;">
-        <%= form.fields_for :secrets, agent.secrets.build, child_index: "__INDEX__" do |secret_field| %>
-          <%= secret_field.text_field :key, placeholder: "Key", style: "flex: 1;" %>
-          <%= secret_field.password_field :value, placeholder: "Value", style: "flex: 2;" %>
-          <button type="button" data-action="click->nested-fields#remove" style="padding: 5px 10px;">Remove</button>
-        <% end %>
-      </div>
-    </template>
-  </div>
+  <%= render "shared/secrets_fields", 
+             form: form, 
+             parent: agent, 
+             title: "Secrets",
+             singular_name: "Secret",
+             help_text: "Values are encrypted and hidden after saving. Existing secrets show as \"[ENCRYPTED]\"." %>
 
   <div>
     <%= form.label :log_processor %><br>
