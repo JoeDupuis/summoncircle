@@ -1,0 +1,111 @@
+body.sessions.new {
+  background-color: var(--surface-logo);
+}
+
+.sessions.new main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.sessions.new .login-container {
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.sessions.new .logo-container {
+  margin-bottom: 2rem;
+}
+
+.sessions.new .logo-container img {
+  max-width: 400px;
+  width: 100%;
+  height: auto;
+  margin-bottom: 1rem;
+}
+
+.sessions.new .dark-mode-message {
+  display: none;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .sessions.new .dark-mode-message {
+    display: block;
+  }
+}
+
+.sessions.new form {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sessions.new form input[type="email"],
+.sessions.new form input[type="password"] {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  font-size: 1rem;
+}
+
+.sessions.new form input[type="submit"] {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.sessions.new form input[type="submit"]:hover {
+  background-color: var(--accent-hover);
+}
+
+.sessions.new .forgot-password {
+  display: inline-block;
+  margin-top: 1rem;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.sessions.new .forgot-password:hover {
+  text-decoration: underline;
+}
+
+.sessions.new .dev-signin {
+  margin-top: 1rem;
+}
+
+.sessions.new .dev-signin button {
+  background-color: var(--surface-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  width: 100%;
+  transition: all 0.2s;
+}
+
+.sessions.new .dev-signin button:hover {
+  background-color: var(--surface);
+  border-color: var(--border-hover);
+}
+

@@ -1,15 +1,26 @@
-<%= tag.div(flash[:alert], style: "color:red") if flash[:alert] %>
-<%= tag.div(flash[:notice], style: "color:green") if flash[:notice] %>
-
-<%= form_with url: session_path do |form| %>
-  <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", placeholder: "Enter your email address", value: params[:email_address] %><br>
-  <%= form.password_field :password, required: true, autocomplete: "current-password", placeholder: "Enter your password", maxlength: 72 %><br>
-  <%= form.submit "Sign in" %>
+<% content_for :nav do %>
+  <div></div>
 <% end %>
-<br>
 
-<%= link_to "Forgot password?", new_password_path %>
+<div class="login-container">
+  <div class="logo-container">
+    <%= image_tag "logo.png", alt: "SummonCircle" %>
+    <div class="dark-mode-message">
+      How embarrassing... I don't have a logo for dark mode...
+    </div>
+  </div>
 
-<% if Rails.env.development? %>
-  <%= button_to "Dev Sign In (admin)", session_path, params: { email_address: "dev@example.com", password: "password" } %>
-<% end %>
+  <%= form_with url: session_path do |form| %>
+    <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", placeholder: "Enter your email address", value: params[:email_address] %>
+    <%= form.password_field :password, required: true, autocomplete: "current-password", placeholder: "Enter your password", maxlength: 72 %>
+    <%= form.submit "Sign in" %>
+    
+    <%= link_to "Forgot password?", new_password_path, class: "forgot-password" %>
+  <% end %>
+
+  <% if Rails.env.development? %>
+    <div class="dev-signin">
+      <%= button_to "Dev Sign In (admin)", session_path, params: { email_address: "dev@example.com", password: "password" } %>
+    </div>
+  <% end %>
+</div>
