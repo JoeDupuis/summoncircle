@@ -6,14 +6,10 @@ class Agent < ApplicationRecord
   has_many :agent_specific_settings, dependent: :destroy
   has_many :secrets, as: :secretable, dependent: :destroy
   has_many :env_variables, as: :envable, dependent: :destroy, class_name: "EnvVariable"
-  has_many :start_arguments_records, -> { order(:position) }, class_name: "StartArgument", dependent: :destroy
-  has_many :continue_arguments_records, -> { order(:position) }, class_name: "ContinueArgument", dependent: :destroy
 
   accepts_nested_attributes_for :agent_specific_settings, allow_destroy: true, reject_if: :reject_new_destroyed_settings
   accepts_nested_attributes_for :secrets, allow_destroy: true, reject_if: :all_blank
   accepts_nested_attributes_for :env_variables, allow_destroy: true, reject_if: :all_blank
-  accepts_nested_attributes_for :start_arguments_records, allow_destroy: true, reject_if: :all_blank
-  accepts_nested_attributes_for :continue_arguments_records, allow_destroy: true, reject_if: :all_blank
 
   validates :name, presence: true
   validates :docker_image, presence: true
@@ -79,12 +75,14 @@ class Agent < ApplicationRecord
     secrets.pluck(:value)
   end
 
-  def start_arguments
-    start_arguments_records.pluck(:value)
+  def start_arguments=(value)
+    parsed = value.is_a?(String) && value.present? ? JSON.parse(value) : value
+    super(parsed)
   end
 
-  def continue_arguments
-    continue_arguments_records.pluck(:value)
+  def continue_arguments=(value)
+    parsed = value.is_a?(String) && value.present? ? JSON.parse(value) : value
+    super(parsed)
   end
 
 

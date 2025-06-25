@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_25_015829) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_25_002158) do
   create_table "agent_specific_settings", force: :cascade do |t|
     t.integer "agent_id", null: false
     t.string "type", null: false
@@ -33,17 +33,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_015829) do
     t.string "ssh_mount_path"
     t.string "home_path"
     t.string "mcp_sse_endpoint"
+    t.json "continue_arguments"
+    t.json "start_arguments"
     t.index ["discarded_at"], name: "index_agents_on_discarded_at"
-  end
-
-  create_table "continue_arguments", force: :cascade do |t|
-    t.integer "agent_id", null: false
-    t.text "value", null: false
-    t.integer "position"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["agent_id", "position"], name: "index_continue_arguments_on_agent_id_and_position"
-    t.index ["agent_id"], name: "index_continue_arguments_on_agent_id"
   end
 
   create_table "env_variables", force: :cascade do |t|
@@ -113,16 +105,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_015829) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_sessions_on_user_id"
-  end
-
-  create_table "start_arguments", force: :cascade do |t|
-    t.integer "agent_id", null: false
-    t.text "value", null: false
-    t.integer "position"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["agent_id", "position"], name: "index_start_arguments_on_agent_id_and_position"
-    t.index ["agent_id"], name: "index_start_arguments_on_agent_id"
   end
 
   create_table "steps", force: :cascade do |t|
@@ -211,11 +193,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_015829) do
   end
 
   add_foreign_key "agent_specific_settings", "agents"
-  add_foreign_key "continue_arguments", "agents"
   add_foreign_key "repo_states", "steps"
   add_foreign_key "runs", "tasks"
   add_foreign_key "sessions", "users"
-  add_foreign_key "start_arguments", "agents"
   add_foreign_key "steps", "runs"
   add_foreign_key "tasks", "agents"
   add_foreign_key "tasks", "projects"

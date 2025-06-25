@@ -18,14 +18,6 @@ class AgentsController < ApplicationController
 
       @agent.volumes_config = source_agent.volumes_config
 
-      source_agent.start_arguments_records.each do |arg|
-        @agent.start_arguments_records.build(value: arg.value, position: arg.position)
-      end
-
-      source_agent.continue_arguments_records.each do |arg|
-        @agent.continue_arguments_records.build(value: arg.value, position: arg.position)
-      end
-
       if source_agent.agent_specific_settings.any?
         source_setting = source_agent.agent_specific_settings.first
         @agent.agent_specific_setting_type = source_setting.type
@@ -74,12 +66,10 @@ class AgentsController < ApplicationController
 
     def agent_params
       params.require(:agent)
-            .permit(:name, :docker_image, :workplace_path, :volumes_config, :env_variables_json, :log_processor, :user_id, :instructions_mount_path, :ssh_mount_path, :home_path, :mcp_sse_endpoint, :agent_specific_setting_type,
+            .permit(:name, :docker_image, :workplace_path, :start_arguments, :continue_arguments, :volumes_config, :env_variables_json, :log_processor, :user_id, :instructions_mount_path, :ssh_mount_path, :home_path, :mcp_sse_endpoint, :agent_specific_setting_type,
                     agent_specific_settings_attributes: [ :id, :type, :_destroy ],
                     env_variables_attributes: [ :id, :key, :value, :_destroy ],
-                    secrets_attributes: [ :id, :key, :value, :_destroy ],
-                    start_arguments_records_attributes: [ :id, :value, :position, :_destroy ],
-                    continue_arguments_records_attributes: [ :id, :value, :position, :_destroy ])
+                    secrets_attributes: [ :id, :key, :value, :_destroy ])
     end
 
     def create_volumes_from_config(agent, volumes_config)
