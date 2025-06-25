@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["fields", "hiddenField"]
+  static targets = ["fields", "hiddenField", "template"]
   static values = { fieldName: String }
 
   connect() {
@@ -11,19 +11,11 @@ export default class extends Controller {
   add(event) {
     event.preventDefault()
     
-    const newIndex = this.fieldsTarget.children.length
-    const fieldHtml = `
-      <div class="nested-field" style="display: flex; gap: 10px; margin-bottom: 10px;">
-        <input type="text" 
-               value="" 
-               data-index="${newIndex}"
-               data-action="input->json-array-fields#updateValue"
-               style="flex: 1;">
-        <button type="button" data-action="click->json-array-fields#remove" data-index="${newIndex}" style="padding: 5px 10px;">Remove</button>
-      </div>
-    `
+    const template = this.templateTarget
+    const clone = template.content.cloneNode(true)
     
-    this.fieldsTarget.insertAdjacentHTML('beforeend', fieldHtml)
+    this.fieldsTarget.appendChild(clone)
+    this.reindexFields()
     this.updateHiddenField()
   }
 
@@ -39,13 +31,7 @@ export default class extends Controller {
   }
 
   reindexFields() {
-    const fields = this.fieldsTarget.querySelectorAll('.nested-field')
-    fields.forEach((field, index) => {
-      const input = field.querySelector('input')
-      const button = field.querySelector('button')
-      input.dataset.index = index
-      button.dataset.index = index
-    })
+    // No longer needed since we don't use index attributes
   }
 
   updateHiddenField() {
