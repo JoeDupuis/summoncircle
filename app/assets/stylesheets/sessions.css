@@ -1,5 +1,5 @@
 body.sessions.new {
-  background-color: #FDFCF9;
+  background-color: var(--surface-logo);
 }
 
 .sessions.new main {
@@ -38,10 +38,6 @@ body.sessions.new {
 @media (prefers-color-scheme: dark) {
   .sessions.new .dark-mode-message {
     display: block;
-  }
-  
-  body.sessions.new {
-    background-color: #181816;
   }
 }
 
@@ -97,9 +93,9 @@ body.sessions.new {
 }
 
 .sessions.new .dev-signin button {
-  background-color: #f8f8f8;
-  color: #555;
-  border: 1px solid #e0e0e0;
+  background-color: var(--surface-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
   padding: 0.75rem;
   border-radius: 0.25rem;
   cursor: pointer;
@@ -109,19 +105,7 @@ body.sessions.new {
 }
 
 .sessions.new .dev-signin button:hover {
-  background-color: #f0f0f0;
-  border-color: #d0d0d0;
+  background-color: var(--surface);
+  border-color: var(--border-hover);
 }
 
-@media (prefers-color-scheme: dark) {
-  .sessions.new .dev-signin button {
-    background-color: #2d2d2d;
-    color: #aaa;
-    border-color: #3d3d3d;
-  }
-  
-  .sessions.new .dev-signin button:hover {
-    background-color: #333;
-    border-color: #444;
-  }
-}
