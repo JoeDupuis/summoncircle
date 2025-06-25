@@ -3,6 +3,7 @@ class PasswordsController < ApplicationController
   before_action :set_user_by_token, only: %i[ edit update ]
 
   def new
+    @smtp_configured = Rails.application.config.action_mailer.smtp_settings.present?
   end
 
   def create
