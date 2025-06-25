@@ -17,15 +17,19 @@
     <small class="form-help">Base URL for MCP server (will append /mcp/sse automatically). Leave blank to disable MCP.</small>
   </div>
 
-  <div>
-    <%= form.label :start_arguments %><br>
-    <%= form.text_area :start_arguments %>
-  </div>
+  <%= render "shared/json_array_fields", 
+             form: form, 
+             field_name: :start_arguments,
+             title: "Start Arguments",
+             singular_name: "Argument",
+             help_text: "Arguments passed when starting a new task" %>
 
-  <div>
-    <%= form.label :continue_arguments %><br>
-    <%= form.text_area :continue_arguments %>
-  </div>
+  <%= render "shared/json_array_fields", 
+             form: form, 
+             field_name: :continue_arguments,
+             title: "Continue Arguments",
+             singular_name: "Argument",
+             help_text: "Arguments passed when continuing an existing task" %>
 
   <div>
     <%= form.label :workplace_path %><br>

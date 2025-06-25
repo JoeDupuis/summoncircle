@@ -19,10 +19,10 @@
 </p>
 
 <h2>Start Arguments</h2>
-<pre><code><%= @agent.start_arguments.to_json %></code></pre>
+<pre><code><%= @agent.start_arguments.inspect %></code></pre>
 
 <h2>Continue Arguments</h2>
-<pre><code><%= @agent.continue_arguments.to_json %></code></pre>
+<pre><code><%= @agent.continue_arguments.inspect %></code></pre>
 
 <% if @agent.workplace_path.present? %>
 <h2>Workplace</h2>
