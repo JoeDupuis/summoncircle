@@ -46,8 +46,20 @@ if Rails.env.development?
     agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
     agent.ssh_mount_path = "/home/claude/.ssh/id_rsa"
     agent.mcp_sse_endpoint = "http://host.docker.internal:3000"
-    agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ]
-    agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ]
+  end
+
+  # Create start arguments
+  [ "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ].each_with_index do |arg, index|
+    StartArgument.find_or_create_by!(agent: claude_agent, position: index) do |start_arg|
+      start_arg.value = arg
+    end
+  end
+
+  # Create continue arguments
+  [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ].each_with_index do |arg, index|
+    ContinueArgument.find_or_create_by!(agent: claude_agent, position: index) do |continue_arg|
+      continue_arg.value = arg
+    end
   end
 
   Volume.find_or_create_by!(agent: claude_agent, name: "home") do |volume|
@@ -73,9 +85,21 @@ if Rails.env.development?
     agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
     agent.ssh_mount_path = "/home/claude/.ssh/id_rsa"
     agent.mcp_sse_endpoint = "http://host.docker.internal:3000"
-    agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "json", "--verbose", "-p", "{PROMPT}" ]
-    agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "json", "--verbose", "-p", "{PROMPT}" ]
     agent.log_processor = "ClaudeJson"
+  end
+
+  # Create start arguments
+  [ "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "json", "--verbose", "-p", "{PROMPT}" ].each_with_index do |arg, index|
+    StartArgument.find_or_create_by!(agent: claude_json_agent, position: index) do |start_arg|
+      start_arg.value = arg
+    end
+  end
+
+  # Create continue arguments
+  [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "json", "--verbose", "-p", "{PROMPT}" ].each_with_index do |arg, index|
+    ContinueArgument.find_or_create_by!(agent: claude_json_agent, position: index) do |continue_arg|
+      continue_arg.value = arg
+    end
   end
 
   Volume.find_or_create_by!(agent: claude_json_agent, name: "home") do |volume|
@@ -101,9 +125,21 @@ if Rails.env.development?
     agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
     agent.ssh_mount_path = "/home/claude/.ssh/id_rsa"
     agent.mcp_sse_endpoint = "http://host.docker.internal:3000"
-    agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "stream-json", "--verbose", "-p", "{PROMPT}" ]
-    agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "stream-json", "--verbose", "-p", "{PROMPT}" ]
     agent.log_processor = "ClaudeStreamingJson"
+  end
+
+  # Create start arguments
+  [ "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "stream-json", "--verbose", "-p", "{PROMPT}" ].each_with_index do |arg, index|
+    StartArgument.find_or_create_by!(agent: claude_streaming_agent, position: index) do |start_arg|
+      start_arg.value = arg
+    end
+  end
+
+  # Create continue arguments
+  [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "stream-json", "--verbose", "-p", "{PROMPT}" ].each_with_index do |arg, index|
+    ContinueArgument.find_or_create_by!(agent: claude_streaming_agent, position: index) do |continue_arg|
+      continue_arg.value = arg
+    end
   end
 
   Volume.find_or_create_by!(agent: claude_streaming_agent, name: "home") do |volume|
