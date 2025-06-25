@@ -19,9 +19,7 @@
             <span>Total Cost: $<%= "%.6f" % @task.total_cost %></span>
           <% end %>
         </div>
-        <div class="task-actions-header" id="task-actions-header">
-          <%= render "tasks/actions_header", task: @task %>
-        </div>
+        <%= render "tasks/actions_header", task: @task %>
         <% if Current.user&.github_token.present? %>
           <%= render "tasks/auto_push_form", task: @task %>
         <% end %>
