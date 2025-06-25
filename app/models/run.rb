@@ -84,7 +84,8 @@ class Run < ApplicationRecord
   end
 
   def broadcast_refresh_task_actions_header
-    broadcast_replace_to(task,
+    task.reload
+    broadcast_replace_later_to(task,
       target: "task-actions-header",
       partial: "tasks/actions_header",
       locals: { task: task })
