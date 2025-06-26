@@ -1,5 +1,10 @@
 <h1>User Settings</h1>
 
+<p>
+  <%= link_to 'Edit Settings', edit_user_settings_path, class: 'button' %>
+  <%= link_to 'Change Email/Password', edit_account_settings_path, class: 'button' %>
+</p>
+
 <div>
   <strong>Email:</strong> <%= @user.email_address %>
 </div>
@@ -45,10 +50,3 @@
 <div>
   <strong>Shrimp Mode 🍤:</strong> <%= @user.shrimp_mode? ? "Enabled" : "Disabled" %>
 </div>
-
-<p>
-  <%= link_to 'Edit Settings', edit_user_settings_path, class: 'button' %>
-  <%= link_to 'Change Email/Password', edit_account_settings_path, class: 'button' %>
-</p>
-
-<%= link_to 'Back', root_path %>
