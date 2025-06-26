@@ -11,4 +11,9 @@ if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
   ./bin/rails db:prepare
 fi
 
-exec "${@}"
+# If running the rails server and RAILS_BINDING is set, add binding parameter
+if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ] && [ -n "${RAILS_BINDING}" ]; then
+  exec "${@}" -b "${RAILS_BINDING}"
+else
+  exec "${@}"
+fi
