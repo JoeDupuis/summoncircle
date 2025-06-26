@@ -136,16 +136,18 @@ if Rails.env.development?
 end
 
 if Rails.env.production?
-  admin_password = SecureRandom.alphanumeric(16)
-  admin_user = User.find_or_create_by!(email_address: "admin@example.com") do |user|
+  admin_email = ENV.fetch("ADMIN_EMAIL", "admin@example.com")
+  admin_password = ENV.fetch("ADMIN_PASSWORD", SecureRandom.alphanumeric(16))
+
+  admin_user = User.find_or_create_by!(email_address: admin_email) do |user|
     user.password = admin_password
     user.password_confirmation = admin_password
     user.role = "admin"
   end
 
   if admin_user.persisted? && admin_user.created_at > 5.seconds.ago
-    Rails.logger.info "Created admin user with email: admin@example.com and password: #{admin_password}"
-    puts "Created admin user with email: admin@example.com and password: #{admin_password}"
+    Rails.logger.info "Created admin user with email: #{admin_email} and password: #{admin_password}"
+    puts "Created admin user with email: #{admin_email} and password: #{admin_password}"
   end
 
   mcp_endpoint = ENV.fetch("MCP_SSE_ENDPOINT", "http://host.docker.internal:3000")
