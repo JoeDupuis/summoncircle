@@ -23,6 +23,11 @@
 <h2>Setup Script</h2>
 <pre><code><%= @project.setup_script %></code></pre>
 
+<% if @project.env_variables.any? %>
+<h2>Environment Variables</h2>
+<p>Configured variables: <strong><%= @project.env_variables.pluck(:key).join(', ') %></strong></p>
+<% end %>
+
 <% if @project.secrets.any? %>
 <h2>Project Secrets</h2>
 <p>Configured secret keys: <strong><%= @project.secrets.pluck(:key).join(', ') %></strong></p>

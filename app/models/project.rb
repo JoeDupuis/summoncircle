@@ -3,12 +3,13 @@ class Project < ApplicationRecord
 
   has_many :tasks, dependent: :destroy
   has_many :secrets, as: :secretable, dependent: :destroy
+  has_many :env_variables, as: :envable, dependent: :destroy, class_name: "EnvVariable"
 
   accepts_nested_attributes_for :secrets, allow_destroy: true, reject_if: :all_blank
+  accepts_nested_attributes_for :env_variables, allow_destroy: true, reject_if: :all_blank
 
   validates :name, presence: true
   validate :valid_repository_url
-
 
   def secrets_hash
     secrets.pluck(:key, :value).to_h
@@ -19,7 +20,10 @@ class Project < ApplicationRecord
   end
 
   def env_strings
-    secrets.map { |secret| "#{secret.key}=#{secret.value}" }
+    vars = []
+    vars += env_variables.map { |env_var| "#{env_var.key}=#{env_var.value}" }
+    vars += secrets.map { |secret| "#{secret.key}=#{secret.value}" }
+    vars
   end
 
   private
