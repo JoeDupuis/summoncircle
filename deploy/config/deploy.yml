@@ -1,0 +1,32 @@
+service: summoncircle
+image: joedupuis/summoncircle
+
+
+builder:
+  arch: amd64
+
+accessories:
+  summoncircle:
+    image: joedupuis/summoncircle:latest
+    host: summoncircle.app
+    env:
+      secret:
+        - ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY
+        - ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY
+        - ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT
+        - MCP_AUTH_TOKEN
+        - SECRET_KEY_BASE
+      clear:
+        CONTAINER_PROXY_LINKS: "1"
+        CONTAINER_PROXY_TARGET_CONTAINERS: "1"
+        CONTAINER_PROXY_BASE_URL: summoncircle.app
+        SOLID_QUEUE_IN_PUMA: true
+        DOCKER_URL: tcp://172.18.0.1:2375
+    volumes:
+      - "summoncircle_storage:/rails/storage"
+    proxy:
+      ssl: true
+      host: summoncircle.app
+      # ssl_redirect: true
+      # certificate_pem: CERTIFICATE_PEM
+      # private_key_pem: PRIVATE_KEY_PEM

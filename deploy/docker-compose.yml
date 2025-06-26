@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # Socat proxy to expose Docker socket as TCP
+  docker-proxy:
+    image: alpine/socat:latest
+    container_name: docker-proxy
+    restart: unless-stopped
+    command: tcp-listen:2375,reuseaddr,fork unix-connect:/var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - summoncircle_network
+    expose:
+      - "2375"
+
+  summoncircle:
+    image: joedupuis/summoncircle:latest
+    container_name: summoncircle
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    env_file:
+      - ./secrets.env
+    environment:
+      - DOCKER_URL=tcp://docker-proxy:2375
+      - MCP_SSE_ENDPOINT=http://summoncircle:3000
+      - SOLID_QUEUE_IN_PUMA=1
+    volumes:
+      - summoncircle_storage:/rails/storage
+    networks:
+      - summoncircle_network
+    depends_on:
+      - docker-proxy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  alpine-helper:
+    image: alpine:latest
+    entrypoint: ["false"]
+    networks:
+      - summoncircle_network
+
+  claude-oauth-helper:
+    image: joedupuis/claude_oauth:latest
+    entrypoint: ["false"]
+    networks:
+      - summoncircle_network
+
+volumes:
+  summoncircle_storage:
+
+networks:
+  summoncircle_network:
+    driver: bridge
