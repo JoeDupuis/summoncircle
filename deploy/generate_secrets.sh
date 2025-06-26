@@ -95,5 +95,4 @@ if [ "$DEPLOY_TYPE" = "1" ]; then
     echo "You can now run: docker-compose up"
 else
     echo "You can now run: docker-compose up -d"
-    echo "Note: Make sure to configure your reverse proxy for SSL termination"
 fi
