@@ -122,7 +122,7 @@ if Rails.env.development?
 
   ClaudeOauthSetting.find_or_create_by!(agent: claude_streaming_agent)
 
-  task_namer_agent = Agent.find_or_create_by!(name: "Task namer") do |agent|
+  task_namer_agent = Agent.find_or_create_by!(name: "Haiku (Task namer)") do |agent|
     agent.docker_image = "joedupuis/claude_oauth:latest"
     agent.workplace_path = "/workspace"
     agent.home_path = "/home/claude"
@@ -211,7 +211,7 @@ if Rails.env.production?
 
   mcp_endpoint = ENV.fetch("MCP_SSE_ENDPOINT", "http://host.docker.internal:3000")
 
-  task_agent = Agent.find_or_create_by!(name: "Task namer") do |agent|
+  task_agent = Agent.find_or_create_by!(name: "Haiku (Task namer)") do |agent|
     agent.docker_image = "joedupuis/claude_oauth:latest"
     agent.workplace_path = "/workspace"
     agent.home_path = "/home/claude"
