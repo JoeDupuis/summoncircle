@@ -42,7 +42,7 @@
     <%= form.label :auto_task_naming_agent_id, "Auto Task Naming Agent" %><br>
     <%= form.select :auto_task_naming_agent_id, 
         options_from_collection_for_select(Agent.kept, :id, :name, @user.auto_task_naming_agent_id),
-        { prompt: "None - Manual task naming only" },
+        { include_blank: "None - Manual task naming only" },
         { class: "form-select" } %>
     <small class="form-help">Select an agent to automatically generate task names based on prompts. The agent should be a text-type agent capable of generating concise task names.</small>
   </div>
