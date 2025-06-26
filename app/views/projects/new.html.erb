@@ -40,6 +40,13 @@
     <small class="form-help">Container port to publish. Docker will assign an available host port automatically (default: 3000)</small>
   </div>
 
+  <%= render "shared/env_variables_fields", 
+             form: form, 
+             parent: @project, 
+             title: "Environment Variables",
+             singular_name: "Environment Variable",
+             help_text: "Set environment variables for the project." %>
+
   <div>
     <%= form.submit %>
   </div>
