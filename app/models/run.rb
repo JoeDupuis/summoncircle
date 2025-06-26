@@ -12,7 +12,7 @@ class Run < ApplicationRecord
   attr_accessor :skip_agent
 
   before_create :cancel_running_runs
-  after_create :enqueue_job, unless: :skip_agent
+  after_create_commit :enqueue_job, unless: :skip_agent
   after_update_commit :broadcast_update
   after_create_commit :broadcast_chat_append
   after_update_commit :broadcast_chat_replace
