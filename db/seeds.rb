@@ -122,6 +122,65 @@ if Rails.env.development?
 
   ClaudeOauthSetting.find_or_create_by!(agent: claude_streaming_agent)
 
+  task_namer_agent = Agent.find_or_create_by!(name: "Task namer") do |agent|
+    agent.docker_image = "joedupuis/claude_oauth:latest"
+    agent.workplace_path = "/workspace"
+    agent.home_path = "/home/claude"
+    agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
+    agent.ssh_mount_path = "/home/claude/.ssh/id_rsa"
+    agent.mcp_sse_endpoint = "http://host.docker.internal:3000"
+    agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "claude-3-5-haiku-20241022", "-p", "{PROMPT}" ]
+    agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "claude-3-5-haiku-20241022", "-p", "{PROMPT}" ]
+  end
+
+  Volume.find_or_create_by!(agent: task_namer_agent, name: "home") do |volume|
+    volume.path = "/home/claude"
+  end
+
+  Volume.find_or_create_by!(agent: task_namer_agent, name: "claude_projects") do |volume|
+    volume.path = "/home/claude/.claude/projects"
+  end
+
+  sonnet_agent = Agent.find_or_create_by!(name: "Sonnet") do |agent|
+    agent.docker_image = "joedupuis/claude_oauth:latest"
+    agent.workplace_path = "/workspace"
+    agent.home_path = "/home/claude"
+    agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
+    agent.ssh_mount_path = "/home/claude/.ssh/id_rsa"
+    agent.mcp_sse_endpoint = "http://host.docker.internal:3000"
+    agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "stream-json", "--verbose", "-p", "{PROMPT}" ]
+    agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "stream-json", "--verbose", "-p", "{PROMPT}" ]
+    agent.log_processor = "ClaudeStreamingJson"
+  end
+
+  Volume.find_or_create_by!(agent: sonnet_agent, name: "home") do |volume|
+    volume.path = "/home/claude"
+  end
+
+  Volume.find_or_create_by!(agent: sonnet_agent, name: "claude_projects") do |volume|
+    volume.path = "/home/claude/.claude/projects"
+  end
+
+  opus_agent = Agent.find_or_create_by!(name: "Opus") do |agent|
+    agent.docker_image = "joedupuis/claude_oauth:latest"
+    agent.workplace_path = "/workspace"
+    agent.home_path = "/home/claude"
+    agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
+    agent.ssh_mount_path = "/home/claude/.ssh/id_rsa"
+    agent.mcp_sse_endpoint = "http://host.docker.internal:3000"
+    agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "opus", "--output-format", "stream-json", "--verbose", "-p", "{PROMPT}" ]
+    agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "opus", "--output-format", "stream-json", "--verbose", "-p", "{PROMPT}" ]
+    agent.log_processor = "ClaudeStreamingJson"
+  end
+
+  Volume.find_or_create_by!(agent: opus_agent, name: "home") do |volume|
+    volume.path = "/home/claude"
+  end
+
+  Volume.find_or_create_by!(agent: opus_agent, name: "claude_projects") do |volume|
+    volume.path = "/home/claude/.claude/projects"
+  end
+
   Project.find_or_create_by!(name: "SummonCircle") do |project|
     project.repository_url = "https://github.com/JoeDupuis/summoncircle"
   end
@@ -159,8 +218,8 @@ if Rails.env.production?
     agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
     agent.ssh_mount_path = "/home/claude/.ssh/id_rsa"
     agent.mcp_sse_endpoint = mcp_endpoint
-    agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ]
-    agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ]
+    agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "claude-3-5-haiku-20241022", "-p", "{PROMPT}" ]
+    agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "claude-3-5-haiku-20241022", "-p", "{PROMPT}" ]
   end
 
   Volume.find_or_create_by!(agent: task_agent, name: "home") do |volume|
