@@ -213,7 +213,7 @@ if Rails.env.production?
 
   if ENV["ANTHROPIC_API_KEY"].present?
     # When using API key, create secrets for each agent
-    agents = [task_agent, sonnet_agent, opus_agent]
+    agents = [ task_agent, sonnet_agent, opus_agent ]
     agents.each do |agent|
       Secret.find_or_create_by!(secretable: agent, key: "ANTHROPIC_API_KEY") do |secret|
         secret.value = ENV["ANTHROPIC_API_KEY"]
