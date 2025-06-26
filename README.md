@@ -1,6 +1,107 @@
-Video demo:
+# SummonCircle
 
-https://www.youtube.com/watch?v=xgm5KnwgrsE
+Deploy and manage autonomous coding agents in Docker containers with persistent storage and iterative development sessions.
 
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/xgm5KnwgrsE/0.jpg)](https://www.youtube.com/watch?v=xgm5KnwgrsE)
 
+## Installation
+
+### Development
+
+You need:
+
+- Ruby (see `.ruby-version`)
+- SQLite
+- Docker
+- Git
+- OpenSSL
+- LibYAML
+
+
+```bash
+bin/setup
+bin/dev
+```
+
+Access the app at http://localhost:3000
+
+### Production
+
+You can run locally or on a remote server.
+To use the development build feature on a remote server (not needed when deploying locally), you will need a wildcard domain pointing to your server.
+The server doesn't need to be accessible to the internet. It just need a wild card domain to map the tasks to subdomains to proxy the requests.
+This wildcard domain doesn't need to be the same you use to access the app (useful for deployments with tailscale).
+If the server is accessible to the internet, the setup will attempt to create a let's encrypt certificate automatically.
+
+
+```bash
+git clone https://github.com/JoeDupuis/summoncircle.git
+cd summoncircle/deploy
+./generate_secrets.sh
+```
+
+Take a look to secrets.env and edit if needed
+
+```bash
+docker compose up -d
+docker compose exec web bin/rails db:seed
+```
+
+The `generate_secrets.sh` script will ask a few questions about your deployment type to generate the `secrets.env` file required by the docker-compose file.
+**Do not lose** this file, it will contain a few keys that are required to run the app. Without the keys, the app won't boot.
+
+If you hit some certificate invalid error after deploying remotely, try restarting your browser.
+
+## Configuration
+
+## Github token / SSH key
+
+You'll likely want to add a github token in your user settings with access to read and write to the repository and optionally open PRs.
+Cloning happens before the agent is invoked and there is a setting in the task view to auto push commits. Therefore, you can opt out of giving the agent access to the token.
+
+Support for gitlab is coming.
+
+You can opt to use an SSH key instead, but you can't opt out of giving access to the agent.
+
+## Git configuration
+
+If you want the agent to commit as yourself, you'll need to enter a git configuration too.
+
+Something like:
+
+```
+[user]
+  name = Joé Dupuis
+  email = cheesecakefactoryisgreatandyoucantconvincemeotherwise@gmail.com
+```
+
+## Global Agent instructions
+
+This maps to your ~/.claude/CLAUDE.md
+Put your instructions here.
+
+## Task naming agent
+
+Haiku is configured in text mode and set as the task naming agent by default. If you prefer to not have the agent auto name your tasks to save the tokens, unset it.
+
+## Projects
+
+You do not have to setup a repo on a project, the agent can pull and work on multiple repos, but certain features of the app won't work. I am planning on adding multi repo support at some point.
+
+
+## Agents
+
+Depending on if you chose an api key or the oauth config (Claude pro/max) when you generated the secrets and seeded your database, your agents will either have a secret env variables for the anthropic key, or a docker volume attached and an OAuth Configuration section.
+
+The volume store the oauth credentials.
+The OAuth configuration will have you go through the oauth signin flow just like you would in the terminal. You'll have to copy the code anthropic give you in the textfield.
+
+
+## Prompting
+
+You can interupt a prompt by repormpting.
+
+It is not yet possible to switch from one agent to another without starting a new task.
+
+## Troubleshooting
+
+Check `/jobs` to see if any background jobs failed.
