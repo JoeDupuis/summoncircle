@@ -43,7 +43,6 @@ class ProjectsController < ApplicationController
 
   def project_params
     params.require(:project).permit(:name, :description, :repository_url, :setup_script, :repo_path, :dev_dockerfile_path, :dev_container_port,
-                                     :env_variables_json,
                                      secrets_attributes: [ :id, :key, :value, :_destroy ],
                                      env_variables_attributes: [ :id, :key, :value, :_destroy ])
   end

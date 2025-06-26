@@ -11,30 +11,6 @@ class Project < ApplicationRecord
   validates :name, presence: true
   validate :valid_repository_url
 
-  attr_accessor :env_variables_json
-
-  def env_variables_json
-    return @env_variables_json if @env_variables_json.present?
-    return "" if env_variables.empty?
-
-    env_variables.pluck(:key, :value).to_h.to_json
-  end
-
-  def env_variables_json=(value)
-    @env_variables_json = value
-    return if value.blank?
-
-    begin
-      parsed = JSON.parse(value)
-      env_variables.destroy_all
-      parsed.each do |key, val|
-        env_variables.build(key: key, value: val)
-      end
-    rescue JSON::ParserError
-      errors.add(:env_variables_json, "must be valid JSON")
-    end
-  end
-
   def secrets_hash
     secrets.pluck(:key, :value).to_h
   end
