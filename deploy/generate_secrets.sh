@@ -79,6 +79,15 @@ ADMIN_PASSWORD=$ADMIN_PASSWORD
 TLS_DOMAIN=$TLS_DOMAIN
 EOF
 
+# Add container proxy settings for remote deployments
+if [ "$DEPLOY_TYPE" = "2" ]; then
+    cat >> "$SECRETS_FILE" << EOF
+CONTAINER_PROXY_LINKS=1
+CONTAINER_PROXY_TARGET_CONTAINERS=1
+CONTAINER_PROXY_BASE_URL=$TLS_DOMAIN
+EOF
+fi
+
 echo
 echo "=== Configuration Summary ==="
 echo "Admin Email: $ADMIN_EMAIL"
