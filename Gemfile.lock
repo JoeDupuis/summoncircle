@@ -445,6 +445,7 @@ DEPENDENCIES
   debug
   discard
   docker-api
+  dotenv
   fast-mcp
   importmap-rails
   jbuilder
