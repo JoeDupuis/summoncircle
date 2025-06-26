@@ -129,8 +129,8 @@ if Rails.env.development?
     agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
     agent.ssh_mount_path = "/home/claude/.ssh/id_rsa"
     agent.mcp_sse_endpoint = "http://host.docker.internal:3000"
-    agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ]
-    agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ]
+    agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "claude-3-5-haiku-20241022", "-p", "{PROMPT}" ]
+    agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "claude-3-5-haiku-20241022", "-p", "{PROMPT}" ]
   end
 
   Volume.find_or_create_by!(agent: task_namer_agent, name: "home") do |volume|
@@ -218,8 +218,8 @@ if Rails.env.production?
     agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
     agent.ssh_mount_path = "/home/claude/.ssh/id_rsa"
     agent.mcp_sse_endpoint = mcp_endpoint
-    agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ]
-    agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "-p", "{PROMPT}" ]
+    agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "claude-3-5-haiku-20241022", "-p", "{PROMPT}" ]
+    agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "claude-3-5-haiku-20241022", "-p", "{PROMPT}" ]
   end
 
   Volume.find_or_create_by!(agent: task_agent, name: "home") do |volume|
