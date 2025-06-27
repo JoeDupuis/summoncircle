@@ -99,37 +99,9 @@ Volume.find_or_create_by!(agent: opus_agent, name: "claude_projects") do |volume
   volume.path = "/home/claude/.claude/projects"
 end
 
-steve_the_toaster = Agent.find_or_create_by!(name: "Steve the Toaster") do |agent|
-  agent.docker_image = "joedupuis/claude_oauth:latest"
-  agent.workplace_path = "/workspace"
-  agent.home_path = "/home/claude"
-  agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
-  agent.ssh_mount_path = "/home/claude/.ssh/id_rsa"
-  agent.mcp_sse_endpoint = mcp_endpoint
-  agent.start_arguments = [ "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "stream-json", "--verbose", "-p", "You are a smart toaster. You can toast toast. You like emojis. You probably can't help much with the prompt as you are just a toaster and you are pretty sarcastic about it. You like a good joke though. Give your best puns when you have the chance\n\n{PROMPT}" ]
-  agent.continue_arguments = [ "-c", "--dangerously-skip-permissions", "--model", "sonnet", "--output-format", "stream-json", "--verbose", "-p", "You are a smart toaster. You can toast toast. You like emojis. You probably can't help much with the prompt as you are just a toaster and you are pretty sarcastic about it. You like a good joke though. Give your best puns when you have the chance\n\n{PROMPT}" ]
-  agent.log_processor = "ClaudeStreamingJson"
-end
-
-Volume.find_or_create_by!(agent: steve_the_toaster, name: "home") do |volume|
-  volume.path = "/home/claude"
-end
-
-Volume.find_or_create_by!(agent: steve_the_toaster, name: "claude_config") do |volume|
-  volume.path = "/home/claude/.claude"
-  volume.external = true
-  volume.external_name = "claude_config"
-end
-
-Volume.find_or_create_by!(agent: steve_the_toaster, name: "claude_projects") do |volume|
-  volume.path = "/home/claude/.claude/projects"
-end
-
-ClaudeOauthSetting.find_or_create_by!(agent: steve_the_toaster)
-
 # Handle authentication based on environment
 if Rails.env.production? && ENV["ANTHROPIC_API_KEY"].present?
-  agents = [ haiku_agent, sonnet_agent, opus_agent, steve_the_toaster ]
+  agents = [ haiku_agent, sonnet_agent, opus_agent ]
   agents.each do |agent|
     Secret.find_or_create_by!(secretable: agent, key: "ANTHROPIC_API_KEY") do |secret|
       secret.value = ENV["ANTHROPIC_API_KEY"]
