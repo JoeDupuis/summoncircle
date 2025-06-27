@@ -37,12 +37,31 @@ if [ "$DEPLOY_TYPE" = "2" ]; then
         echo "Domain is required for remote deployment"
         read -p "Enter your domain: " DOMAIN
     done
-    TLS_DOMAIN=$DOMAIN
+
+    echo
+    echo "TLS Certificate Management:"
+    echo "1) Automatic (Let's Encrypt via Thruster)"
+    echo "2) Manual (You'll manage certificates yourself)"
+    read -p "Select certificate management type [1]: " CERT_TYPE
+    CERT_TYPE=${CERT_TYPE:-1}
+
+    if [ "$CERT_TYPE" = "1" ]; then
+        TLS_DOMAIN=$DOMAIN
+        HTTPS_PORT="443"
+        echo "Using automatic Let's Encrypt certificates on port 443"
+    else
+        TLS_DOMAIN=""
+        HTTPS_PORT="444"
+        echo "Manual certificate management - will use port 444"
+        echo "You'll need to configure your reverse proxy to handle SSL termination"
+    fi
+
     RAILS_FORCE_SSL="true"
     RAILS_BINDING="0.0.0.0"
 else
     DOMAIN="localhost"
     TLS_DOMAIN=""
+    HTTPS_PORT=""
     RAILS_FORCE_SSL="false"
     RAILS_BINDING="127.0.0.1"
 fi
@@ -77,14 +96,31 @@ RAILS_BINDING=$RAILS_BINDING
 ADMIN_EMAIL=$ADMIN_EMAIL
 ADMIN_PASSWORD=$ADMIN_PASSWORD
 TLS_DOMAIN=$TLS_DOMAIN
+HTTPS_PORT=$HTTPS_PORT
 EOF
 
 # Add container proxy settings for remote deployments
 if [ "$DEPLOY_TYPE" = "2" ]; then
+    echo
+    echo "Container Proxy Configuration:"
+    echo "Agent containers need to communicate back to the main application."
+    read -p "Use same domain for container proxy? (y/n) [y]: " USE_SAME_DOMAIN
+    USE_SAME_DOMAIN=${USE_SAME_DOMAIN:-y}
+
+    if [[ "$USE_SAME_DOMAIN" =~ ^[Yy]$ ]]; then
+        CONTAINER_PROXY_BASE_URL=$DOMAIN
+    else
+        read -p "Enter container proxy base URL: " CONTAINER_PROXY_BASE_URL
+        while [ -z "$CONTAINER_PROXY_BASE_URL" ]; do
+            echo "Container proxy base URL is required"
+            read -p "Enter container proxy base URL: " CONTAINER_PROXY_BASE_URL
+        done
+    fi
+
     cat >> "$SECRETS_FILE" << EOF
 CONTAINER_PROXY_LINKS=1
 CONTAINER_PROXY_TARGET_CONTAINERS=1
-CONTAINER_PROXY_BASE_URL=$TLS_DOMAIN
+CONTAINER_PROXY_BASE_URL=$CONTAINER_PROXY_BASE_URL
 EOF
 fi
 
@@ -96,6 +132,12 @@ echo "Domain: $DOMAIN"
 echo "Force SSL: $RAILS_FORCE_SSL"
 if [ -n "$TLS_DOMAIN" ]; then
     echo "TLS Domain: $TLS_DOMAIN"
+    echo "HTTPS Port: $HTTPS_PORT"
+elif [ -n "$HTTPS_PORT" ]; then
+    echo "HTTPS Port: $HTTPS_PORT (Manual SSL)"
+fi
+if [ "$DEPLOY_TYPE" = "2" ]; then
+    echo "Container Proxy URL: $CONTAINER_PROXY_BASE_URL"
 fi
 echo
 echo "Secrets file generated at: $SECRETS_FILE"
