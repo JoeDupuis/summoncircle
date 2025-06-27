@@ -27,10 +27,10 @@ Access the app at http://localhost:3000
 ### Production
 
 You can run locally or on a remote server.
-To use the development build feature on a remote server (not needed when deploying locally), you will need a wildcard domain pointing to your server.
-The server doesn't need to be accessible to the internet. It just need a wild card domain to map the tasks to subdomains to proxy the requests.
-This wildcard domain doesn't need to be the same you use to access the app (useful for deployments with tailscale).
-If the server is accessible to the internet, the setup will attempt to create a let's encrypt certificate automatically.
+To use the development build feature on a remote server, allowing you to test the app the agent is building, you will need a wildcard domain pointing to your server.
+The server doesn't need to be accessible to the internet, it could be on a tailscale network for example. It just need a wild card domain to map the tasks to subdomains to proxy the requests to the right container.
+This wildcard domain doesn't need to be the same you use to access the app (useful if you run the app in a private network).
+If the TLD_DOMAIN env is set int he secrets file and the server is accessible to the internet, the setup will attempt to create a let's encrypt certificate automatically.
 
 
 ```bash
@@ -46,10 +46,10 @@ docker compose up -d
 docker compose exec web bin/rails db:seed
 ```
 
-The `generate_secrets.sh` script will ask a few questions about your deployment type to generate the `secrets.env` file required by the docker-compose file.
+The `generate_secrets.sh` script will ask a few questions about your deployment type before generating the secrets file required by the docker-compose.
 **Do not lose** this file, it will contain a few keys that are required to run the app. Without the keys, the app won't boot.
 
-If you hit some certificate invalid error after deploying remotely, try restarting your browser.
+If you hit some invalid certificate errors after deploying remotely, try restarting your browser.
 
 ## Configuration
 
