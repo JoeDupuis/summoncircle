@@ -90,11 +90,9 @@ You do not have to setup a repo on a project, the agent can pull and work on mul
 
 ## Agents
 
-Depending on if you chose an api key or the oauth config (Claude pro/max) when you generated the secrets and seeded your database, your agents will either have a secret env variables for the anthropic key, or a docker volume attached and an OAuth Configuration section.
+Depending on if you chose an API key or the OAuth config (Claude Pro/Max) when you generated the secrets and seeded your database, your agents will either have a secret env variable for the Anthropic key, or a Docker volume attached and an OAuth Configuration section.
 
-The volume store the oauth credentials.
-The OAuth configuration will have you go through the oauth signin flow just like you would in the terminal. You'll have to copy the code anthropic give you in the textfield.
-
+The volume stores the OAuth credentials. The OAuth configuration will have you go through the OAuth sign-in flow just like you would in the terminal. You'll have to copy the code Anthropic gives you into the text field.
 
 ## Prompting
 
