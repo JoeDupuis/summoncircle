@@ -26,6 +26,11 @@ Access the app at http://localhost:3000
 
 ### Production
 
+You need:
+- Docker compose
+- Docker
+- Openssl
+
 You can run locally or on a remote server.
 To use the development build feature on a remote server, allowing you to test the app the agent is building, you will need a wildcard domain pointing to your server.
 The server doesn't need to be accessible to the internet, it could be on a tailscale network for example. It just need a wild card domain to map the tasks to subdomains to proxy the requests to the right container.
