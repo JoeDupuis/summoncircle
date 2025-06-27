@@ -107,3 +107,18 @@ It is not yet possible to switch from one agent to another without starting a ne
 ## Troubleshooting
 
 Check `/jobs` to see if any background jobs failed.
+
+
+## Roadmap
+
+- Plan mode
+- Refactor & Performance enhancements
+- Multi-repo per projects
+- Multi user support
+- Gitlab tokens
+- Support for codex-cli and Gemini-client
+- Allow switching agent per prompt instead of per task
+- Attaching a local shell to a task
+- Amazon Bedrock support
+- Make tool calls collapsable and various readability/QoL improvements
+- MCP support
