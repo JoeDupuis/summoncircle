@@ -87,6 +87,10 @@ Haiku is configured in text mode and set as the task naming agent by default. If
 
 You do not have to setup a repo on a project, the agent can pull and work on multiple repos, but certain features of the app won't work. I am planning on adding multi repo support at some point.
 
+### Dev build (PREVIEW)
+
+You can give a path from the repo to the development build dockerfile and a build & run container will appear in your tasks.
+Be aware that I released this is a bit early and kind of buggy.
 
 ## Agents
 
