@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Script to generate Docker Compose secrets.env file
 # Usage: ./generate_secrets.sh
