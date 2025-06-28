@@ -53,6 +53,7 @@ env:
     CONTAINER_PROXY_LINKS: "1"
     CONTAINER_PROXY_TARGET_CONTAINERS: "1"
     CONTAINER_PROXY_BASE_URL: "summoncircle.net"
+    RAILS_FORCE_SSL: "false"
 
     # Set number of processes dedicated to Solid Queue (default: 1)
     # JOB_CONCURRENCY: 3
