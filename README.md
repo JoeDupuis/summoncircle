@@ -111,6 +111,12 @@ Depending on if you chose an API key or the OAuth config (Claude Pro/Max) when y
 
 The volume stores the OAuth credentials. The OAuth configuration will have you go through the OAuth sign-in flow just like you would in the terminal. You'll have to copy the code Anthropic gives you into the text field.
 
+### Language/Framework Support and Custom Containers
+
+The default agents use [https://github.com/JoeDupuis/summoncircle_claude](https://github.com/JoeDupuis/summoncircle_claude) as the base image. This image includes the same languages and frameworks supported by [Codex Universal](https://github.com/openai/codex-universal), providing a comprehensive development environment.
+
+If you need a slimmer container or want to build your own custom agent image, you can use [https://github.com/JoeDupuis/claude_oauth](https://github.com/JoeDupuis/claude_oauth) as the base image. This provides the essential OAuth authentication layer while allowing you to customize the installed languages and tools.
+
 ## Prompting
 
 You can interupt a prompt by repormpting.
