@@ -47,6 +47,11 @@ services:
     entrypoint: ["false"]
     networks:
       - summoncircle_network
+  summoncircle-claude-helper:
+    image: joedupuis/summoncircle_claude:latest
+    entrypoint: ["false"]
+    networks:
+      - summoncircle_network
 
 volumes:
   summoncircle_storage:
