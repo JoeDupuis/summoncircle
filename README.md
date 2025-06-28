@@ -48,7 +48,7 @@ Take a look to secrets.env and edit if needed
 
 ```bash
 docker compose up -d
-docker compose exec web bin/rails db:seed
+docker compose exec summoncircle bin/rails db:seed
 ```
 
 The `generate_secrets.sh` script will ask a few questions about your deployment type before generating the secrets file required by the docker-compose.
