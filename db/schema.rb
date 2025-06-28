@@ -16,8 +16,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_002158) do
     t.string "type", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["agent_id", "type"], name: "index_agent_specific_settings_on_agent_id_and_type", unique: true
-    t.index ["agent_id"], name: "index_agent_specific_settings_on_agent_id"
+    t.index [ "agent_id", "type" ], name: "index_agent_specific_settings_on_agent_id_and_type", unique: true
+    t.index [ "agent_id" ], name: "index_agent_specific_settings_on_agent_id"
   end
 
   create_table "agents", force: :cascade do |t|
@@ -35,7 +35,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_002158) do
     t.string "mcp_sse_endpoint"
     t.json "continue_arguments"
     t.json "start_arguments"
-    t.index ["discarded_at"], name: "index_agents_on_discarded_at"
+    t.index [ "discarded_at" ], name: "index_agents_on_discarded_at"
   end
 
   create_table "env_variables", force: :cascade do |t|
@@ -45,8 +45,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_002158) do
     t.integer "envable_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["envable_type", "envable_id", "key"], name: "index_env_vars_on_envable_and_key", unique: true
-    t.index ["envable_type", "envable_id"], name: "index_env_variables_on_envable"
+    t.index [ "envable_type", "envable_id", "key" ], name: "index_env_vars_on_envable_and_key", unique: true
+    t.index [ "envable_type", "envable_id" ], name: "index_env_variables_on_envable"
   end
 
   create_table "projects", force: :cascade do |t|
@@ -61,7 +61,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_002158) do
     t.string "dev_dockerfile"
     t.text "dev_dockerfile_path"
     t.integer "dev_container_port", default: 3000
-    t.index ["discarded_at"], name: "index_projects_on_discarded_at"
+    t.index [ "discarded_at" ], name: "index_projects_on_discarded_at"
   end
 
   create_table "repo_states", force: :cascade do |t|
@@ -72,7 +72,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_002158) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "git_diff"
-    t.index ["step_id"], name: "index_repo_states_on_step_id"
+    t.index [ "step_id" ], name: "index_repo_states_on_step_id"
   end
 
   create_table "runs", force: :cascade do |t|
@@ -84,7 +84,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_002158) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "container_id"
-    t.index ["task_id"], name: "index_runs_on_task_id"
+    t.index [ "task_id" ], name: "index_runs_on_task_id"
   end
 
   create_table "secrets", force: :cascade do |t|
@@ -94,8 +94,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_002158) do
     t.datetime "updated_at", null: false
     t.string "secretable_type", null: false
     t.integer "secretable_id", null: false
-    t.index ["secretable_type", "secretable_id", "key"], name: "index_secrets_on_secretable_and_key", unique: true
-    t.index ["secretable_type", "secretable_id"], name: "index_secrets_on_secretable_type_and_secretable_id"
+    t.index [ "secretable_type", "secretable_id", "key" ], name: "index_secrets_on_secretable_and_key", unique: true
+    t.index [ "secretable_type", "secretable_id" ], name: "index_secrets_on_secretable_type_and_secretable_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -104,7 +104,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_002158) do
     t.string "user_agent"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["user_id"], name: "index_sessions_on_user_id"
+    t.index [ "user_id" ], name: "index_sessions_on_user_id"
   end
 
   create_table "steps", force: :cascade do |t|
@@ -122,10 +122,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_002158) do
     t.integer "cache_creation_tokens"
     t.integer "cache_read_tokens"
     t.string "parent_tool_use_id"
-    t.index ["run_id", "tool_use_id"], name: "index_steps_on_run_id_and_tool_use_id"
-    t.index ["run_id"], name: "index_steps_on_run_id"
-    t.index ["tool_call_id"], name: "index_steps_on_tool_call_id"
-    t.index ["type"], name: "index_steps_on_type"
+    t.index [ "run_id", "tool_use_id" ], name: "index_steps_on_run_id_and_tool_use_id"
+    t.index [ "run_id" ], name: "index_steps_on_run_id"
+    t.index [ "tool_call_id" ], name: "index_steps_on_tool_call_id"
+    t.index [ "type" ], name: "index_steps_on_type"
   end
 
   create_table "tasks", force: :cascade do |t|
@@ -148,10 +148,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_002158) do
     t.string "container_status"
     t.string "docker_image_id"
     t.integer "container_host_port"
-    t.index ["agent_id"], name: "index_tasks_on_agent_id"
-    t.index ["discarded_at"], name: "index_tasks_on_discarded_at"
-    t.index ["project_id"], name: "index_tasks_on_project_id"
-    t.index ["user_id"], name: "index_tasks_on_user_id"
+    t.index [ "agent_id" ], name: "index_tasks_on_agent_id"
+    t.index [ "discarded_at" ], name: "index_tasks_on_discarded_at"
+    t.index [ "project_id" ], name: "index_tasks_on_project_id"
+    t.index [ "user_id" ], name: "index_tasks_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -167,8 +167,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_002158) do
     t.boolean "allow_github_token_access", default: true, null: false
     t.boolean "shrimp_mode", default: true, null: false
     t.integer "auto_task_naming_agent_id"
-    t.index ["auto_task_naming_agent_id"], name: "index_users_on_auto_task_naming_agent_id"
-    t.index ["email_address"], name: "index_users_on_email_address", unique: true
+    t.index [ "auto_task_naming_agent_id" ], name: "index_users_on_auto_task_naming_agent_id"
+    t.index [ "email_address" ], name: "index_users_on_email_address", unique: true
   end
 
   create_table "volume_mounts", force: :cascade do |t|
@@ -177,8 +177,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_002158) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "volume_name"
-    t.index ["task_id"], name: "index_volume_mounts_on_task_id"
-    t.index ["volume_id"], name: "index_volume_mounts_on_volume_id"
+    t.index [ "task_id" ], name: "index_volume_mounts_on_task_id"
+    t.index [ "volume_id" ], name: "index_volume_mounts_on_volume_id"
   end
 
   create_table "volumes", force: :cascade do |t|
@@ -189,7 +189,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_002158) do
     t.datetime "updated_at", null: false
     t.boolean "external", default: false
     t.string "external_name"
-    t.index ["agent_id"], name: "index_volumes_on_agent_id"
+    t.index [ "agent_id" ], name: "index_volumes_on_agent_id"
   end
 
   add_foreign_key "agent_specific_settings", "agents"

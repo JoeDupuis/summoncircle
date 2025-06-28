@@ -2,6 +2,8 @@
 
 Deploy and manage autonomous coding agents in Docker containers with persistent storage and iterative development sessions.
 
+**Note:** The current default image makes starting a task quite slow. I'm working on fixing this. Subsequent requests are fast, but if you need faster initial startup, you can build your own image using [https://github.com/JoeDupuis/claude_oauth](https://github.com/JoeDupuis/claude_oauth) as the base in the meantime.
+
 Video instructions:
 https://youtu.be/WVhDRbnlAEg
 
