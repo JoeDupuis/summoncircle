@@ -47,8 +47,8 @@ cd summoncircle/deploy
 Take a look to secrets.env and edit if needed
 
 ```bash
-docker compose up -d
-docker compose exec summoncircle bin/rails db:seed
+docker-compose up -d
+docker-compose exec summoncircle bin/rails db:seed
 ```
 
 The `generate_secrets.sh` script will ask a few questions about your deployment type before generating the secrets file required by the docker-compose.
@@ -116,6 +116,7 @@ Check `/jobs` to see if any background jobs failed.
 
 ## Roadmap
 
+- Notifications
 - Plan mode
 - Refactor & Performance enhancements
 - Multi-repo per projects
