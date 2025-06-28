@@ -2,6 +2,8 @@
 
 Deploy and manage autonomous coding agents in Docker containers with persistent storage and iterative development sessions.
 
+Video instructions:
+https://youtu.be/WVhDRbnlAEg
 
 ## Installation
 
