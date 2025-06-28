@@ -1,0 +1,18 @@
+<div class="task-details">
+  <span>Agent: <%= task.agent.name %></span>
+  <span>Project: <%= task.project.name %></span>
+  <% if task.runs.any? && task.runs.any?(&:completed?) %>
+    <% if task.total_cost > 0 %>
+      <span>Total Cost: $<%= "%.6f" % task.total_cost %></span>
+    <% end %>
+  <% end %>
+</div>
+<% if task.runs.any? && task.runs.any?(&:completed?) %>
+  <%= render "tasks/actions_header", task: task %>
+  <% if task.user.github_token.present? %>
+    <%= render "tasks/auto_push_form", task: task %>
+  <% end %>
+  <% if task.project.dev_dockerfile_path.present? %>
+    <%= render "tasks/docker_controls", task: task %>
+  <% end %>
+<% end %>
