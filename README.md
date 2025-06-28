@@ -99,6 +99,8 @@ You do not have to setup a repo on a project, the agent can pull and work on mul
 You can give a path from the repo to the development build dockerfile and a build & run container will appear in your tasks.
 Be aware that I released this is a bit early and kind of buggy.
 
+The automatic let's encrypt setup does not support wild card domains. To use this feature on a remote setup, you will need to manage HTTPS yourself through something like cloudflare, tailscale or self-signed certificate.
+
 ## Agents
 
 Depending on if you chose an API key or the OAuth config (Claude Pro/Max) when you generated the secrets and seeded your database, your agents will either have a secret env variable for the Anthropic key, or a Docker volume attached and an OAuth Configuration section.
