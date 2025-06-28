@@ -97,9 +97,13 @@ You do not have to setup a repo on a project, the agent can pull and work on mul
 ### Dev build (PREVIEW)
 
 You can give a path from the repo to the development build dockerfile and a build & run container will appear in your tasks.
-Be aware that I released this is a bit early and kind of buggy.
+Be aware that I released this is a bit early and hard to setup on remote deployments.
 
-The automatic let's encrypt setup does not support wild card domains. To use this feature on a remote setup, you will need to manage HTTPS yourself through something like cloudflare, tailscale or self-signed certificate.
+The automatic let's encrypt setup does not support wild card domains. To use this feature on a remote deployment, you will need to manage HTTPS yourself through something like cloudflare, tailscale or self-signed certificate.
+
+I run summoncircle in a tailnet (tailscale) with https turned off. I use tailscale serve, to encrypt the traffic to the app.
+I use a second domain (wildcard point to the private IP) without https for the dev containers.
+Hoping to simplify things for remote deployments soon.
 
 ## Agents
 
