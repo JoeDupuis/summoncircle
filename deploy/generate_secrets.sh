@@ -47,12 +47,10 @@ if [ "$DEPLOY_TYPE" = "2" ]; then
 
     if [ "$CERT_TYPE" = "1" ]; then
         TLS_DOMAIN=$DOMAIN
-        HTTPS_PORT="443"
-        echo "Using automatic Let's Encrypt certificates on port 443"
+        echo "Using automatic Let's Encrypt certificates"
     else
         TLS_DOMAIN=""
-        HTTPS_PORT="444"
-        echo "Manual certificate management - will use port 444"
+        echo "Manual certificate management"
         echo "You'll need to configure your reverse proxy to handle SSL termination"
     fi
 
@@ -61,7 +59,6 @@ if [ "$DEPLOY_TYPE" = "2" ]; then
 else
     DOMAIN="localhost"
     TLS_DOMAIN=""
-    HTTPS_PORT=""
     RAILS_FORCE_SSL="false"
     RAILS_BINDING="127.0.0.1"
 fi
@@ -96,7 +93,6 @@ RAILS_BINDING=$RAILS_BINDING
 ADMIN_EMAIL=$ADMIN_EMAIL
 ADMIN_PASSWORD=$ADMIN_PASSWORD
 TLS_DOMAIN=$TLS_DOMAIN
-HTTPS_PORT=$HTTPS_PORT
 EOF
 
 # Add container proxy settings for remote deployments
@@ -132,9 +128,6 @@ echo "Domain: $DOMAIN"
 echo "Force SSL: $RAILS_FORCE_SSL"
 if [ -n "$TLS_DOMAIN" ]; then
     echo "TLS Domain: $TLS_DOMAIN"
-    echo "HTTPS Port: $HTTPS_PORT"
-elif [ -n "$HTTPS_PORT" ]; then
-    echo "HTTPS Port: $HTTPS_PORT (Manual SSL)"
 fi
 if [ "$DEPLOY_TYPE" = "2" ]; then
     echo "Container Proxy URL: $CONTAINER_PROXY_BASE_URL"
