@@ -1,4 +1,4 @@
-<%= form_with(model: @task, local: true, class: "task-form", url: @project ? project_tasks_path(@project) : tasks_path) do |form| %>
+<%= form_with(model: @task, local: true, class: "task-form", url: @project ? project_tasks_path(@project) : tasks_path, data: { controller: "branch-select", branch_select_hidden_class: "_hidden" }) do |form| %>
   <% if @task.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(@task.errors.count, "error") %> prohibited this task from being saved:</h2>
@@ -13,12 +13,18 @@
   <div class="selectors">
     <div class="field">
       <%= form.label :project_id, "Project" %><br>
-      <%= form.collection_select :project_id, @projects, :id, :name, { prompt: "Select a project" } %>
+      <%= form.collection_select :project_id, @projects, :id, :name, { prompt: "Select a project" }, { data: { action: "change->branch-select#projectChanged", branch_select_target: "projectSelect" } } %>
     </div>
 
     <div class="field">
       <%= form.label :agent_id, "Agent" %><br>
       <%= form.collection_select :agent_id, @agents, :id, :name, { prompt: "Select an agent" } %>
+    </div>
+
+    <div class="field">
+      <%= form.label :target_branch, "Target Branch" %><br>
+      <%= form.select :target_branch, [], {}, { data: { branch_select_target: "select" }, disabled: true } %>
+      <span data-branch-select-target="loading" class="_hidden">Loading branches...</span>
     </div>
   </div>
 
