@@ -21,6 +21,9 @@ export default class extends Controller {
   }
   
   projectChanged(event) {
+    // Clear current selection immediately when project changes
+    this.setDefaultBranch()
+    
     const projectId = parseInt(event.target.value)
     if (projectId) {
       this.projectIdValue = projectId
@@ -28,7 +31,6 @@ export default class extends Controller {
       this.loadBranches()
     } else {
       this.selectTarget.disabled = true
-      this.setDefaultBranch()
     }
   }
   
@@ -45,6 +47,9 @@ export default class extends Controller {
   async loadBranches() {
     if (!this.projectIdValue) return
     
+    // Clear selection and show loading state
+    this.selectTarget.innerHTML = '<option value="">Loading branches...</option>'
+    this.selectTarget.disabled = true
     this.showLoading()
     
     try {
