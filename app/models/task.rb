@@ -47,7 +47,14 @@ class Task < ApplicationRecord
   end
 
   def docker_env_strings(additional_vars = [])
-    agent.env_strings + project.env_strings + user.env_strings + additional_vars
+    additional_env_array = case additional_vars
+    when Hash
+      additional_vars.map { |k, v| "#{k}=#{v}" }
+    else
+      Array(additional_vars)
+    end
+    
+    agent.env_strings + project.env_strings + user.env_strings + additional_env_array
   end
 
   def latest_repo_state
