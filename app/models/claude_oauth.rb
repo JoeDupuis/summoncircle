@@ -171,6 +171,7 @@ class ClaudeOauth
   end
 
   def clean_logs(logs)
-    logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
+    # Docker prefixes each line with 8 bytes of metadata that need to be stripped
+    logs.force_encoding("UTF-8").scrub.lines.map { |line| line[8..] || "" }.join.strip
   end
 end

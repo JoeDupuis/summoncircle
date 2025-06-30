@@ -24,7 +24,8 @@ class DockerGitCommand
 
     wait_result = git_container.wait(300)
     logs = git_container.logs(stdout: true, stderr: true)
-    clean_logs = logs.dup.force_encoding("UTF-8").scrub.gsub(/^.{8}/m, "").strip
+    # Docker prefixes each line with 8 bytes of metadata that need to be stripped
+    clean_logs = logs.dup.force_encoding("UTF-8").scrub.lines.map { |line| line[8..] || "" }.join.strip
     exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
 
     if exit_code && exit_code != 0

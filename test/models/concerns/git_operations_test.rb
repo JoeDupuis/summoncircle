@@ -123,12 +123,11 @@ class GitOperationsTest < ActiveSupport::TestCase
     task.workplace_mount
 
     # Mock git branch output with detached HEAD
-    # Note: DockerGitCommand strips first 8 chars from each line for Docker log prefixes
     git_branch_output = <<~OUTPUT
-      XXXXXXXX* main
-      XXXXXXXX  feature-branch
-      XXXXXXXX  (HEAD detached at 7aae1c2)
-      XXXXXXXX  another-branch
+      * main
+        feature-branch
+        (HEAD detached at 7aae1c2)
+        another-branch
     OUTPUT
 
     Docker::Container.expects(:create).with do |config|
@@ -162,7 +161,9 @@ class GitOperationsTest < ActiveSupport::TestCase
     container.expects(:start)
     container.expects(:exec).with(anything).at_least(0).at_most(8)
     container.expects(:wait).returns({ "StatusCode" => 0 })
-    container.expects(:logs).returns(output)
+    # Docker prefixes each line with 8 bytes of metadata
+    docker_output = output.lines.map { |line| "\x01\x00\x00\x00\x00\x00\x00\x00#{line}" }.join
+    container.expects(:logs).returns(docker_output)
     container.expects(:delete)
     container
   end
