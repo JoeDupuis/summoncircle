@@ -3,10 +3,10 @@ module DockerTestHelper
   # Docker format: [stream_type(1)][reserved(3)][size(4)][data(size)]
   def docker_log_output(content, stream_type: 1)
     return "" if content.nil?
-    
+
     # Stream type: 1 = stdout, 2 = stderr
-    header = [stream_type, 0, 0, 0].pack("C*")  # 4 bytes
-    size = [content.bytesize].pack("N")         # 4 bytes big-endian
+    header = [ stream_type, 0, 0, 0 ].pack("C*")  # 4 bytes
+    size = [ content.bytesize ].pack("N")         # 4 bytes big-endian
     header + size + content
   end
 
@@ -17,10 +17,10 @@ module DockerTestHelper
     container.expects(:wait).returns({ "StatusCode" => status_code })
     container.expects(:logs).with(stdout: true, stderr: true).returns(docker_log_output(output))
     container.expects(:delete).with(force: true)
-    
+
     # Support for exec calls (used by SSH setup)
     container.expects(:exec).with(anything).at_least(0)
-    
+
     container
   end
 

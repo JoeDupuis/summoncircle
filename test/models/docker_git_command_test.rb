@@ -2,7 +2,7 @@ require "test_helper"
 
 class DockerGitCommandTest < ActiveSupport::TestCase
   include DockerTestHelper
-  
+
   setup do
     @task = tasks(:without_runs)
     @project = @task.project

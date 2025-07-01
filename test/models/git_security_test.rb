@@ -111,6 +111,4 @@ class GitSecurityTest < ActiveSupport::TestCase
 
     task.push_changes_to_branch
   end
-
-
 end

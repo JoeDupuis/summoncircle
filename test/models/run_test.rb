@@ -2,7 +2,7 @@ require "test_helper"
 
 class RunTest < ActiveSupport::TestCase
   include DockerTestHelper
-  
+
   setup do
     Task.any_instance.stubs(:branches).returns([])
   end

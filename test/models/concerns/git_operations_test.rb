@@ -144,5 +144,4 @@ class GitOperationsTest < ActiveSupport::TestCase
     assert_includes branches, "another-branch"
     refute_includes branches, "(HEAD detached at 7aae1c2)"
   end
-
 end
