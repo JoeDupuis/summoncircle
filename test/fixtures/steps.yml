@@ -11,3 +11,9 @@ error_step:
   type: "Step::Error"
   raw_response: '{"error": "Something went wrong"}'
   content: "Error: Something went wrong"
+
+bash_tool:
+  run: one
+  type: "Step::BashTool"
+  raw_response: '{"type": "assistant", "message": {"content": [{"type": "tool_use", "name": "Bash", "input": {"command": "echo test"}}]}}'
+  content: "echo test"

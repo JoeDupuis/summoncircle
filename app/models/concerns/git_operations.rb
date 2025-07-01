@@ -165,6 +165,8 @@ module GitOperations
         Rails.logger.error "Failed to capture git diff: #{e.message}"
       end
 
+      # IMPORTANT: Do not filter diffs - they should be stored exactly as captured
+      # to prevent corruption of code content (e.g., "else" becoming "e" if "els" is filtered)
       repo_state_step.repo_states.create!(
         uncommitted_diff: diff_output,
         target_branch_diff: target_branch_diff,

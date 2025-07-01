@@ -1,4 +1,6 @@
 class Secret < ApplicationRecord
+  include SecretValidation
+  
   belongs_to :secretable, polymorphic: true
 
   encrypts :value, deterministic: false
