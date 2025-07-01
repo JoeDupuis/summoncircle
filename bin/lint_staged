@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+
+staged_rb_files = `git diff --cached --name-only`.split("\n").select { |f| f.end_with?('.rb') }
+
+unless staged_rb_files.empty?
+  puts "Running rubocop on staged Ruby files..."
+  absolute_paths = staged_rb_files.map { |f| File.expand_path(f) }
+  system("bundle exec rubocop -A #{absolute_paths.join(' ')}")
+
+  # Re-add files that were modified by rubocop
+  staged_rb_files.each do |file|
+    system("git add #{file}") if File.exist?(file)
+  end
+end
+
+# Strip trailing whitespace from all staged files
+staged_files = `git diff --cached --name-only --diff-filter=ACM`.split("\n")
+staged_files.each do |file|
+  if File.exist?(file)
+    content = File.read(file)
+    new_content = content.gsub(/[ \t]+$/, '')
+    if content != new_content
+      File.write(file, new_content)
+      system("git add #{file}")
+    end
+  end
+end

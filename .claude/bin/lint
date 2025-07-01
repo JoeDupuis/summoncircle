@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require 'json'
+
+system("$(git rev-parse --show-toplevel)/bin/lint_staged")

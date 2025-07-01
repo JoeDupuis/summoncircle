@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+input = $stdin.read
+
+File.open('.claude/hook_log.txt', 'a') do |file|
+  file.puts "=== #{Time.now} ==="
+  file.puts input
+  file.puts ""
+end
