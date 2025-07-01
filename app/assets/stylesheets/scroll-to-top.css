@@ -28,6 +28,12 @@
   visibility: visible;
 }
 
+.panel-scroll-to-top {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+}
+
 @media (max-width: 768px) {
   .scroll-to-top {
     bottom: 15px;
@@ -35,5 +41,9 @@
     width: 45px;
     height: 45px;
     font-size: 20px;
+  }
+
+  .panel-scroll-to-top {
+    display: none;
   }
 }
