@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -e
+
+echo "Running checks..."
+
+echo "Running security analysis..."
+bin/brakeman --no-pager
+
+echo "Running tests..."
+bin/rails t
+
+echo "All checks passed!"

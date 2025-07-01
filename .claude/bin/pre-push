@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+
+require 'json'
+
+# Check if stdin contains git push commands
+if STDIN.tty?
+  # No stdin, don't run checks
+  exit 0
+else
+  # Read stdin
+  stdin_content = STDIN.read
+
+  begin
+    # Parse the JSON
+    data = JSON.parse(stdin_content)
+
+    # Check if it's a git push command or mcp__github__push_files
+    if data['tool_name'] == 'Bash' && data['tool_input'] && data['tool_input']['command'] && data['tool_input']['command'].match(/^git\s+push/)
+      system("$(git rev-parse --show-toplevel)/bin/checks")
+      unless $?.success?
+        $stderr.puts "\nPre-push checks failed! Run 'bin/checks' to see what went wrong."
+        exit 2
+      end
+    elsif data['tool_name'] == 'mcp__github__push_files'
+      system("$(git rev-parse --show-toplevel)/bin/checks")
+      unless $?.success?
+        $stderr.puts "\nPre-push checks failed! Run 'bin/checks' to see what went wrong."
+        exit 2
+      end
+    else
+      # Not a git push, don't run checks
+      exit 0
+    end
+  end
+end
