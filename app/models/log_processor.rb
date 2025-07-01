@@ -18,7 +18,7 @@ class LogProcessor
     container.wait
     logs = container.logs(stdout: true, stderr: true)
     # Docker logs prefix each line with 8 bytes of metadata that we need to strip
-    clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
+    clean_logs = logs.force_encoding("UTF-8").scrub.lines.map { |line| line[8..] || "" }.join.strip
 
     step_data_list = process(clean_logs)
     step_data_list.each do |step_data|
