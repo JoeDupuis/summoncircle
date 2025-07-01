@@ -17,6 +17,7 @@ This is a rails project using the default stack:
 
 # Git
 - Never put yourself as co-author.
+- If you call git commit do it in a separate call. Never chain git add and git commit.
 
 # Worktrees
 - A `/worktrees` directory exists for agent-specific worktrees. Only the `.keep`
