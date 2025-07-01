@@ -526,7 +526,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
       -  puts "hello"
       +  puts "hello world"
     DIFF
-    
+
     docker_output = add_docker_headers(diff_content)
 
     container.expects(:logs).with(stdout: true, stderr: true).returns(docker_output)
@@ -569,7 +569,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
 
       Line 3
     OUTPUT
-    
+
     docker_output = add_docker_headers(test_output)
 
     container.expects(:logs).returns(docker_output)
