@@ -74,7 +74,7 @@ class TaskTest < ActiveSupport::TestCase
   test "docker_env_strings with no additional vars" do
     task = tasks(:one)
     env_strings = task.docker_env_strings
-    
+
     # Should include environment variables from agent, project, and user
     assert_kind_of Array, env_strings
     assert env_strings.all? { |str| str.is_a?(String) && str.include?("=") }
@@ -82,9 +82,9 @@ class TaskTest < ActiveSupport::TestCase
 
   test "docker_env_strings with array of additional vars" do
     task = tasks(:one)
-    additional_vars = ["FOO=bar", "BAZ=qux"]
+    additional_vars = [ "FOO=bar", "BAZ=qux" ]
     env_strings = task.docker_env_strings(additional_vars)
-    
+
     assert env_strings.include?("FOO=bar")
     assert env_strings.include?("BAZ=qux")
   end
@@ -93,7 +93,7 @@ class TaskTest < ActiveSupport::TestCase
     task = tasks(:one)
     additional_vars = { "FOO" => "bar", "BAZ" => "qux" }
     env_strings = task.docker_env_strings(additional_vars)
-    
+
     assert env_strings.include?("FOO=bar")
     assert env_strings.include?("BAZ=qux")
   end
@@ -102,7 +102,7 @@ class TaskTest < ActiveSupport::TestCase
     task = tasks(:one)
     env_strings_base = task.docker_env_strings
     env_strings_with_empty_hash = task.docker_env_strings({})
-    
+
     assert_equal env_strings_base, env_strings_with_empty_hash
   end
 
@@ -110,7 +110,7 @@ class TaskTest < ActiveSupport::TestCase
     task = tasks(:one)
     env_strings_base = task.docker_env_strings
     env_strings_with_nil = task.docker_env_strings(nil)
-    
+
     assert_equal env_strings_base, env_strings_with_nil
   end
 end

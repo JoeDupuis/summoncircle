@@ -53,7 +53,7 @@ class Task < ApplicationRecord
     else
       Array(additional_vars)
     end
-    
+
     agent.env_strings + project.env_strings + user.env_strings + additional_env_array
   end
 
