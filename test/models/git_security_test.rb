@@ -1,6 +1,7 @@
 require "test_helper"
 
 class GitSecurityTest < ActiveSupport::TestCase
+  include DockerTestHelper
   setup do
     Task.any_instance.stubs(:branches).returns([])
   end
@@ -109,30 +110,5 @@ class GitSecurityTest < ActiveSupport::TestCase
     end.returns(mock_container)
 
     task.push_changes_to_branch
-  end
-
-
-  private
-
-  def mock_container
-    container = mock("container")
-    container.expects(:start)
-    container.expects(:exec).with(anything).at_least(0).at_most(8)
-    container.expects(:wait).returns({ "StatusCode" => 0 })
-    container.expects(:logs).returns("Success")
-    container.expects(:delete)
-    container
-  end
-
-  def mock_container_with_output(output)
-    container = mock("container")
-    container.expects(:start)
-    container.expects(:exec).with(anything).at_least(0).at_most(8)
-    container.expects(:wait).returns({ "StatusCode" => 0 })
-    # Docker prefixes each line with 8 bytes of metadata
-    docker_output = output.lines.map { |line| "\x01\x00\x00\x00\x00\x00\x00\x00#{line}" }.join
-    container.expects(:logs).returns(docker_output)
-    container.expects(:delete)
-    container
   end
 end
