@@ -162,7 +162,7 @@ class Run < ApplicationRecord
     Docker::Container.create(
       "Image" => agent.docker_image,
       "Cmd" => command,
-      "Env" => task.docker_env_strings(ENV.slice("DOCKER_URL")),
+      "Env" => task.docker_env_strings(ENV.slice("DOCKER_HOST")),
       "User" => agent.user_id.to_s,
       "WorkingDir" => task.agent.workplace_path,
       "HostConfig" => {

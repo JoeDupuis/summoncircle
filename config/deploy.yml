@@ -47,7 +47,7 @@ env:
     SOLID_QUEUE_IN_PUMA: true
 
     # Docker daemon URL for agent containers
-    DOCKER_URL: tcp://172.18.0.1:2375
+    DOCKER_HOST: tcp://172.18.0.1:2375
 
     # Enable proxy links and target containers directly when running in container
     CONTAINER_PROXY_LINKS: "1"
