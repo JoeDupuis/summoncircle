@@ -1,6 +1,8 @@
 require "docker"
 
 class ClaudeOauth
+  include DockerStreamProcessor
+
   OAUTH_IMAGE = "joedupuis/claude_oauth:latest"
   VOLUME_NAME = "claude_config"
 
@@ -19,7 +21,7 @@ class ClaudeOauth
     container.start
     wait_result = container.wait(30)
     logs = container.logs(stdout: true, stderr: true)
-    output = clean_logs(logs)
+    output = process_docker_stream(logs)
 
     if wait_result["StatusCode"] == 0
       # Extract the OAuth URL from the output
@@ -43,7 +45,7 @@ class ClaudeOauth
     container.start
     wait_result = container.wait(60)
     logs = container.logs(stdout: true, stderr: true)
-    output = clean_logs(logs)
+    output = process_docker_stream(logs)
 
     if wait_result["StatusCode"] == 0
       # Check if credentials were saved
@@ -66,7 +68,7 @@ class ClaudeOauth
     container.start
     wait_result = container.wait(60)
     logs = container.logs(stdout: true, stderr: true)
-    output = clean_logs(logs)
+    output = process_docker_stream(logs)
 
     if wait_result["StatusCode"] == 0
       output.include?("Token refreshed successfully!")
@@ -91,7 +93,7 @@ class ClaudeOauth
     container.start
     wait_result = container.wait(10)
     logs = container.logs(stdout: true, stderr: true)
-    output = clean_logs(logs).strip
+    output = process_docker_stream(logs).strip
 
     output == "yes"
   ensure
@@ -114,7 +116,7 @@ class ClaudeOauth
     container.start
     wait_result = container.wait(10)
     logs = container.logs(stdout: true, stderr: true)
-    output = clean_logs(logs).strip
+    output = process_docker_stream(logs).strip
 
     if wait_result["StatusCode"] == 0 && output.present?
       begin
@@ -168,10 +170,5 @@ class ClaudeOauth
     end
   rescue Docker::Error::NotFoundError
     raise "OAuth Docker image not found. Please build it using the claude_oauth repository."
-  end
-
-  def clean_logs(logs)
-    # Docker prefixes each line with 8 bytes of metadata that need to be stripped
-    logs.force_encoding("UTF-8").scrub.lines.map { |line| line[8..] || "" }.join.strip
   end
 end

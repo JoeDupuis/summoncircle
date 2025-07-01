@@ -8,10 +8,13 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     @agent = @task.agent
   end
 
-  # Helper to add Docker's 8-byte header to each line of output
+  # Helper to add Docker's 8-byte header to output
+  # Docker sends output as chunks with headers, not line-by-line
   def add_docker_headers(output)
-    docker_header = "\x01\x00\x00\x00\x00\x00\x00\x00"
-    output.lines.map { |line| docker_header + line }.join
+    # Stream type 1 (stdout), 3 reserved bytes, then size in big-endian
+    stream_type = "\x01\x00\x00\x00"
+    size = [ output.bytesize ].pack("N")
+    stream_type + size + output
   end
 
   test "initialize sets all attributes correctly" do
