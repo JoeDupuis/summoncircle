@@ -4,8 +4,12 @@ class RunTest < ActiveSupport::TestCase
   setup do
     Task.any_instance.stubs(:branches).returns([])
   end
-  # Docker prefixes logs with 8 bytes of metadata
-  DOCKER_LOG_HEADER = "\x01\x00\x00\x00\x00\x00\x00\x00"
+  # Helper to create Docker log header with correct size
+  def docker_log_header(content)
+    stream_type = "\x01\x00\x00\x00"
+    size = [content.bytesize].pack("N")
+    stream_type + size
+  end
 
   def mock_docker_git_command
     # Create a mock that handles execute calls based on the command
@@ -526,7 +530,8 @@ class RunTest < ActiveSupport::TestCase
     mcp_container = mock("mcp_container")
     mcp_container.expects(:start)
     mcp_container.expects(:wait).returns({ "StatusCode" => 1 })
-    mcp_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "MCP error")
+    output = "MCP error"
+    mcp_container.expects(:logs).with(stdout: true, stderr: true).returns(docker_log_header(output) + output)
     mcp_container.expects(:delete).with(force: true)
 
     # Mock git operations
@@ -715,7 +720,7 @@ class RunTest < ActiveSupport::TestCase
     mock_container.expects(:id).returns("test-container-id-123")
     mock_container.expects(:start)
     mock_container.expects(:wait).returns({ "StatusCode" => 0 })
-    mock_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + output)
+    mock_container.expects(:logs).with(stdout: true, stderr: true).returns(docker_log_header(output) + output)
     mock_container.expects(:delete).with(force: true)
     mock_container
   end
@@ -724,7 +729,7 @@ class RunTest < ActiveSupport::TestCase
     git_container = mock("git_container")
     git_container.expects(:start)
     git_container.expects(:wait).returns({ "StatusCode" => status_code })
-    git_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + log_output)
+    git_container.expects(:logs).with(stdout: true, stderr: true).returns(docker_log_header(log_output) + log_output)
     git_container.expects(:delete).with(force: true)
     git_container
   end
@@ -788,7 +793,8 @@ class RunTest < ActiveSupport::TestCase
     git_diff_container = mock("git_diff_container")
     git_diff_container.expects(:start)
     git_diff_container.expects(:wait).returns({ "StatusCode" => 0 })
-    git_diff_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "")
+    empty_output = ""
+    git_diff_container.expects(:logs).with(stdout: true, stderr: true).returns(docker_log_header(empty_output) + empty_output)
     git_diff_container.expects(:delete).with(force: true)
 
     Docker::Container.expects(:create).with(
@@ -804,7 +810,8 @@ class RunTest < ActiveSupport::TestCase
       target_diff_container = mock("target_diff_container")
       target_diff_container.expects(:start)
       target_diff_container.expects(:wait).returns({ "StatusCode" => 0 })
-      target_diff_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + "")
+      empty_output = ""
+      target_diff_container.expects(:logs).with(stdout: true, stderr: true).returns(docker_log_header(empty_output) + empty_output)
       target_diff_container.expects(:delete).with(force: true)
 
       Docker::Container.expects(:create).with(
@@ -821,7 +828,7 @@ class RunTest < ActiveSupport::TestCase
     setup_container = mock("setup_container")
     setup_container.expects(:start)
     setup_container.expects(:wait).returns({ "StatusCode" => status_code })
-    setup_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + output)
+    setup_container.expects(:logs).with(stdout: true, stderr: true).returns(docker_log_header(output) + output)
     setup_container.expects(:delete).with(force: true)
 
     expectations = {
@@ -845,7 +852,7 @@ class RunTest < ActiveSupport::TestCase
     mcp_container.expects(:start)
     mcp_container.expects(:wait).returns({ "StatusCode" => status_code })
     if status_code != 0
-      mcp_container.expects(:logs).with(stdout: true, stderr: true).returns(DOCKER_LOG_HEADER + output)
+      mcp_container.expects(:logs).with(stdout: true, stderr: true).returns(docker_log_header(output) + output)
     end
     mcp_container.expects(:delete).with(force: true)
 

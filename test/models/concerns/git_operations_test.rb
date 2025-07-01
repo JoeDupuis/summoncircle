@@ -151,7 +151,12 @@ class GitOperationsTest < ActiveSupport::TestCase
     container.expects(:start)
     container.expects(:exec).with(anything).at_least(0).at_most(8)
     container.expects(:wait).returns({ "StatusCode" => 0 })
-    container.expects(:logs).returns("Success")
+    # Add Docker header to the output
+    output = "Success"
+    stream_type = "\x01\x00\x00\x00"
+    size = [output.bytesize].pack("N")
+    docker_output = stream_type + size + output
+    container.expects(:logs).returns(docker_output)
     container.expects(:delete)
     container
   end
@@ -161,8 +166,10 @@ class GitOperationsTest < ActiveSupport::TestCase
     container.expects(:start)
     container.expects(:exec).with(anything).at_least(0).at_most(8)
     container.expects(:wait).returns({ "StatusCode" => 0 })
-    # Docker prefixes each line with 8 bytes of metadata
-    docker_output = output.lines.map { |line| "\x01\x00\x00\x00\x00\x00\x00\x00#{line}" }.join
+    # Docker sends output as chunks with 8-byte headers, not line-by-line
+    stream_type = "\x01\x00\x00\x00"
+    size = [output.bytesize].pack("N")
+    docker_output = stream_type + size + output
     container.expects(:logs).returns(docker_output)
     container.expects(:delete)
     container
