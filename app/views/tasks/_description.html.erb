@@ -1,3 +1,6 @@
 <%= turbo_frame_tag "task_#{task.id}_description" do %>
+  <turbo-stream action="update" target="page-title">
+    <template>Task: <%= task.description.presence || "Task ##{task.id}" %> - Summoncircle</template>
+  </turbo-stream>
   <%= link_to task.description.presence || "Task ##{task.id}", edit_task_path(task), style: "cursor: pointer; text-decoration: none; color: inherit;" %>
 <% end %>
