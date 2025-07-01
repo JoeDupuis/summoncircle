@@ -1,20 +1,13 @@
 require "test_helper"
 
 class DockerGitCommandTest < ActiveSupport::TestCase
+  include DockerTestHelper
+  
   setup do
     @task = tasks(:without_runs)
     @project = @task.project
     @user = @task.user
     @agent = @task.agent
-  end
-
-  # Helper to add Docker's 8-byte header to output
-  # Docker sends output as chunks with headers, not line-by-line
-  def add_docker_headers(output)
-    # Stream type 1 (stdout), 3 reserved bytes, then size in big-endian
-    stream_type = "\x01\x00\x00\x00"
-    size = [ output.bytesize ].pack("N")
-    stream_type + size + output
   end
 
   test "initialize sets all attributes correctly" do
@@ -45,7 +38,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container = mock("container")
     container.expects(:start)
     container.expects(:wait).with(300).returns({ "StatusCode" => 0 })
-    container.expects(:logs).with(stdout: true, stderr: true).returns(add_docker_headers("clean"))
+    container.expects(:logs).with(stdout: true, stderr: true).returns(docker_log_output("clean"))
     container.expects(:delete).with(force: true)
 
     Docker::Container.expects(:create).with(
@@ -75,7 +68,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container = mock("container")
     container.expects(:start)
     container.expects(:wait).with(300).returns({ "StatusCode" => 0 })
-    container.expects(:logs).with(stdout: true, stderr: true).returns(add_docker_headers("main\ndevelop"))
+    container.expects(:logs).with(stdout: true, stderr: true).returns(docker_log_output("main\ndevelop"))
     container.expects(:delete).with(force: true)
 
     Docker::Container.expects(:create).returns(container)
@@ -94,7 +87,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container = mock("container")
     container.expects(:start)
     container.expects(:wait).with(300).returns({ "StatusCode" => 128 })
-    container.expects(:logs).with(stdout: true, stderr: true).returns(add_docker_headers("fatal: repository not found"))
+    container.expects(:logs).with(stdout: true, stderr: true).returns(docker_log_output("fatal: repository not found"))
     container.expects(:delete).with(force: true)
 
     Docker::Container.expects(:create).returns(container)
@@ -133,7 +126,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container = mock("container")
     container.expects(:start)
     container.expects(:wait).returns({ "StatusCode" => 0 })
-    container.expects(:logs).returns(add_docker_headers("files"))
+    container.expects(:logs).returns(docker_log_output("files"))
     container.expects(:delete)
 
     Docker::Container.expects(:create).with(
@@ -158,7 +151,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container = mock("container")
     container.expects(:start)
     container.expects(:wait).returns({ "StatusCode" => 0 })
-    container.expects(:logs).returns(add_docker_headers("files"))
+    container.expects(:logs).returns(docker_log_output("files"))
     container.expects(:delete)
 
     Docker::Container.expects(:create).with(
@@ -179,7 +172,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container = mock("container")
     container.expects(:start)
     container.expects(:wait).returns({ "StatusCode" => 0 })
-    container.expects(:logs).returns(add_docker_headers("files"))
+    container.expects(:logs).returns(docker_log_output("files"))
     container.expects(:delete)
 
     Docker::Container.expects(:create).with(
@@ -202,7 +195,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container = mock("container")
     container.expects(:start)
     container.expects(:wait).returns({ "StatusCode" => 0 })
-    container.expects(:logs).returns(add_docker_headers("success"))
+    container.expects(:logs).returns(docker_log_output("success"))
     container.expects(:delete)
 
     Docker::Container.expects(:create).with do |config|
@@ -228,7 +221,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container = mock("container")
     container.expects(:start)
     container.expects(:wait).returns({ "StatusCode" => 0 })
-    container.expects(:logs).returns(add_docker_headers("success"))
+    container.expects(:logs).returns(docker_log_output("success"))
     container.expects(:delete)
 
     Docker::Container.expects(:create).with do |config|
@@ -260,7 +253,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container.expects(:exec).with([ "chmod", "600", "/home/user/.ssh/id_rsa" ])
     container.expects(:exec).with([ "chmod", "700", "/home/user/.ssh" ])
     container.expects(:wait).returns({ "StatusCode" => 0 })
-    container.expects(:logs).returns(add_docker_headers("success"))
+    container.expects(:logs).returns(docker_log_output("success"))
     container.expects(:delete)
 
     Docker::Container.expects(:create).returns(container)
@@ -282,7 +275,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container.expects(:start)
     container.expects(:exec).never
     container.expects(:wait).returns({ "StatusCode" => 0 })
-    container.expects(:logs).returns(add_docker_headers("success"))
+    container.expects(:logs).returns(docker_log_output("success"))
     container.expects(:delete)
 
     Docker::Container.expects(:create).returns(container)
@@ -305,7 +298,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container.expects(:start)
     container.expects(:exec).with([ "mkdir", "-p", "/home/user/.ssh" ]).raises(StandardError, "Permission denied")
     container.expects(:wait).returns({ "StatusCode" => 0 })
-    container.expects(:logs).returns(add_docker_headers("success"))
+    container.expects(:logs).returns(docker_log_output("success"))
     container.expects(:delete)
 
     Docker::Container.expects(:create).returns(container)
@@ -328,7 +321,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container = mock("container")
     container.expects(:start)
     container.expects(:wait).returns({ "StatusCode" => 128 })
-    container.expects(:logs).returns(add_docker_headers("Permission denied (publickey)"))
+    container.expects(:logs).returns(docker_log_output("Permission denied (publickey)"))
     container.expects(:delete)
 
     Docker::Container.expects(:create).returns(container)
@@ -352,7 +345,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container.expects(:start)
     container.expects(:exec).never # No SSH setup because mount path is missing
     container.expects(:wait).returns({ "StatusCode" => 128 })
-    container.expects(:logs).returns(add_docker_headers("Could not read from remote repository"))
+    container.expects(:logs).returns(docker_log_output("Could not read from remote repository"))
     container.expects(:delete)
 
     Docker::Container.expects(:create).returns(container)
@@ -376,7 +369,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container.expects(:start)
     container.expects(:exec).times(4) # SSH setup calls
     container.expects(:wait).returns({ "StatusCode" => 128 })
-    container.expects(:logs).returns(add_docker_headers("Permission denied (publickey)"))
+    container.expects(:logs).returns(docker_log_output("Permission denied (publickey)"))
     container.expects(:delete)
 
     Docker::Container.expects(:create).returns(container)
@@ -398,7 +391,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container = mock("container")
     container.expects(:start)
     container.expects(:wait).returns({ "StatusCode" => 128 })
-    container.expects(:logs).returns(add_docker_headers("fatal: repository not found"))
+    container.expects(:logs).returns(docker_log_output("fatal: repository not found"))
     container.expects(:delete)
 
     Docker::Container.expects(:create).returns(container)
@@ -420,7 +413,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container.expects(:wait).returns({ "StatusCode" => 0 })
     # Docker header (8 bytes) + content with invalid UTF-8
     # Test with invalid UTF-8 in the content
-    container.expects(:logs).returns(add_docker_headers("test\xFFlog"))
+    container.expects(:logs).returns(docker_log_output("test\xFFlog"))
     container.expects(:delete)
 
     Docker::Container.expects(:create).returns(container)
@@ -446,7 +439,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container = mock("container")
     container.expects(:start)
     container.expects(:wait).returns({ "StatusCode" => 0 })
-    container.expects(:logs).returns(add_docker_headers("success"))
+    container.expects(:logs).returns(docker_log_output("success"))
     container.expects(:delete)
 
     Docker::Container.expects(:create).with do |config|
@@ -470,7 +463,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container = mock("container")
     container.expects(:start)
     container.expects(:wait).returns({ "StatusCode" => 0 })
-    container.expects(:logs).returns(add_docker_headers("success"))
+    container.expects(:logs).returns(docker_log_output("success"))
     container.expects(:delete)
 
     # The agent's env_strings are already part of the config["Env"] array
@@ -496,7 +489,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
     container = mock("container")
     container.expects(:start)
     container.expects(:wait).returns({ "StatusCode" => 0 })
-    container.expects(:logs).returns(add_docker_headers(expected_dir))
+    container.expects(:logs).returns(docker_log_output(expected_dir))
     container.expects(:delete)
 
     Docker::Container.expects(:create).with(
@@ -530,7 +523,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
       +  puts "hello world"
     DIFF
 
-    docker_output = add_docker_headers(diff_content)
+    docker_output = docker_log_output(diff_content)
 
     container.expects(:logs).with(stdout: true, stderr: true).returns(docker_output)
     container.expects(:delete).with(force: true)
@@ -573,7 +566,7 @@ class DockerGitCommandTest < ActiveSupport::TestCase
       Line 3
     OUTPUT
 
-    docker_output = add_docker_headers(test_output)
+    docker_output = docker_log_output(test_output)
 
     container.expects(:logs).returns(docker_output)
     container.expects(:delete)

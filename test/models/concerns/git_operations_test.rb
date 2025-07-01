@@ -1,6 +1,7 @@
 require "test_helper"
 
 class GitOperationsTest < ActiveSupport::TestCase
+  include DockerTestHelper
   setup do
     Task.any_instance.stubs(:branches).returns([])
   end
@@ -144,34 +145,4 @@ class GitOperationsTest < ActiveSupport::TestCase
     refute_includes branches, "(HEAD detached at 7aae1c2)"
   end
 
-  private
-
-  def mock_container
-    container = mock("container")
-    container.expects(:start)
-    container.expects(:exec).with(anything).at_least(0).at_most(8)
-    container.expects(:wait).returns({ "StatusCode" => 0 })
-    # Add Docker header to the output
-    output = "Success"
-    stream_type = "\x01\x00\x00\x00"
-    size = [output.bytesize].pack("N")
-    docker_output = stream_type + size + output
-    container.expects(:logs).returns(docker_output)
-    container.expects(:delete)
-    container
-  end
-
-  def mock_container_with_output(output)
-    container = mock("container")
-    container.expects(:start)
-    container.expects(:exec).with(anything).at_least(0).at_most(8)
-    container.expects(:wait).returns({ "StatusCode" => 0 })
-    # Docker sends output as chunks with 8-byte headers, not line-by-line
-    stream_type = "\x01\x00\x00\x00"
-    size = [output.bytesize].pack("N")
-    docker_output = stream_type + size + output
-    container.expects(:logs).returns(docker_output)
-    container.expects(:delete)
-    container
-  end
 end
