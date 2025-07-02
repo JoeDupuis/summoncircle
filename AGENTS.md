@@ -32,6 +32,9 @@ This is a rails project using the default stack:
 - Stick to the default RESTful actions: `new`, `create`, `index`, `show`, `edit`, `update`, `destroy`.
 - Avoid notice and alert copy in controller. use failure_message and success_message in NoticeI18n. Do not use the failure_message when rendering a failure to save a model since the form will show the validation error anyway.
 
+# Views
+- Use the `form_errors` helper instead of rendering the validation errors manually.
+
 # Ruby
 - Prefer zeitwerk over using require and prefer putting require at the top of the file instead of in a method.
 
