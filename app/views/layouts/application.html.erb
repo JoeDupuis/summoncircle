@@ -40,5 +40,12 @@
         <%= current_git_branch || "unknown" %>
       </div>
     <% end %>
+    
+    <button data-controller="scroll-to-top" 
+            data-action="click->scroll-to-top#scrollToTop"
+            class="scroll-to-top" 
+            title="Scroll to top">
+      ↑
+    </button>
   </body>
 </html>
