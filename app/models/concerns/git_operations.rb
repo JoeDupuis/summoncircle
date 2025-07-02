@@ -10,6 +10,72 @@ module GitOperations
 
     validate_ssh_setup!(task, repository_url)
 
+    # Check if repository already exists
+    git_dir_path = if clone_target == "."
+      ".git"
+    else
+      "#{clone_target}/.git"
+    end
+
+    begin
+      # Check if .git directory exists
+      run_git_command(
+        task: task,
+        command: "test -d '#{git_dir_path}'",
+        working_dir: task.workplace_mount.container_path,
+        error_message: nil,
+        skip_repo_path: true
+      )
+
+      # If we get here, .git exists - verify it's the correct repository
+      current_remote = run_git_command(
+        task: task,
+        command: "git config --get remote.origin.url",
+        error_message: nil,
+        return_logs: true
+      ).strip
+
+      if current_remote == repository_url
+        # Same repository, just fetch latest changes
+        run_git_command(
+          task: task,
+          command: "git fetch origin",
+          error_message: "Failed to fetch from repository"
+        )
+
+        # Checkout the target branch if specified
+        if task.target_branch.present?
+          run_git_command(
+            task: task,
+            command: "git checkout '#{task.target_branch}'",
+            error_message: "Failed to checkout branch"
+          )
+        end
+      else
+        # Different repository, remove the old one and clone the new one
+        run_git_command(
+          task: task,
+          command: "rm -rf '#{clone_target}'",
+          working_dir: task.workplace_mount.container_path,
+          error_message: "Failed to remove existing repository",
+          skip_repo_path: true
+        )
+        perform_clone(task, repository_url, clone_target)
+      end
+    rescue DockerGitCommand::GitOperationError
+      # .git doesn't exist, proceed with clone
+      perform_clone(task, repository_url, clone_target)
+    end
+
+    # If target_branch was nil, detect and save the default branch
+    if task.target_branch.blank?
+      detect_and_save_default_branch(task)
+    end
+  end
+
+  private
+
+  def perform_clone(task, repository_url, clone_target)
     if task.target_branch.present?
       command = "git clone -b '#{task.target_branch}' '#{repository_url}' '#{clone_target}'"
     else
@@ -24,11 +90,6 @@ module GitOperations
       error_message: "Failed to clone repository",
       skip_repo_path: true  # Clone operates from workspace root
     )
-
-    # If target_branch was nil, detect and save the default branch
-    if task.target_branch.blank?
-      detect_and_save_default_branch(task)
-    end
   end
 
   def detect_and_save_default_branch(task)
