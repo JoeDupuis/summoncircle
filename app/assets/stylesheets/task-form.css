@@ -7,4 +7,9 @@
   & .selectors .field {
     flex: 1;
   }
+
+  & .selectors .field select {
+    width: 100%;
+    box-sizing: border-box;
+  }
 }
