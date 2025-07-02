@@ -21,24 +21,23 @@
   </div>
 <% end %>
 
-<div data-controller="tabs resizable-panels" class="codex-layout">
+<div data-controller="tabs resizable-panels scroll-to-top" class="codex-layout">
   <%= turbo_stream_from @task %>
   <div class="nav">
     <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="chat" class="tab chat-tab">Chat</button>
     <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="steps" class="tab -active">Runs</button>
   </div>
-  <div data-tabs-target="panel" data-resizable-panels-target="chat" data-panel-id="chat" class="chat-panel">
+  <div data-tabs-target="panel" data-resizable-panels-target="chat" data-panel-id="chat" data-scroll-to-top-target="container" class="chat-panel">
     <%= render "tasks/chat_panel", task: @task %>
-    <button data-controller="scroll-to-top"
+    <button data-scroll-to-top-target="button"
             data-action="click->scroll-to-top#scrollToTop"
-            data-scroll-to-top-container-value="chat"
             class="scroll-to-top panel-scroll-to-top"
             title="Scroll to top">
       ↑
     </button>
   </div>
   <div class="panel-divider" data-resizable-panels-target="divider" data-action="mousedown->resizable-panels#startResize"></div>
-  <div data-tabs-target="panel" data-resizable-panels-target="log" data-panel-id="steps" class="log-panel -active">
+  <div data-tabs-target="panel" data-resizable-panels-target="log" data-panel-id="steps" data-scroll-to-top-target="container" class="log-panel -active">
     <div id="runs-list" data-controller="auto-scroll">
       <% if @runs.any? %>
         <% @runs.each do |run| %>
@@ -67,9 +66,8 @@
         </div>
       <% end %>
     </div>
-    <button data-controller="scroll-to-top"
+    <button data-scroll-to-top-target="button"
             data-action="click->scroll-to-top#scrollToTop"
-            data-scroll-to-top-container-value="runs"
             class="scroll-to-top panel-scroll-to-top"
             title="Scroll to top">
       ↑
