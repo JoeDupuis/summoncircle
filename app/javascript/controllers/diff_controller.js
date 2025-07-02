@@ -101,5 +101,6 @@ export default class extends Controller {
     })
     
     diff2htmlUi.draw()
+    diff2htmlUi.highlightCode()
   }
 }
