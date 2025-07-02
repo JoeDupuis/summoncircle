@@ -1,8 +1,8 @@
 <div class="task-actions-header" id="task-actions-header">
-  <%= link_to 'Download Repository', task_repository_download_path(task), class: 'button', data: { turbo: false } %>
   <%= link_to 'Archive', task_path(task),
               data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to archive this task?' },
               class: 'button archive' %>
+  <%= link_to 'Download Repository', task_repository_download_path(task), class: 'button', data: { turbo: false } %>
   <% if (repo_state = task.latest_repo_state) %>
     <% diff_content = repo_state.git_diff.presence || repo_state.target_branch_diff.presence || repo_state.uncommitted_diff %>
     <% if diff_content.present? %>
