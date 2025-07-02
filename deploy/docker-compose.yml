@@ -24,7 +24,7 @@ services:
     env_file:
       - ./secrets.env
     environment:
-      - DOCKER_URL=tcp://docker-proxy:2375
+      - DOCKER_HOST=tcp://docker-proxy:2375
       - MCP_SSE_ENDPOINT=http://summoncircle:3000
       - SOLID_QUEUE_IN_PUMA=1
     volumes:
@@ -44,6 +44,11 @@ services:
 
   claude-oauth-helper:
     image: joedupuis/claude_oauth:latest
+    entrypoint: ["false"]
+    networks:
+      - summoncircle_network
+  summoncircle-claude-helper:
+    image: joedupuis/summoncircle_claude:latest
     entrypoint: ["false"]
     networks:
       - summoncircle_network

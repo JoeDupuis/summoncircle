@@ -69,11 +69,10 @@ module ApplicationHelper
   end
 
   def git_apply_command(diff_content)
-    <<~COMMAND.strip
-      (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF'
-      #{diff_content}
-      EOF
-      )
-    COMMAND
+    cleaned_diff = diff_content.lines.map(&:rstrip).join("\n").rstrip
+    %(cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF'
+#{cleaned_diff}
+EOF
+)
   end
 end

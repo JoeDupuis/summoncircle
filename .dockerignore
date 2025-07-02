@@ -56,3 +56,9 @@
 .devenv*
 devenv.local.nix
 vendor/bundle
+
+# Local worktrees used by parallel agents
+/worktrees/*
+!/worktrees/.keep
+
+.claude/hook_log.txt

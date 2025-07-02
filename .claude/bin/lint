@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+
+require 'json'
+
+# Check if stdin contains git commit commands
+if STDIN.tty?
+  # No stdin, don't run lint
+  exit 0
+else
+  # Read stdin
+  stdin_content = STDIN.read
+
+  begin
+    # Parse the JSON
+    data = JSON.parse(stdin_content)
+
+    # Check if it's a git commit command
+    if data['tool_name'] == 'Bash' && data['tool_input'] && data['tool_input']['command'] && data['tool_input']['command'].match(/^git\s+commit/)
+      system("$(git rev-parse --show-toplevel)/bin/lint_staged")
+    elsif data['tool_name'] == 'mcp__git__git_commit'
+      system("$(git rev-parse --show-toplevel)/bin/lint_staged")
+    else
+      # Not a git commit, don't run lint
+      exit 0
+    end
+  end
+end

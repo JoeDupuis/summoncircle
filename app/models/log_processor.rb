@@ -1,4 +1,6 @@
 class LogProcessor
+  include DockerStreamProcessor
+
   ALL = [
     LogProcessor::Text,
     LogProcessor::ClaudeJson,
@@ -17,8 +19,8 @@ class LogProcessor
     # Default behavior: wait for container, get logs, process them
     container.wait
     logs = container.logs(stdout: true, stderr: true)
-    # Docker logs prefix each line with 8 bytes of metadata that we need to strip
-    clean_logs = logs.gsub(/^.{8}/m, "").force_encoding("UTF-8").scrub.strip
+    # Process Docker's binary stream format
+    clean_logs = process_docker_stream(logs)
 
     step_data_list = process(clean_logs)
     step_data_list.each do |step_data|

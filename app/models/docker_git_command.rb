@@ -1,4 +1,6 @@
 class DockerGitCommand
+  include DockerStreamProcessor
+
   attr_reader :task, :command, :error_message, :return_logs, :working_dir, :skip_repo_path
 
   def initialize(task:, command:, error_message:, return_logs: false, working_dir: nil, skip_repo_path: false)
@@ -24,7 +26,10 @@ class DockerGitCommand
 
     wait_result = git_container.wait(300)
     logs = git_container.logs(stdout: true, stderr: true)
-    clean_logs = logs.dup.force_encoding("UTF-8").scrub.gsub(/^.{8}/m, "").strip
+    # Docker prefixes output chunks with 8 bytes of metadata
+    # Format: [stream(1)][reserved(3)][size(4)][data(size)]
+    # Multiple chunks may be concatenated in the output
+    clean_logs = process_docker_stream(logs)
     exit_code = wait_result["StatusCode"] if wait_result.is_a?(Hash)
 
     if exit_code && exit_code != 0

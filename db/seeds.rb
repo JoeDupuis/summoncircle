@@ -41,7 +41,7 @@ end
 
 # Create agents
 haiku_agent = Agent.find_or_create_by!(name: "Haiku (Task namer)") do |agent|
-  agent.docker_image = "joedupuis/claude_oauth:latest"
+  agent.docker_image = "joedupuis/summoncircle_claude:latest"
   agent.workplace_path = "/workspace"
   agent.home_path = "/home/claude"
   agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
@@ -60,7 +60,7 @@ Volume.find_or_create_by!(agent: haiku_agent, name: "claude_projects") do |volum
 end
 
 sonnet_agent = Agent.find_or_create_by!(name: "Sonnet") do |agent|
-  agent.docker_image = "joedupuis/claude_oauth:latest"
+  agent.docker_image = "joedupuis/summoncircle_claude:latest"
   agent.workplace_path = "/workspace"
   agent.home_path = "/home/claude"
   agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"
@@ -80,7 +80,7 @@ Volume.find_or_create_by!(agent: sonnet_agent, name: "claude_projects") do |volu
 end
 
 opus_agent = Agent.find_or_create_by!(name: "Opus") do |agent|
-  agent.docker_image = "joedupuis/claude_oauth:latest"
+  agent.docker_image = "joedupuis/summoncircle_claude:latest"
   agent.workplace_path = "/workspace"
   agent.home_path = "/home/claude"
   agent.instructions_mount_path = "/home/claude/.claude/CLAUDE.md"

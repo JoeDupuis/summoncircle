@@ -16,6 +16,7 @@ class Run < ApplicationRecord
   after_update_commit :broadcast_update
   after_create_commit :broadcast_chat_append
   after_update_commit :broadcast_chat_replace
+  after_create_commit :broadcast_initial_run
 
   def first_run?
     siblings.where.not(id: id).none?
@@ -48,6 +49,7 @@ class Run < ApplicationRecord
       broadcast_refresh_task_actions_header
       push_changes_if_enabled
       completed!
+      broadcast_refresh_task_header if first_run?
       broadcast_refresh_auto_push_form
     rescue => e
       error_message = "Error: #{e.message}\nBacktrace: #{e.backtrace.first(5).join("\n")}"
@@ -88,6 +90,28 @@ class Run < ApplicationRecord
     broadcast_replace_later_to(task,
       target: "task-actions-header",
       partial: "tasks/actions_header",
+      locals: { task: task })
+  end
+
+  def broadcast_initial_run
+    if first_run?
+      broadcast_replace_to(task,
+        target: "loading-placeholder",
+        partial: "tasks/run",
+        locals: { run: self })
+    else
+      broadcast_append_to(task,
+        target: "runs-list",
+        partial: "tasks/run",
+        locals: { run: self })
+    end
+  end
+
+  def broadcast_refresh_task_header
+    task.reload
+    broadcast_replace_later_to(task,
+      target: "task_header_content",
+      partial: "tasks/header_content",
       locals: { task: task })
   end
 
@@ -138,7 +162,7 @@ class Run < ApplicationRecord
     Docker::Container.create(
       "Image" => agent.docker_image,
       "Cmd" => command,
-      "Env" => task.docker_env_strings,
+      "Env" => task.docker_env_strings(ENV.slice("DOCKER_HOST")),
       "User" => agent.user_id.to_s,
       "WorkingDir" => task.agent.workplace_path,
       "HostConfig" => {

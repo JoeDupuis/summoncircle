@@ -54,8 +54,8 @@ class ContainerProxy
 
           if host.present? && port.present?
             # Update the host for the proxy but keep the original path
-            env["HTTP_HOST"] = "#{host}:#{port}"
-            env["SERVER_NAME"] = host
+            env["HTTP_HOST"] = "localhost"
+            env["SERVER_NAME"] = "localhost"
             env["SERVER_PORT"] = port.to_s
 
             # Create a new proxy instance with the backend

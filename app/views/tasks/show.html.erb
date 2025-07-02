@@ -1,3 +1,5 @@
+<% content_for :title, "#{@task.description} - Summoncircle" %>
+
 <% if flash[:shrimp_mode] %>
   <div data-controller="shrimp-rain"></div>
 <% end %>
@@ -12,50 +14,66 @@
             <%= render "description", task: @task %>
           </h1>
         </div>
-        <div class="task-details">
-          <span>Agent: <%= @task.agent.name %></span>
-          <span>Project: <%= @task.project.name %></span>
-          <% if @task.total_cost > 0 %>
-            <span>Total Cost: $<%= "%.6f" % @task.total_cost %></span>
-          <% end %>
+        <div id="task_header_content">
+          <%= render "tasks/header_content", task: @task %>
         </div>
-        <%= render "tasks/actions_header", task: @task %>
-        <% if Current.user&.github_token.present? %>
-          <%= render "tasks/auto_push_form", task: @task %>
-        <% end %>
-        <% if @task.project.dev_dockerfile_path.present? %>
-          <%= render "tasks/docker_controls", task: @task %>
-        <% end %>
       </div>
       <div class="nav-pull-tab" data-sliding-header-target="pullTab" data-action="click->sliding-header#showHeader"></div>
     </div>
   </div>
 <% end %>
 
-<div data-controller="tabs resizable-panels" class="codex-layout">
+<div data-controller="tabs resizable-panels scroll-to-top" class="codex-layout">
   <%= turbo_stream_from @task %>
   <div class="nav">
     <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="chat" class="tab chat-tab">Chat</button>
     <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="steps" class="tab -active">Runs</button>
   </div>
-  <div data-tabs-target="panel" data-resizable-panels-target="chat" data-panel-id="chat" class="chat-panel">
+  <div data-tabs-target="panel" data-resizable-panels-target="chat" data-panel-id="chat" data-scroll-to-top-target="container" class="chat-panel">
     <%= render "tasks/chat_panel", task: @task %>
+    <button data-scroll-to-top-target="button"
+            data-action="click->scroll-to-top#scrollToTop"
+            class="scroll-to-top panel-scroll-to-top"
+            title="Scroll to top">
+      ↑
+    </button>
   </div>
   <div class="panel-divider" data-resizable-panels-target="divider" data-action="mousedown->resizable-panels#startResize"></div>
-  <div data-tabs-target="panel" data-resizable-panels-target="log" data-panel-id="steps" class="log-panel -active">
-    <% if @task.runs.any? %>
-      <%= render "tasks/runs_list", runs: @runs %>
-    <% else %>
-      <div id="runs-list">
-        <p>No runs yet.</p>
-      </div>
-    <% end %>
+  <div data-tabs-target="panel" data-resizable-panels-target="log" data-panel-id="steps" data-scroll-to-top-target="container" class="log-panel -active">
+    <div id="runs-list" data-controller="auto-scroll">
+      <% if @runs.any? %>
+        <% @runs.each do |run| %>
+          <%= render "tasks/run", run: run %>
+        <% end %>
+      <% else %>
+        <div id="loading-placeholder" class="run-item">
+          <p class="status">
+            <strong>Status:</strong> pending
+          </p>
+          <div data-controller="tabs" class="tabs-container">
+            <div class="nav">
+              <button data-tabs-target="tab" data-action="click->tabs#switchTab" data-tab-panel="steps" class="tab -active">Log</button>
+            </div>
+            <div class="content">
+              <div data-tabs-target="panel" data-panel-id="steps" class="panel -active">
+                <div class="output" data-controller="auto-scroll">
+                  <div class="run-spinner">
+                    <div class="spinner"></div>
+                    Loading...
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    <button data-scroll-to-top-target="button"
+            data-action="click->scroll-to-top#scrollToTop"
+            class="scroll-to-top panel-scroll-to-top"
+            title="Scroll to top">
+      ↑
+    </button>
   </div>
 </div>
 
-<div class="task-actions">
-  <%= link_to 'Archive', task_path(@task),
-              data: { turbo_method: :delete, turbo_confirm: 'Are you sure you want to archive this task?' },
-              class: 'archive' %> |
-  <%= link_to 'Back', project_tasks_path(@task.project) %>
-</div>

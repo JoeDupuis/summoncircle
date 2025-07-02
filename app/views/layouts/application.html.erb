@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "Summoncircle" %></title>
+    <title id="page-title"><%= content_for(:title) || "Summoncircle" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -27,7 +27,7 @@
 
   <body class="<%= controller_name %> <%= action_name %>">
     <%= content_for?(:nav) ? yield(:nav) : render("nav") %>
-    
+
     <main>
       <div id="flash-messages">
         <%= render 'flash_messages' %>
@@ -40,5 +40,12 @@
         <%= current_git_branch || "unknown" %>
       </div>
     <% end %>
+    
+    <button data-controller="scroll-to-top" 
+            data-action="click->scroll-to-top#scrollToTop"
+            class="scroll-to-top" 
+            title="Scroll to top">
+      ↑
+    </button>
   </body>
 </html>

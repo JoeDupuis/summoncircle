@@ -1,0 +1,24 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|mcp__git__git_commit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$(git rev-parse --show-toplevel)/.claude/bin/lint"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|mcp__github__push_files",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$(git rev-parse --show-toplevel)/.claude/bin/pre-push"
+          }
+        ]
+      }
+    ]
+  }
+}
