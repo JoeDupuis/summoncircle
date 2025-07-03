@@ -14,22 +14,10 @@ class RemoveDockerContainerJob < ApplicationJob
 
     container.delete(force: true)
 
-    if task.docker_image_id.present?
-      begin
-        image = Docker::Image.get(task.docker_image_id)
-        image.remove(force: true)
-      rescue Docker::Error::NotFoundError
-        Rails.logger.info "Image already removed: #{task.docker_image_id}"
-      rescue => e
-        Rails.logger.warn "Failed to remove image #{task.docker_image_id}: #{e.message}, continuing anyway"
-      end
-    end
-
     task.update!(
       container_id: nil,
       container_name: nil,
-      container_status: nil,
-      docker_image_id: nil
+      container_status: nil
     )
 
     broadcast_docker_status(task)
@@ -37,8 +25,7 @@ class RemoveDockerContainerJob < ApplicationJob
     task.update!(
       container_id: nil,
       container_name: nil,
-      container_status: nil,
-      docker_image_id: nil
+      container_status: nil
     )
     broadcast_docker_status(task)
   rescue => e
