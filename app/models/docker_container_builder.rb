@@ -113,7 +113,7 @@ class DockerContainerBuilder
     tar_stream = create_tar_stream_from_directory(workspace_dir, @task.project.dev_dockerfile_path)
 
     # Build with CONTAINER_PROXY_BASE_URL as build argument
-    build_args = ENV.slice("CONTAINER_PROXY_BASE_URL")
+    build_args = ENV.slice("CONTAINER_PROXY_BASE_URL").transform_values(&:to_s).to_json
 
     Docker::Image.build_from_tar(tar_stream, t: image_name, dockerfile: @task.project.dev_dockerfile_path, buildargs: build_args)
   end
