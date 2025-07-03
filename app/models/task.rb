@@ -56,8 +56,8 @@ class Task < ApplicationRecord
 
     # Always include DOCKER_HOST and CONTAINER_PROXY_BASE_URL when they're set
     system_env = []
-    system_env << "DOCKER_HOST=#{ENV['DOCKER_HOST']}" if ENV['DOCKER_HOST'].present?
-    system_env << "CONTAINER_PROXY_BASE_URL=#{ENV['CONTAINER_PROXY_BASE_URL']}" if ENV['CONTAINER_PROXY_BASE_URL'].present?
+    system_env << "DOCKER_HOST=#{ENV['DOCKER_HOST']}" if ENV["DOCKER_HOST"].present?
+    system_env << "CONTAINER_PROXY_BASE_URL=#{ENV['CONTAINER_PROXY_BASE_URL']}" if ENV["CONTAINER_PROXY_BASE_URL"].present?
 
     agent.env_strings + project.env_strings + user.env_strings + system_env + additional_env_array
   end
