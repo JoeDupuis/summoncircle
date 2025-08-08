@@ -34,7 +34,7 @@ jobs:
           tags: tag:gh-action-summoncircle
 
       - name: Install 1Password CLI
-        uses: 1password/install-cli-action@v1
+        uses: 1password/install-cli-action@v2
 
       - name: Deploy with Kamal
         env:
