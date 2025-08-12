@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_25_002158) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_12_201945) do
   create_table "agent_specific_settings", force: :cascade do |t|
     t.integer "agent_id", null: false
     t.string "type", null: false
@@ -167,6 +167,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_002158) do
     t.boolean "allow_github_token_access", default: true, null: false
     t.boolean "shrimp_mode", default: true, null: false
     t.integer "auto_task_naming_agent_id"
+    t.text "gitlab_token"
+    t.boolean "allow_gitlab_token_access", default: true, null: false
     t.index [ "auto_task_naming_agent_id" ], name: "index_users_on_auto_task_naming_agent_id"
     t.index [ "email_address" ], name: "index_users_on_email_address", unique: true
   end

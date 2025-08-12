@@ -14,7 +14,7 @@
 </div>
 
 <div>
-  <strong>GitHub Token:</strong> 
+  <strong>GitHub Token:</strong>
   <% if @user.github_token.present? %>
     ••••••••••••••••
   <% else %>
@@ -23,8 +23,22 @@
 </div>
 
 <div>
-  <strong>Allow tasks to access GitHub token:</strong> 
+  <strong>Allow tasks to access GitHub token:</strong>
   <%= @user.allow_github_token_access ? "Yes" : "No" %>
+</div>
+
+<div>
+  <strong>GitLab Token:</strong>
+  <% if @user.gitlab_token.present? %>
+    ••••••••••••••••
+  <% else %>
+    Not set
+  <% end %>
+</div>
+
+<div>
+  <strong>Allow tasks to access GitLab token:</strong>
+  <%= @user.allow_gitlab_token_access ? "Yes" : "No" %>
 </div>
 
 <div>

@@ -134,6 +134,8 @@ class DockerGitCommand
     case url
     when /github\.com/
       :github
+    when /gitlab\.com/
+      :gitlab
     else
       nil
     end
@@ -147,6 +149,13 @@ class DockerGitCommand
         username: "x-access-token",
         env_var: "GITHUB_TOKEN",
         token: user.github_token
+      }
+    when :gitlab
+      return nil unless user&.gitlab_token.present?
+      {
+        username: "oauth2",
+        env_var: "GITLAB_TOKEN",
+        token: user.gitlab_token
       }
     else
       nil
