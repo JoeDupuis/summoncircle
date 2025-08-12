@@ -15,6 +15,10 @@ class UserSettingsController < ApplicationController
       user_update_params.delete(:github_token)
     end
 
+    if user_update_params[:gitlab_token].blank?
+      user_update_params.delete(:gitlab_token)
+    end
+
     if user_update_params[:ssh_key].blank?
       user_update_params.delete(:ssh_key)
     end
@@ -29,6 +33,6 @@ class UserSettingsController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:github_token, :ssh_key, :instructions, :git_config, :allow_github_token_access, :shrimp_mode, :auto_task_naming_agent_id)
+    params.require(:user).permit(:github_token, :gitlab_token, :ssh_key, :instructions, :git_config, :allow_github_token_access, :allow_gitlab_token_access, :shrimp_mode, :auto_task_naming_agent_id)
   end
 end

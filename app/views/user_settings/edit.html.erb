@@ -16,6 +16,18 @@
   </div>
 
   <div>
+    <%= form.label :gitlab_token, "GitLab Personal Access Token" %><br>
+    <%= form.password_field :gitlab_token, placeholder: "Leave blank to keep current token" %>
+    <small>Used to clone private GitLab repositories. Token is encrypted and never displayed.</small>
+  </div>
+
+  <div>
+    <%= form.check_box :allow_gitlab_token_access %>
+    <%= form.label :allow_gitlab_token_access, "Allow tasks to have access to my GitLab token" %><br>
+    <small>When checked, tasks can use your GitLab token for Git operations. Uncheck to prevent tasks from accessing your token.</small>
+  </div>
+
+  <div>
     <%= form.label :ssh_key, "SSH Private Key" %><br>
     <%= form.text_area :ssh_key, rows: 10, placeholder: "Paste your SSH private key here (leave blank to keep current key)", value: "" %>
     <small>Used for Git authentication. Key is encrypted and automatically mounted in containers. Never displayed or logged.</small>
@@ -40,7 +52,7 @@
 
   <div>
     <%= form.label :auto_task_naming_agent_id, "Auto Task Naming Agent" %><br>
-    <%= form.select :auto_task_naming_agent_id, 
+    <%= form.select :auto_task_naming_agent_id,
         options_from_collection_for_select(Agent.kept, :id, :name, @user.auto_task_naming_agent_id),
         { include_blank: "None - Manual task naming only" },
         { class: "form-select" } %>

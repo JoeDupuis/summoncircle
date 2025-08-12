@@ -4,6 +4,7 @@ class User < ApplicationRecord
   belongs_to :auto_task_naming_agent, class_name: "Agent", optional: true
 
   encrypts :github_token, deterministic: false
+  encrypts :gitlab_token, deterministic: false
   encrypts :ssh_key, deterministic: false
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
@@ -13,6 +14,7 @@ class User < ApplicationRecord
   def env_strings
     vars = []
     vars << "GITHUB_TOKEN=#{github_token}" if github_token.present? && allow_github_token_access
+    vars << "GITLAB_TOKEN=#{gitlab_token}" if gitlab_token.present? && allow_gitlab_token_access
     vars
   end
 end
