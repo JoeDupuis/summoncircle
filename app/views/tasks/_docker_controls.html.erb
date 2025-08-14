@@ -1,11 +1,14 @@
 <div id="docker_controls" class="docker-controls">
   <% container_info = container_status_info(task) %>
-  
+
   <% if task.container_status == "building" %>
     <div class="container-info">
       <span class="container-status">
         Container: Building...
       </span>
+      <%= link_to "View Build Logs", task_build_log_path(task),
+          target: "_blank",
+          class: "button action-button -mini -primary" %>
     </div>
   <% elsif task.container_status == "removing" %>
     <div class="container-info">
@@ -18,7 +21,10 @@
       <span class="container-status -error">
         Container: Build Failed
       </span>
-      <%= link_to "Retry Build", task_container_path(task), 
+      <%= link_to "View Build Logs", task_build_log_path(task),
+          target: "_blank",
+          class: "button action-button -mini" %>
+      <%= link_to "Retry Build", task_container_path(task),
           data: { turbo_method: :post },
           class: "button action-button -mini -primary" %>
     </div>
@@ -33,15 +39,18 @@
           | Port: <%= task.project.dev_container_port %> (not mapped)
         <% end %>
       </span>
-      <%= link_to "Build", task_container_path(task), 
+      <%= link_to "View Build Logs", task_build_log_path(task),
+          target: "_blank",
+          class: "button action-button -mini" %>
+      <%= link_to "Build", task_container_path(task),
           data: { turbo_method: :post, turbo_confirm: "Build container?" },
           class: "button action-button -mini" %>
-      <%= link_to "Remove", task_container_path(task), 
+      <%= link_to "Remove", task_container_path(task),
           data: { turbo_method: :delete, turbo_confirm: "Remove container?" },
           class: "button action-button -mini -danger" %>
     </div>
   <% else %>
-    <%= link_to "Build & Run Container", task_container_path(task), 
+    <%= link_to "Build & Run Container", task_container_path(task),
         data: { turbo_method: :post },
         class: "button action-button -primary -mini",
         title: "Build and run a development container with the project's Dockerfile" %>

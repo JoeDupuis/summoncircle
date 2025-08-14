@@ -19,6 +19,7 @@ Rails.application.routes.draw do
         patch :update_auto_push
       end
       resource :container, only: %i[create destroy]
+      resource :build_log, only: %i[show]
       resources :runs, only: %i[create]
     end
   end

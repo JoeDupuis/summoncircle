@@ -1,0 +1,98 @@
+<%= turbo_stream_from "task_#{@task.id}_build_logs" %>
+
+<div class="container">
+  <div class="card">
+    <div class="card-header">
+      <h2>Build Logs for <%= @task.description %></h2>
+      <div class="card-actions">
+        <%= link_to "Back to Task", task_path(@task), class: "button secondary" %>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="build-log-console">
+        <div id="build-logs" class="log-output">
+          <% if @task.container_status == "building" %>
+            <div class="log-entry" id="initial-message">Connecting to build stream...</div>
+          <% elsif @task.container_status == "failed" %>
+            <div class="log-entry error">Build failed. Build logs may appear below if available.</div>
+          <% elsif @task.container_status == "running" %>
+            <div class="log-entry success">Build completed successfully. Container is running.</div>
+          <% elsif @task.container_status == "exited" %>
+            <div class="log-entry warning">Container has exited. Check logs below for details.</div>
+          <% else %>
+            <div class="log-entry">Waiting for build to start...</div>
+          <% end %>
+
+          <% if @existing_logs.present? %>
+            <% @existing_logs.each do |log_line| %>
+              <div class="log-entry"><%= log_line %></div>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .build-log-console {
+    background-color: #1e1e1e;
+    border-radius: 4px;
+    padding: 1rem;
+    min-height: 400px;
+    max-height: 600px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+  }
+
+  .log-output {
+    color: #d4d4d4;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .log-entry {
+    margin-bottom: 0.25rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 13px;
+  }
+
+  .log-entry.error {
+    color: #f48771;
+  }
+
+  .log-entry.success {
+    color: #89d185;
+  }
+
+  .log-entry.info {
+    color: #61afef;
+  }
+
+  .log-entry.warning {
+    color: #e5c07b;
+  }
+</style>
+
+<script>
+  document.addEventListener('turbo:load', () => {
+    const buildLogs = document.getElementById('build-logs');
+    if (!buildLogs) return;
+
+    // Auto-scroll to bottom on new log entries
+    const observer = new MutationObserver(() => {
+      // Remove initial message if it exists
+      const initialMessage = document.getElementById('initial-message');
+      if (initialMessage) {
+        initialMessage.remove();
+      }
+
+      // Scroll to bottom
+      const console = buildLogs.parentElement;
+      console.scrollTop = console.scrollHeight;
+    });
+
+    observer.observe(buildLogs, { childList: true });
+  });
+</script>
